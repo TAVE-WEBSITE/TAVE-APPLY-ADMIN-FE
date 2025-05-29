@@ -1,7 +1,7 @@
 interface InputProps {
   categories: string[];
   active?: string;
-  onChange: (value: string) => void;
+  onChange: () => void;
   className?: string;
   fitWidth?: boolean; //회색 border를 fit하게 맞출지의 유무
   centerType?: boolean; //center로 오는 경우
@@ -29,7 +29,7 @@ const Tab = ({
             ${current === text ? "text-[#255FF4]" : "text-[#6C727F]"}
             ${centerType && "px-26"}
           `}
-          onClick={() => onChange(text)}
+          onClick={onChange}
         >
           {text}
           {current === text && (
