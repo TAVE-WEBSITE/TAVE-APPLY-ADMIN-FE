@@ -29,14 +29,20 @@ const Modal = ({
   isPending = false,
 }: ModalProps) => {
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    // 초기 상태 설정
-    if (defaultOpen && dialog) {
-      dialog.showModal();
-      document.body.style.overflow = "hidden";
-    }
+    if (defaultOpen) openModal();
+
+    return () => {
+      closeModal();
+    };
   }, []);
+
+  const openModal = () => {
+    dialogRef.current?.showModal();
+  };
+
+  const closeModal = () => {
+    dialogRef.current?.close();
+  };
 
   return (
     <dialog
