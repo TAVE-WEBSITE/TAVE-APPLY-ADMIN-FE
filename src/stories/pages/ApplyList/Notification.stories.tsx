@@ -9,7 +9,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="bg-gray-900 min-h-screen pt-12">
+      <div className="bg-gray-900 min-h-screen pt-10">
         <Story />
       </div>
     ),
