@@ -14,6 +14,7 @@ import StepCounter from "@/components/StepCounter/StepCounter";
 import SkeletonAccordion from "@/components/Accordion/Skeleton";
 import ToastMessage from "@/components/Modal/ToastMessage";
 import Icon from "@/components/Icon/Icon";
+import { formatMMDD, formatHHMin } from "@/utils/formatDate";
 
 const tabCategories = ["파트별 질문", "공통 질문"];
 // 샘플 데이터
@@ -43,6 +44,26 @@ const InterviewSettingDetail = () => {
   const [selectedDate, setSelectedDate] = useState("");
   const [isToastOpen, setIsToastOpen] = useState(false);
 
+  const renderLabels = (label: string) => {
+    switch (label) {
+      case "성별":
+        return applicant?.gender === "MALE" ? "남자" : "여자";
+      case "학교":
+        return applicant?.school;
+      case "연락처":
+        return applicant?.contact;
+      case "생년월일":
+        return applicant?.birthDate;
+      case "전공/부전공":
+        return `${applicant?.major} / ${applicant?.subMajor}`;
+      case "이메일 주소":
+        return applicant?.email;
+        break;
+      default:
+        return "";
+    }
+  };
+
   const {
     mutate,
     data: postInterviewDataResult,
@@ -58,20 +79,6 @@ const InterviewSettingDetail = () => {
       setIsToastOpen(true);
     },
   });
-
-  const formatMMDD = (isoString: string) => {
-    const date = new Date(isoString);
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const dd = String(date.getDate()).padStart(2, "0");
-    return `${mm}.${dd}`;
-  };
-
-  const formatHHMin = (isoString: string) => {
-    const date = new Date(isoString);
-    const hh = String(date.getHours()).padStart(2, "0");
-    const min = String(date.getMinutes()).padStart(2, "0");
-    return `${hh}:${min}`;
-  };
 
   const handleUpdateInterviewData = () => {
     mutate({ selectedDate });
@@ -94,37 +101,19 @@ const InterviewSettingDetail = () => {
         </FlexBox>
       </FlexBox>
       <div className="px-16 pb-8 grid grid-cols-3 gap-4">
-        <FlexBox className="gap-8">
-          <label className="text-gray-400">성별</label>
-          <span>{applicant?.gender === "MALE" ? "남자" : "여자"}</span>
-        </FlexBox>
-
-        <FlexBox className="gap-8">
-          <label className="text-gray-400">학교</label>
-          <span>{applicant?.school}</span>
-        </FlexBox>
-
-        <FlexBox className="gap-8">
-          <label className="text-gray-400">연락처</label>
-          <span>{applicant?.contact}</span>
-        </FlexBox>
-
-        <FlexBox className="gap-8">
-          <label className="text-gray-400">생년월일</label>
-          <span>{applicant?.birthDate}</span>
-        </FlexBox>
-
-        <FlexBox className="gap-8">
-          <label className="text-gray-400">전공/부전공</label>
-          <span>
-            {applicant?.major} / {applicant?.subMajor}
-          </span>
-        </FlexBox>
-
-        <FlexBox className="gap-8">
-          <label className="text-gray-400">이메일 주소</label>
-          <span>{applicant?.email}</span>
-        </FlexBox>
+        {[
+          "성별",
+          "학교",
+          "연락처",
+          "생년월일",
+          "전공/부전공",
+          "이메일 주소",
+        ].map((label) => (
+          <FlexBox className="gap-8">
+            <label className="text-gray-400">{label}</label>
+            <span>{renderLabels(label)}</span>
+          </FlexBox>
+        ))}
       </div>
       <Body className="py-8 px-12">
         <Tab

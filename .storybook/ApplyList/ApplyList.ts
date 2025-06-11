@@ -1,5 +1,4 @@
 import { delay, http, HttpResponse } from "msw";
-import type { Resume } from "@/types/interview";
 
 const interviewMockData = [
   {
@@ -126,7 +125,7 @@ const interviewMockData = [
   },
 ];
 
-const mockResumes: Resume[] = interviewMockData.map((app, i) => {
+const mockResumes = interviewMockData.map((app, i) => {
   return {
     resumeId: app.id,
     name: app.name,
@@ -190,64 +189,4 @@ const getSingleInterviewer = http.get(
   }
 );
 
-const postFile = http.post("/v1/admin/interview/files", async ({ request }) => {
-  const formData = await request.formData(); // 🔁 JSON이 아니라 FormData로 받기
-  const files: File[] = [];
-
-  for (const [_, value] of formData.entries()) {
-    if (value instanceof File) {
-      files.push(value);
-    }
-  }
-
-  await delay(1000);
-
-  if (files) {
-    return HttpResponse.json(
-      {
-        message: "면접시간표 등록에 성공했습니다",
-        files: files.map((f) => f.name),
-      },
-      { status: 200 }
-    );
-  } else {
-    return HttpResponse.json(
-      {
-        message: "면접시간표 등록에 실패했습니다",
-      },
-      { status: 400 }
-    );
-  }
-});
-
-const postInterviewDate = http.post(
-  "/v1/admin/interview",
-  async ({ request }) => {
-    const body = await request.json();
-    await delay(1000);
-    if (body) {
-      return HttpResponse.json(
-        {
-          message: "면접 시간 설정이 성공했습니다",
-          body: body,
-        },
-        { status: 200 }
-      );
-    } else {
-      return HttpResponse.json(
-        {
-          message: "면접 시간 설정에 실패했습니다",
-          body: body,
-        },
-        { status: 400 }
-      );
-    }
-  }
-);
-
-export {
-  getAllInterviewers,
-  getSingleInterviewer,
-  postInterviewDate,
-  postFile,
-};
+export { getAllInterviewers, getSingleInterviewer };

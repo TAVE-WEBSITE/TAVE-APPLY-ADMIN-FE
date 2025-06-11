@@ -29,6 +29,7 @@ const TimeTable = () => {
     handleFilter,
     searchByName,
   } = useFilter();
+
   return (
     <div
       className="flex flex-col gap-4"
@@ -57,13 +58,13 @@ const TimeTable = () => {
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           placeholder="이름을 입력해주세요"
-          onKeyDown={(e) => e.key === "Enter" && searchByName()}
         />
       </FlexBox>
       <ApplicationTable
         applications={filteredList}
         rows={tableRows}
         isLoading={isLoading}
+        baseUrl="/setting/interview"
         navigate={navigate}
       />
     </div>

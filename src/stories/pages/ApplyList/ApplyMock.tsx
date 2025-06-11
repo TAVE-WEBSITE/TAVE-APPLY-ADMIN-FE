@@ -1,10 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Icon from "@/components/Icon/Icon";
 import CheckBox from "@/components/Input/CheckBox";
 import SearchInput from "@/components/Input/SearchInput";
 import FlexBox from "@/components/Layout/FlexBox";
-import { useApplyFilter } from "@/hooks/ApplyList/useApplyFilter";
-import type { RoleType } from "@/types/role";
+import { fetchAllInterviewers } from "@/api/Setting/Interview";
+import type { Application, RoleType } from "@/types/role";
 import ApplicationTable from "@/components/ApplicationTable/ApplicationTable";
 
 const filters: RoleType[] = [
@@ -16,17 +16,64 @@ const filters: RoleType[] = [
   "딥러닝",
 ];
 
-const Apply = () => {
-  const navigate = useNavigate();
-  const {
-    filteredList,
-    checkedRoles,
-    isLoading,
-    searchInput,
-    setSearchInput,
-    handleFilter,
-    searchByName,
-  } = useApplyFilter();
+const ApplyMock = () => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [filteredList, setFilteredList] = useState<Application[]>([]);
+  const [searchInput, setSearchInput] = useState("");
+  const [checkedRoles, setCheckedRoles] = useState<Set<RoleType>>(new Set());
+
+  useEffect(() => {
+    const fetcher = async () => {
+      setIsLoading(true);
+      const data = await fetchAllInterviewers();
+      setFilteredList(data);
+      setIsLoading(false);
+    };
+    fetcher();
+  }, []);
+
+  const getFilteredApplications = (
+    base: Application[],
+    roles: Set<RoleType>,
+    keyword: string
+  ) => {
+    return base.filter((app) => {
+      const matchRole =
+        roles.size === 0 || roles.has(app.fieldType as RoleType);
+      const matchName = app.name.includes(keyword);
+      return matchRole && matchName;
+    });
+  };
+
+  const searchByName = () => {
+    const filtered = getFilteredApplications(
+      filteredList,
+      checkedRoles,
+      searchInput
+    );
+    setFilteredList(filtered);
+  };
+
+  const handleFilter = (role: RoleType) => {
+    setCheckedRoles((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(role)) {
+        newSet.delete(role);
+      } else {
+        newSet.add(role);
+      }
+
+      const filtered = getFilteredApplications(
+        filteredList,
+        newSet,
+        searchInput
+      );
+      setFilteredList(filtered);
+
+      return newSet;
+    });
+  };
 
   return (
     <>
@@ -65,12 +112,10 @@ const Apply = () => {
           rows={["지원 분야", "이름", "성별", "학교", "지원 일자"]}
           applications={filteredList}
           isLoading={isLoading}
-          baseUrl="/applies"
-          navigate={navigate}
         />
       </div>
     </>
   );
 };
 
-export default Apply;
+export default ApplyMock;

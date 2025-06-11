@@ -1,3 +1,17 @@
+const formatMMDD = (isoString: string) => {
+  const date = new Date(isoString);
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${mm}.${dd}`;
+};
+
+const formatHHMin = (isoString: string) => {
+  const date = new Date(isoString);
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `${hh}:${min}`;
+};
+
 /**
  * ISO 문자열을 'YYYY.MM.DD' 형식으로 변환
  */
@@ -63,4 +77,10 @@ const formatDateTimeInput = (
   setValue(formatted);
 };
 
-export { formatDateOnly, formatDateTime, formatDateTimeInput };
+export {
+  formatMMDD,
+  formatHHMin,
+  formatDateOnly,
+  formatDateTime,
+  formatDateTimeInput,
+};

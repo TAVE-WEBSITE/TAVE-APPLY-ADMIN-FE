@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Page as DashBoard } from "@/pages/DashBoard";
 import { Page as ApplyList } from "@/pages/ApplyList";
+import ApplyListDetail from "./pages/ApplyList/Detail";
 import {
   DefaultSetting,
   DocumentSetting,
@@ -26,6 +27,7 @@ function App() {
             <Routes>
               <Route path="/" element={<DashBoard />} />
               <Route path="/applies" element={<ApplyList />} />
+              <Route path="/applies/:id" element={<ApplyListDetail />} />
               <Route path="/setting/default" element={<DefaultSetting />} />
               <Route path="/setting/document" element={<DocumentSetting />} />
               <Route path="/setting/interview" element={<InterviewSetting />} />

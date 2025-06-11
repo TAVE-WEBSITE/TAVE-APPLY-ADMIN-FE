@@ -10,6 +10,7 @@ interface ApplicationTableProps {
   rows: string[];
   applications: any[] | undefined;
   isLoading: boolean;
+  baseUrl?: string;
   navigate?: NavigateFunction;
 }
 
@@ -18,6 +19,7 @@ const ApplicationTable = ({
   rows,
   applications,
   isLoading,
+  baseUrl,
   navigate,
 }: ApplicationTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -94,7 +96,8 @@ const ApplicationTable = ({
                   }`}
                   onClick={() => {
                     navigate &&
-                      navigate(`/setting/interview/${application.id}`, {
+                      baseUrl &&
+                      navigate(`${baseUrl}/${application.id}`, {
                         state: { application },
                       });
                   }}

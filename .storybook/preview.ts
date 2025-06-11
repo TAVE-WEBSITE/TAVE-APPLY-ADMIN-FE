@@ -15,6 +15,10 @@ import {
   postReservation,
   postIndividualReservation,
 } from "./ApplyList/Notification";
+import {
+  getAllInterviewers,
+  getSingleInterviewer,
+} from "./ApplyList/ApplyList";
 
 initialize({
   onUnhandledRequest: "bypass",
@@ -42,6 +46,9 @@ const preview: Preview = {
         getNotificationList,
         postReservation,
         postIndividualReservation,
+        // 지원 명단 조회 페이지 관련
+        getAllInterviewers,
+        getSingleInterviewer,
       ],
     },
     controls: {
@@ -51,8 +58,7 @@ const preview: Preview = {
       },
     },
   },
+  loaders: [mswLoader],
 };
-
-export const loaders = [mswLoader];
 
 export default preview;
