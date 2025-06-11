@@ -6,6 +6,7 @@ import Button from "@/components/Button/Button";
 import { formatDateTimeInput } from "@/utils/formatDate";
 import ToastMessage from "@/components/Modal/ToastMessage";
 import Body from "@/components/Layout/Body";
+import Icon from "@/components/Icon/Icon";
 
 export const SettingDefaultMock = () => {
   const [nextGeneration, setNextGeneration] = useState("16");
@@ -43,8 +44,8 @@ export const SettingDefaultMock = () => {
           direction="col"
           className="gap-4 justify-center w-2xl mx-auto pt-8 gap-8"
         >
-          <Input.WithNumber number={1} className="items-start">
-            <Input.WithTitle
+          <Input.NumberContainer number={1} className="items-start">
+            <Input.TitleContainer
               title="다음 기수를 입력해주세요"
               className="pt-1 mb-4"
             >
@@ -52,103 +53,96 @@ export const SettingDefaultMock = () => {
                 placeholder="기수를 입력해주세요"
                 value={nextGeneration}
                 onChange={(e) => setNextGeneration(e.target.value)}
-                className="w-full"
+                className="w-xl"
               />
-            </Input.WithTitle>
-          </Input.WithNumber>
+            </Input.TitleContainer>
+          </Input.NumberContainer>
 
-          <Input.WithNumber number={2} className="items-start">
-            <Input.WithTitle
+          <Input.NumberContainer number={2} className="items-start">
+            <Input.TitleContainer
               title="앞으로의 모집 일정을 알려주세요"
               className="pt-1 mb-4"
             >
-              <Input.WithLabel
-                label="서류 모집"
-                iconType="CheckCircle"
-                labelColor="text-gray-900"
-                className="mb-2"
-              >
-                <FlexBox className="gap-4">
-                  <DatePicker
-                    value={documentStartDate}
-                    setValue={setDocumentStartDate}
-                  />
-                  <div className="text-gray-300 font-bold w-5 border border-t" />
-                  <DatePicker
-                    value={documentEndDate}
-                    setValue={setDocumentEndDate}
-                  />
+              <FlexBox className={`justify-between gap-4`}>
+                <FlexBox direction="col" className={`items-start w-full`}>
+                  <FlexBox className="gap-2">
+                    <Icon type="CheckCircle" size={20} />
+                    <span className="text-gray-900">서류 모집</span>
+                  </FlexBox>
+                  <FlexBox className="gap-2">
+                    <DatePicker
+                      value={documentStartDate}
+                      setValue={setDocumentStartDate}
+                    />
+                    <div className="text-gray-300 font-bold w-3 border border-t" />
+                    <DatePicker
+                      value={documentEndDate}
+                      setValue={setDocumentEndDate}
+                    />
+                  </FlexBox>
                 </FlexBox>
-              </Input.WithLabel>
+              </FlexBox>
               <Input.WithLabel
                 iconType="ClockCircle"
                 label="서류 발표"
                 labelColor="text-gray-900"
-                className="mb-4"
-              >
-                <Input
-                  placeholder="YYYY.MM.DD HH:MM"
-                  className="mt-2 w-full"
-                  value={documentResultDateTime}
-                  onChange={(e) =>
-                    formatDateTimeInput(e, setDocumentResultDateTime)
-                  }
-                />
-              </Input.WithLabel>
-              <Input.WithLabel
-                label="면접 기간"
-                iconType="CheckCircle"
-                labelColor="text-gray-900"
-                className="mb-2"
-              >
-                <FlexBox className="gap-4">
-                  <DatePicker
-                    value={interviewStartDate}
-                    setValue={setInterviewStartDate}
-                  />
-                  <div className="text-gray-300 font-bold w-5 border border-t" />
-                  <DatePicker
-                    value={interviewEndDate}
-                    setValue={setInterviewEndDate}
-                  />
+                placeholder="YYYY.MM.DD HH:MM"
+                width="w-xl"
+                value={documentResultDateTime}
+                onChange={(e) =>
+                  formatDateTimeInput(e, setDocumentResultDateTime)
+                }
+              />
+              <FlexBox className={`justify-between gap-4`}>
+                <FlexBox direction="col" className={`items-start w-full`}>
+                  <FlexBox className="gap-2">
+                    <Icon type="CheckCircle" size={20} />
+                    <span className="text-gray-900">면접 기간</span>
+                  </FlexBox>
+                  <FlexBox className="gap-2">
+                    <DatePicker
+                      value={interviewStartDate}
+                      setValue={setInterviewStartDate}
+                    />
+                    <div className="text-gray-300 font-bold w-3 border border-t" />
+                    <DatePicker
+                      value={interviewEndDate}
+                      setValue={setInterviewEndDate}
+                    />
+                  </FlexBox>
                 </FlexBox>
-              </Input.WithLabel>
+              </FlexBox>
 
               <Input.WithLabel
                 iconType="ClockCircle"
                 label="최종 발표"
                 labelColor="text-gray-900"
-              >
-                <Input
-                  placeholder="YYYY.MM.DD HH:MM"
-                  className="mt-2 w-full"
-                  value={finalResultDateTime}
-                  onChange={(e) =>
-                    formatDateTimeInput(e, setFinalResultDateTime)
-                  }
-                />
-              </Input.WithLabel>
-            </Input.WithTitle>
-          </Input.WithNumber>
+                placeholder="YYYY.MM.DD HH:MM"
+                width="w-xl"
+                value={finalResultDateTime}
+                onChange={(e) => formatDateTimeInput(e, setFinalResultDateTime)}
+              />
+            </Input.TitleContainer>
+          </Input.NumberContainer>
 
-          <Input.WithNumber number={3} className="items-start">
-            <Input.WithHelperText
+          <Input.NumberContainer number={3} className="items-start">
+            <Input.HelperTextContainer
               title="홈페이지 공개"
               helperText="신규 기수 지원 안내를 포함한 홈페이지에 접근이 가능한 일정입니다 :)"
             >
-              <FlexBox className="gap-4">
+              <FlexBox className="gap-2">
                 <DatePicker
                   value={homepageOpenStartDate}
                   setValue={setHomepageOpenStartDate}
                 />
-                <div className="text-gray-300 font-bold w-5 border border-t" />
+                <div className="text-gray-300 font-bold w-3 border border-t" />
                 <DatePicker
                   value={homepageOpenEndDate}
                   setValue={setHomepageOpenEndDate}
                 />
               </FlexBox>
-            </Input.WithHelperText>
-          </Input.WithNumber>
+            </Input.HelperTextContainer>
+          </Input.NumberContainer>
         </FlexBox>
         <div className="w-[100px] mx-auto my-12">
           <Button

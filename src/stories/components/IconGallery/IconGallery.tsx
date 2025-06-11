@@ -8,6 +8,7 @@ const iconNames: StandardIconType[] = [
   "TextLength",
   "Dots",
   "Calendar",
+  "Check",
   "Filter",
   "Left",
   "CheckCircle",

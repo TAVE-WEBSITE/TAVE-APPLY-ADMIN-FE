@@ -46,48 +46,51 @@ const DefaultMock = () => {
           </FlexBox>
           <FlexBox direction="col" className="gap-4 p-4 items-start">
             {Array.from({ length: 4 }, (_, index) => (
-              <Input.WithTitle key={index} title={`${index + 1}일차 (8/10)`}>
+              <Input.TitleContainer
+                key={index}
+                title={`${index + 1}일차 (8/10)`}
+              >
                 <FlexBox className="w-full gap-4">
-                  <Input.WithLabel label="오픈채팅방 링크" iconType="Link">
-                    <Input
-                      placeholder="링크를 입력해주세요"
-                      className="w-full"
-                      value={openChatLinks[index]}
-                      onChange={(e) => {
-                        const newLinks = [...openChatLinks];
-                        newLinks[index] = e.target.value;
-                        setOpenChatLinks(newLinks);
-                      }}
-                    />
-                  </Input.WithLabel>
-                  <Input.WithLabel label="비밀번호 설정" iconType="Key">
-                    <Input
-                      placeholder="비밀번호를 입력해주세요"
-                      className="w-full"
-                      value={openChatPasswords[index]}
-                      onChange={(e) => {
-                        const newPasswords = [...openChatPasswords];
-                        newPasswords[index] = e.target.value;
-                        setOpenChatPasswords(newPasswords);
-                      }}
-                    />
-                  </Input.WithLabel>
+                  <Input.WithLabel
+                    label="오픈채팅방 링크"
+                    iconType="Link"
+                    placeholder="링크를 입력해주세요"
+                    value={openChatLinks[index]}
+                    width="w-lg"
+                    onChange={(e) => {
+                      const newLinks = [...openChatLinks];
+                      newLinks[index] = e.target.value;
+                      setOpenChatLinks(newLinks);
+                    }}
+                  ></Input.WithLabel>
+                  <Input.WithLabel
+                    label="비밀번호 설정"
+                    iconType="Key"
+                    placeholder="비밀번호를 입력해주세요"
+                    className="w-full"
+                    value={openChatPasswords[index]}
+                    onChange={(e) => {
+                      const newPasswords = [...openChatPasswords];
+                      newPasswords[index] = e.target.value;
+                      setOpenChatPasswords(newPasswords);
+                    }}
+                  ></Input.WithLabel>
                 </FlexBox>
-              </Input.WithTitle>
+              </Input.TitleContainer>
             ))}
           </FlexBox>
         </section>
       </FlexBox>
       <div className="flex justify-center">
-        <Button 
+        <Button
           className="w-[88px] text-center"
           onClick={() => {
             // 저장 시뮬레이션
-            console.log('저장된 데이터:', {
+            console.log("저장된 데이터:", {
               address,
               detailAddress,
               openChatLinks,
-              openChatPasswords
+              openChatPasswords,
             });
           }}
         >
@@ -98,4 +101,4 @@ const DefaultMock = () => {
   );
 };
 
-export { DefaultMock }; 
+export { DefaultMock };

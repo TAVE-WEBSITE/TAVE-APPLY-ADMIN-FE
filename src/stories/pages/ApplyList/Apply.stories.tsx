@@ -25,7 +25,7 @@ export const applyListPage: Story = {
   render: () => (
     <>
       <FlexBox className="gap-8 px-16 pb-8 items-start" direction="col">
-        <h1 className="font-bold text-4xl">"16기 지원서 명단"</h1>
+        <h1 className="font-bold text-4xl">16기 지원서 명단</h1>
         <p className="text-gray-500">2025.08.11 14:00 기준</p>
       </FlexBox>
       <section className="min-h-[calc(100vh-244px)] bg-gray-100 flex flex-col gap-8">

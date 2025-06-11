@@ -36,7 +36,6 @@ export const useApplyFilter = () => {
       checkedRoles,
       searchInput
     );
-    console.log(filtered);
     setFilteredList(filtered);
   };
 

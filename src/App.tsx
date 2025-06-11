@@ -35,7 +35,7 @@ function App() {
                 path="/setting/interview/:id"
                 element={<InterviewSettingDetail />}
               />
-              <Route path="/setting/finalPass" element={<FinalPassSetting />} />
+              <Route path="/setting/final" element={<FinalPassSetting />} />
               <Route path="/evalution" element={<Evaluation />} />
             </Routes>
           </main>

@@ -16,6 +16,7 @@ const meta = {
         "TextLength",
         "Dots",
         "Calendar",
+        "Check",
         "Filter",
         "Left",
         "CheckCircle",

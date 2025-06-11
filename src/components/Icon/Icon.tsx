@@ -8,6 +8,7 @@ export type IconType =
   | "X"
   | "ChevronDown"
   | "ChevronUp"
+  | "Check"
   | "Left"
   | "Calendar"
   | "Arrow"

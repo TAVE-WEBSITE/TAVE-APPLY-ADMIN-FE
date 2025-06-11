@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent, SetStateAction } from "react";
-import Icon from "../Icon/Icon";
+import Icon from "@/components/Icon/Icon";
 import DatePanel from "./DatePanel";
 
 type CustomDatePickerProps = {
@@ -64,7 +64,7 @@ export default function DatePicker({
     <button
       onClick={() => setShowPanel(!showPanel)}
       onKeyDown={(e) => e.key === "Enter" && setShowPanel(!showPanel)}
-      className={`flex flex-col justify-center gap-2 w-[282px] ${className}`}
+      className={`flex flex-col justify-center gap-2 w-[272px] ${className}`}
     >
       <div className="pl-4 text-sm font-normal text-gray-600">{label}</div>
       <div

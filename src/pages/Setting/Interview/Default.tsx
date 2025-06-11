@@ -43,22 +43,21 @@ const Default = () => {
           </FlexBox>
           <FlexBox direction="col" className="gap-4 p-4 items-start">
             {Array.from({ length: 4 }, (_, index) => (
-              <Input.WithTitle title={`${index + 1}일차 (8/10)`}>
-                <FlexBox className="w-full gap-4">
-                  <Input.WithLabel label="오픈채팅방 링크" iconType="Link">
-                    <Input
-                      placeholder="링크를 입력해주세요"
-                      className="w-full"
-                    />
-                  </Input.WithLabel>
-                  <Input.WithLabel label="비밀번호 설정" iconType="Key">
-                    <Input
-                      placeholder="비밀번호를 입력해주세요"
-                      className="w-full"
-                    />
-                  </Input.WithLabel>
+              <Input.TitleContainer title={`${index + 1}일차 (8/10)`}>
+                <FlexBox className="gap-4">
+                  <Input.WithLabel
+                    label="오픈채팅방 링크"
+                    iconType="Link"
+                    placeholder="링크를 입력해주세요"
+                    width="w-lg"
+                  ></Input.WithLabel>
+                  <Input.WithLabel
+                    label="비밀번호 설정"
+                    iconType="Key"
+                    placeholder="비밀번호를 입력해주세요"
+                  ></Input.WithLabel>
                 </FlexBox>
-              </Input.WithTitle>
+              </Input.TitleContainer>
             ))}
           </FlexBox>
         </section>

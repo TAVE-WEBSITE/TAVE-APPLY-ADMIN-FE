@@ -18,7 +18,7 @@ const filters: RoleType[] = [
 
 const ApplyMock = () => {
   const [isLoading, setIsLoading] = useState(false);
-
+  const [originalList, setOrigianlList] = useState<Application[]>([]);
   const [filteredList, setFilteredList] = useState<Application[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const [checkedRoles, setCheckedRoles] = useState<Set<RoleType>>(new Set());
@@ -27,6 +27,7 @@ const ApplyMock = () => {
     const fetcher = async () => {
       setIsLoading(true);
       const data = await fetchAllInterviewers();
+      setOrigianlList(data);
       setFilteredList(data);
       setIsLoading(false);
     };
@@ -47,8 +48,9 @@ const ApplyMock = () => {
   };
 
   const searchByName = () => {
+    if (!originalList) return;
     const filtered = getFilteredApplications(
-      filteredList,
+      originalList,
       checkedRoles,
       searchInput
     );

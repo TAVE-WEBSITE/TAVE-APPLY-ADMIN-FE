@@ -1,6 +1,5 @@
 import FlexBox from "@/components/Layout/FlexBox";
 import Icon from "@/components/Icon/Icon";
-import type { IconType } from "@/components/Icon/Icon";
 
 export interface WithTitleProps {
   title: string;
@@ -10,13 +9,7 @@ export interface WithTitleProps {
 export interface WithHelperTextProps extends WithTitleProps {
   helperText: string;
 }
-export interface WithLabelProps {
-  iconType: Exclude<IconType, "TaveLogo">;
-  label: string;
-  labelColor?: string;
-  children: React.ReactNode;
-  className?: string;
-}
+
 export interface WithNumberProps {
   number: number;
   children: React.ReactNode;
@@ -27,12 +20,14 @@ const WithTitle = ({ title, children, className = "" }: WithTitleProps) => {
     <>
       <FlexBox direction="col" className="justify-center">
         <FlexBox>
-          <label className={`text-gray-700 font-bold ${className}`}>
+          <label className={`text-gray-700 font-bold pt-2 mb-4 ${className}`}>
             {title}
           </label>
         </FlexBox>
       </FlexBox>
-      {children}
+      <FlexBox direction="col" className="gap-4">
+        {children}
+      </FlexBox>
     </>
   );
 };
@@ -61,26 +56,6 @@ const WithHelperText = ({
   );
 };
 
-const WithLabel = ({
-  label,
-  iconType,
-  children,
-  labelColor = "text-gray-500",
-  className = "",
-}: WithLabelProps) => {
-  return (
-    <FlexBox className={`w-full justify-between gap-4 ${className}`}>
-      <FlexBox direction="col" className={`items-start gap-2 w-full`}>
-        <FlexBox className="gap-2">
-          <Icon type={iconType} size={20} />
-          <span className={`${labelColor}`}>{label}</span>
-        </FlexBox>
-        {children}
-      </FlexBox>
-    </FlexBox>
-  );
-};
-
 const WithNumber = ({ number, children, className = "" }: WithNumberProps) => {
   return (
     <>
@@ -98,4 +73,4 @@ const WithNumber = ({ number, children, className = "" }: WithNumberProps) => {
   );
 };
 
-export { WithTitle, WithLabel, WithNumber, WithHelperText };
+export { WithTitle, WithNumber, WithHelperText };
