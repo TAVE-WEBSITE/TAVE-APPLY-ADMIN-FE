@@ -1,28 +1,31 @@
-import { useState } from "react";
 import Pagination from "../Pagination/Pagination";
 import Icon from "../Icon/Icon";
 import InterviewersLoading from "@/pages/Setting/Loading/InterviewersLoading";
-import Button from "../Button/Button";
 import type { NavigateFunction } from "react-router-dom";
+import { formatDateTime } from "@/utils/formatDate";
 
 interface ApplicationTableProps {
-  filterStatus?: "전체" | "대기중" | "완료";
+  filterStatus?: string;
   rows: string[];
   applications: any[] | undefined;
   isLoading: boolean;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  totalPages: number | undefined;
   baseUrl?: string;
   navigate?: NavigateFunction;
 }
 
 const ApplicationTable = ({
-  filterStatus = "전체",
   rows,
   applications,
   isLoading,
+  currentPage,
+  setCurrentPage,
+  totalPages,
   baseUrl,
   navigate,
 }: ApplicationTableProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
 
   const getFieldColor = (field: string) => {
@@ -48,22 +51,10 @@ const ApplicationTable = ({
     return gender === "MALE" ? "남" : "여";
   };
 
-  // 필터링된 데이터 생성
-  const filteredData =
-    applications &&
-    applications.filter((item) => {
-      if (filterStatus === "전체") return true;
-      if (filterStatus === "완료") return item.isEvaluated;
-      if (filterStatus === "대기중") return !item.isEvaluated;
-      return true;
-    });
-
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems =
-    filteredData && filteredData.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages =
-    filteredData && Math.ceil(filteredData.length / itemsPerPage);
+    applications && applications.slice(indexOfFirstItem, indexOfLastItem);
 
   const handlePageChange = (pageNumber: number): void => {
     setCurrentPage(pageNumber);
@@ -86,11 +77,10 @@ const ApplicationTable = ({
             </tr>
           </thead>
           <tbody className="bg-white">
-            {isLoading && <InterviewersLoading />}
-            {currentItems && currentItems.length > 0 ? (
-              currentItems.map((application, index) => (
+            {currentItems && !isLoading ? (
+              currentItems?.map((application, index) => (
                 <tr
-                  key={application.id}
+                  key={application.id + index}
                   className={`hover:bg-slate-600/5 border-b border-gray-200 cursor-pointer ${
                     index === currentItems.length - 1 ? "rounded-b-xl" : ""
                   }`}
@@ -119,31 +109,64 @@ const ApplicationTable = ({
                   <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
                     {application.school}
                   </td>
-                  <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
-                    {application.recruitTime}
-                  </td>
-                  {application.isEvaluated && (
+                  {application.count && (
+                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
+                      {application.count}
+                    </td>
+                  )}
+                  {application.interviewTime && (
+                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
+                      {formatDateTime(application.interviewTime)}
+                    </td>
+                  )}
+                  {application.recruitTime && (
+                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
+                      {formatDateTime(application.recruitTime)}
+                    </td>
+                  )}
+                  {application.status && (
                     <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 text-sm max-w-16">
                       <span
-                        className={`px-2 justify-start text-base leading-5 font-semibold rounded-full ${
-                          application.isEvaluated
-                            ? "text-blue-600 font-bold"
-                            : "text-gray-700 font-medium"
-                        }`}
+                        className={`px-2 justify-start text-base leading-5 font-semibold rounded-full
+                          ${
+                            application.status === "COMPLETE"
+                              ? "text-blue-600 font-semibold"
+                              : application.status === "FAIL"
+                              ? "text-red-600 font-semibold"
+                              : application.status === "PASS"
+                              ? "text-green-600 font-semibold"
+                              : application.status === "HOLD"
+                              ? "text-gray-900 font-semibold"
+                              : application.status === "NOTCHECKED"
+                              ? "text-gray-600 font-semibold"
+                              : ""
+                          }
+                          `}
                       >
-                        {application.isEvaluated ? "완료" : "대기"}
+                        {application.status === "COMPLETE"
+                          ? "완료"
+                          : application.status === "FAIL"
+                          ? "불합격"
+                          : application.status === "PASS"
+                          ? "합격"
+                          : application.status === "HOLD"
+                          ? "대기"
+                          : application.status === "NOTCHECKED"
+                          ? "평가 진행 전"
+                          : ""}
                       </span>
                     </td>
                   )}
                 </tr>
               ))
+            ) : isLoading ? (
+              <InterviewersLoading />
             ) : (
               <tr className="h-[500px]">
                 <td colSpan={6}>
-                  <div className="flex flex-col justify-center items-center gap-4 p-4 text-gray-700 w-full h-full">
+                  <div className="flex flex-col justify-center items-center gap-4 p-4 text-gray-700 w-full h-full text-center">
                     <Icon type="Alert" size={28} />
-                    서류 평가가 완료되지 않았습니다
-                    <Button onClick={() => {}}>서류 평가 바로가기</Button>
+                    데이터를 불러오는데 실패했습니다 <br />
                   </div>
                 </td>
               </tr>
@@ -154,7 +177,7 @@ const ApplicationTable = ({
 
       <Pagination
         currentPage={currentPage}
-        totalPages={totalPages ? totalPages : 0}
+        totalPages={totalPages ? totalPages : 1}
         onPageChange={handlePageChange}
       />
     </div>

@@ -9,7 +9,7 @@ const applyListPageMap: Record<ApplyListPages, React.ComponentType> = {
   "지원 명단": Apply,
 };
 
-const isRecruiting: boolean = false;
+const isRecruiting: boolean = true;
 const CurrentPage = isRecruiting
   ? applyListPageMap["지원 명단"]
   : applyListPageMap["알림 신청 명단"];

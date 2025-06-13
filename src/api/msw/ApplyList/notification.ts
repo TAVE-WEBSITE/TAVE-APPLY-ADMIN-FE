@@ -74,9 +74,30 @@ const notificationList: NotificationItem[] = [
   },
 ];
 
-const getNotificationList = http.get("/v1/admin/notification", () => {
-  return HttpResponse.json(notificationList, { status: 200 });
-});
+const getNotificationList = http.get(
+  "/v1/admin/notification",
+  async ({ request }) => {
+    const url = new URL(request.url);
+    const page = Number(url.searchParams.get("page") || 0);
+    const size = Number(url.searchParams.get("size") || 7);
+
+    const start = page * size;
+    const end = start + size;
+    const paged = notificationList.slice(start, end);
+
+    const result = {
+      content: paged,
+      page: {
+        size: size,
+        number: 0,
+        totalElement: notificationList.length,
+        totalPages: Math.floor(notificationList.length / size),
+      },
+    };
+
+    return HttpResponse.json(result, { status: 200 });
+  }
+);
 
 const postReservation = http.post(
   "/v1/admin/notification/reservation",

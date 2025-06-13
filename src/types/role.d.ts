@@ -5,13 +5,3 @@ export type RoleType =
   | "데이터 분석"
   | "딥러닝"
   | "앱 프론트";
-
-export type Application = {
-  id: string;
-  name: string;
-  fieldType: string;
-  sex: string;
-  school: string;
-  recruitTime: string;
-  isEvaluated: boolean;
-};

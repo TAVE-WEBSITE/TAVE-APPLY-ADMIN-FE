@@ -2,12 +2,24 @@ import Button from "@/components/Button/Button";
 import NotificationTable from "@/components/ApplicationTable/NotificationTable";
 import FlexBox from "@/components/Layout/FlexBox";
 import ToastMessage from "@/components/Modal/ToastMessage";
+import { usePagination } from "@/hooks/usePagination";
 import { useNotification } from "@/hooks/ApplyList/useNotification";
 import Icon from "@/components/Icon/Icon";
+import { useState } from "react";
+import type { NotificationItem } from "@/types/applylist";
 
 const Notification = () => {
+  const [currentPage, setCurrentPage] = useState(1);
   const {
-    notificationList,
+    entireList: notificationList,
+    isLoading,
+    totalPages,
+  } = usePagination<NotificationItem>({
+    type: "알림 신청",
+    page: currentPage,
+    size: 7,
+  });
+  const {
     postIndividual,
     postNotification,
     isPending,
@@ -32,6 +44,10 @@ const Notification = () => {
       <NotificationTable
         rows={["이메일", "신청 날짜", ""]}
         applications={notificationList}
+        isLoading={isLoading}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
         onClick={postIndividual}
       />
       <ToastMessage

@@ -3,9 +3,11 @@ import Icon from "@/components/Icon/Icon";
 import CheckBox from "@/components/Input/CheckBox";
 import SearchInput from "@/components/Input/SearchInput";
 import FlexBox from "@/components/Layout/FlexBox";
-import { useApplyFilter } from "@/hooks/ApplyList/useApplyFilter";
+import { usePagination } from "@/hooks/usePagination";
+import { useFilter } from "@/hooks/useFilter";
 import type { RoleType } from "@/types/role";
 import ApplicationTable from "@/components/ApplicationTable/ApplicationTable";
+import { useState } from "react";
 
 const filters: RoleType[] = [
   "디자인",
@@ -18,22 +20,24 @@ const filters: RoleType[] = [
 
 const Apply = () => {
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const { entireList, isLoading, totalPages } = usePagination({
+    type: "지원서",
+    page: currentPage,
+    size: 7,
+  });
+
   const {
     filteredList,
     checkedRoles,
-    isLoading,
     searchInput,
     setSearchInput,
     handleFilter,
-    searchByName,
-  } = useApplyFilter();
+  } = useFilter(entireList);
 
   return (
     <>
-      <div
-        className="flex flex-col items-center px-16 justify-between"
-        onKeyDown={(e) => e.key === "Enter" && searchByName()}
-      >
+      <div className="flex flex-col items-center px-16 justify-between">
         <FlexBox className="w-full justify-between pt-8">
           <details className="relative">
             <summary className="flex items-center gap-2 px-4 py-3 rounded-lg bg-white text-gray-700 focus:outline outline-gray-300 font-medium cursor-pointer">
@@ -67,6 +71,9 @@ const Apply = () => {
           isLoading={isLoading}
           baseUrl="/applies"
           navigate={navigate}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          totalPages={totalPages}
         />
       </div>
     </>

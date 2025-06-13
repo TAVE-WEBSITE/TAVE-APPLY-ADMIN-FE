@@ -109,7 +109,7 @@ const InterviewSettingDetail = () => {
           "전공/부전공",
           "이메일 주소",
         ].map((label) => (
-          <FlexBox className="gap-8">
+          <FlexBox key={label} className="gap-8">
             <label className="text-gray-400">{label}</label>
             <span>{renderLabels(label)}</span>
           </FlexBox>

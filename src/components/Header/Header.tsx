@@ -58,19 +58,19 @@ const Header = ({ redirectionList }: HeaderProps) => {
                     </li>
                     <li
                       className="hover:text-white cursor-pointer"
-                      onClick={() => navigate("setting/document")}
+                      onClick={() => navigate("/setting/document")}
                     >
                       서류 설정
                     </li>
                     <li
                       className="hover:text-white cursor-pointer"
-                      onClick={() => navigate("setting/interview")}
+                      onClick={() => navigate("/setting/interview")}
                     >
                       면접 설정
                     </li>
                     <li
                       className="hover:text-white cursor-pointer"
-                      onClick={() => navigate("setting/final")}
+                      onClick={() => navigate("/setting/final")}
                     >
                       최종 합격
                     </li>
@@ -80,10 +80,16 @@ const Header = ({ redirectionList }: HeaderProps) => {
                 <div className="absolute top-full left-0 w-full h-2" />
                 {item === "EVALUTION" && (
                   <ul className="absolute top-14 left-0 w-full bg-gray-800 text-gray-400 px-4 py-3 rounded-xl flex flex-col gap-3 text-center hidden group-hover:flex transition-all duration-200">
-                    <li className="hover:text-white cursor-pointer">
+                    <li
+                      className="hover:text-white cursor-pointer"
+                      onClick={() => navigate("/evalution/document")}
+                    >
                       서류 평가
                     </li>
-                    <li className="hover:text-white cursor-pointer">
+                    <li
+                      className="hover:text-white cursor-pointer"
+                      onClick={() => navigate("/evalution/interview")}
+                    >
                       면접 평가
                     </li>
                   </ul>

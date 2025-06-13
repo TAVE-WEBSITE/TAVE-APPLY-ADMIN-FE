@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Pagination from "../Pagination/Pagination";
 import Icon from "@/components/Icon/Icon";
 import InterviewersLoading from "@/pages/Setting/Loading/InterviewersLoading";
@@ -9,6 +8,9 @@ interface NotificationTableProps {
   rows: string[];
   applications: NotificationItem[] | null;
   isLoading?: boolean;
+  totalPages: number | undefined;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
   onClick: (id: string | number) => Promise<any>;
 }
 
@@ -16,21 +18,23 @@ const NotificationTable = ({
   rows,
   applications,
   isLoading = false,
+  totalPages,
+  currentPage,
+  setCurrentPage,
   onClick,
 }: NotificationTableProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 7;
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems =
     applications && applications.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages =
-    applications && Math.ceil(applications.length / itemsPerPage);
 
   const handlePageChange = (pageNumber: number): void => {
     setCurrentPage(pageNumber);
   };
+
+  console.log(applications);
 
   return (
     <div className="w-full overflow-x-auto pb-8">
@@ -85,7 +89,7 @@ const NotificationTable = ({
 
       <Pagination
         currentPage={currentPage}
-        totalPages={totalPages ? totalPages : 0}
+        totalPages={totalPages ? totalPages : 1}
         onPageChange={handlePageChange}
       />
     </div>

@@ -1,158 +1,166 @@
-// import type { Application } from "@/types/role";
+import { delay, http, HttpResponse } from "msw";
+import { type Status } from "@/types/application";
 
-// const DocumentEvalutionMockData: Application[] = [
-//   {
-//     id: "1",
-//     fieldType: "웹 프론트",
-//     name: "홍길동",
-//     sex: "MALE",
-//     school: "서울대학교",
-//     recruitTime: "2024.03.20 14:30",
-//     isEvaluated: true,
-//   },
-//   {
-//     id: "2",
-//     fieldType: "백엔드",
-//     name: "김철수",
-//     sex: "MALE",
-//     school: "연세대학교",
-//     recruitTime: "2024.03.20 15:00",
-//     isEvaluated: false,
-//   },
-//   {
-//     id: "3",
-//     fieldType: "디자인",
-//     name: "이영희",
-//     sex: "FEMALE",
-//     school: "고려대학교",
-//     recruitTime: "2024.03.20 15:30",
-//     isEvaluated: true,
-//   },
-//   {
-//     id: "4",
-//     fieldType: "데이터 분석",
-//     name: "박지민",
-//     sex: "FEMALE",
-//     school: "성균관대학교",
-//     recruitTime: "2024.03.21 09:00",
-//     isEvaluated: true,
-//   },
-//   {
-//     id: "5",
-//     fieldType: "딥러닝",
-//     name: "최현우",
-//     sex: "MALE",
-//     school: "한양대학교",
-//     recruitTime: "2024.03.21 09:30",
-//     isEvaluated: false,
-//   },
-//   {
-//     id: "6",
-//     fieldType: "앱 프론트",
-//     name: "서지수",
-//     sex: "FEMALE",
-//     school: "서울여자대학교",
-//     recruitTime: "2024.03.21 10:00",
-//     isEvaluated: true,
-//   },
-//   {
-//     id: "7",
-//     fieldType: "백엔드",
-//     name: "정민호",
-//     sex: "MALE",
-//     school: "중앙대학교",
+const statusPool: Status[] = ["HOLD", "COMPLETE"];
+const statusFinalPool: Status[] = [
+  "FAIL",
+  "PASS",
+  "HOLD",
+  "NOTCHECKED",
+  "COMPLETE",
+];
 
-//     recruitTime: "2024.03.21 10:30",
-//     isEvaluated: false,
-//   },
-//   {
-//     id: "8",
+const fields = [
+  "웹 프론트",
+  "백엔드",
+  "디자인",
+  "데이터 분석",
+  "딥러닝",
+  "앱 프론트",
+];
+const names = [
+  "홍길동",
+  "김철수",
+  "이영희",
+  "박지민",
+  "최현우",
+  "서지수",
+  "정민호",
+  "한소희",
+  "이승기",
+  "김보라",
+  "장우진",
+  "오지현",
+  "강다연",
+  "류진우",
+  "배수지",
+  "이도현",
+  "유재석",
+  "장나라",
+  "신동엽",
+  "아이유",
+  "정우성",
+  "수지",
+  "나연",
+  "제니",
+  "지수",
+  "채원",
+  "태연",
+  "슬기",
+  "지민",
+  "뷔",
+];
 
-//     fieldType: "디자인",
-//     name: "한소희",
-//     sex: "FEMALE",
-//     school: "홍익대학교",
-//     recruitTime: "2024.03.21 11:00",
-//     isEvaluated: true,
-//   },
-//   {
-//     id: "9",
-//     fieldType: "데이터 분석",
-//     name: "이승기",
-//     sex: "MALE",
-//     school: "경희대학교",
-//     recruitTime: "2024.03.21 11:30",
-//     isEvaluated: false,
-//   },
-//   {
-//     id: "10",
-//     fieldType: "딥러닝",
-//     name: "김보라",
+const schools = [
+  "서울대학교",
+  "연세대학교",
+  "고려대학교",
+  "성균관대학교",
+  "한양대학교",
+  "서울여자대학교",
+  "중앙대학교",
+  "홍익대학교",
+  "경희대학교",
+  "부산대학교",
+  "인하대학교",
+  "동국대학교",
+  "이화여자대학교",
+  "건국대학교",
+  "경북대학교",
+];
 
-//     sex: "FEMALE",
-//     school: "부산대학교",
+const generateMockData = (type: "final" | "document", count: number) => {
+  return Array.from({ length: count }, (_, i) => {
+    const common = {
+      id: `${i + 1}`,
+      name: names[i % names.length],
+      fieldType: fields[i % fields.length],
+      sex: i % 2 === 0 ? "MALE" : "FEMALE",
+      school: schools[i % schools.length],
+    };
 
-//     recruitTime: "2024.03.21 12:00",
-//     isEvaluated: true,
-//   },
-//   {
-//     id: "11",
+    if (type === "final") {
+      return {
+        ...common,
+        count: (i % 5) + 1,
+        status: statusFinalPool[i % statusPool.length],
+      };
+    } else {
+      return {
+        ...common,
+        recruitTime: new Date().toISOString(),
+        status: statusPool[i % statusPool.length],
+      };
+    }
+  });
+};
 
-//     fieldType: "웹 프론트",
-//     name: "장우진",
+const DocumentEvalutionMockData = generateMockData("document", 40);
+const DocumentFinalEvalutionMockData = generateMockData("final", 40);
 
-//     sex: "MALE",
-//     school: "인하대학교",
+export const getEvalutionList = http.get(
+  "/v1/manager/resume/evaluate",
+  async ({ request }) => {
+    await delay(800);
 
-//     recruitTime: "2024.03.21 12:30",
-//     isEvaluated: false,
-//   },
-//   {
-//     id: "12",
+    const url = new URL(request.url);
+    const page = Number(url.searchParams.get("page") || 0);
+    const size = Number(url.searchParams.get("size") || 7);
+    const status = url.searchParams.get("status") as Status | null;
 
-//     fieldType: "백엔드",
-//     name: "오지현",
+    let filtered = DocumentEvalutionMockData;
 
-//     sex: "FEMALE",
-//     school: "동국대학교",
+    if (status) {
+      filtered = filtered.filter((item) => item.status === status);
+    }
 
-//     recruitTime: "2024.03.21 13:00",
-//     isEvaluated: true,
-//   },
-//   {
-//     id: "13",
+    const start = page * size;
+    const end = start + size;
+    const paged = filtered.slice(start, end);
 
-//     fieldType: "디자인",
-//     name: "강다연",
+    const result = {
+      content: paged,
+      page: {
+        size: size,
+        number: 0,
+        totalElement: DocumentFinalEvalutionMockData.length,
+        totalPages: Math.floor(DocumentFinalEvalutionMockData.length / size),
+      },
+    };
 
-//     sex: "FEMALE",
-//     school: "이화여자대학교",
+    return HttpResponse.json(result, { status: 200 });
+  }
+);
 
-//     recruitTime: "2024.03.21 13:30",
-//     isEvaluated: false,
-//   },
-//   {
-//     id: "14",
+export const getFinalEvaluationList = http.get(
+  "/v1/manager/resume/evaluate/final",
+  async ({ request }) => {
+    await delay(800);
 
-//     fieldType: "데이터 분석",
-//     name: "류진우",
+    const url = new URL(request.url);
+    const page = Number(url.searchParams.get("page") || 0);
+    const size = Number(url.searchParams.get("size") || 7);
+    const status = url.searchParams.get("status") as Status | null;
 
-//     sex: "MALE",
-//     school: "건국대학교",
+    let filtered = DocumentFinalEvalutionMockData;
 
-//     recruitTime: "2024.03.21 14:00",
-//     isEvaluated: true,
-//   },
-//   {
-//     id: "15",
+    if (status) {
+      filtered = filtered.filter((item) => item.status === status);
+    }
 
-//     fieldType: "딥러닝",
-//     name: "배수지",
+    const start = page * size;
+    const end = start + size;
+    const paged = filtered.slice(start, end);
+    const result = {
+      content: paged,
+      page: {
+        size: size,
+        number: 0,
+        totalElement: DocumentFinalEvalutionMockData.length,
+        totalPages: Math.floor(DocumentFinalEvalutionMockData.length / size),
+      },
+    };
 
-//     sex: "FEMALE",
-//     school: "경북대학교",
-
-//     recruitTime: "2024.03.21 14:30",
-//     isEvaluated: false,
-//   },
-// ];
+    return HttpResponse.json(result, { status: 200 });
+  }
+);
