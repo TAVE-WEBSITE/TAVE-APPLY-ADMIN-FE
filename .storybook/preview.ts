@@ -19,6 +19,10 @@ import {
   getAllInterviewers,
   getSingleInterviewer,
 } from "./ApplyList/ApplyList";
+import {
+  getEvalutionList,
+  getFinalEvaluationList,
+} from "./Evaluation/Document";
 
 initialize({
   onUnhandledRequest: "bypass",
@@ -49,6 +53,9 @@ const preview: Preview = {
         // 지원 명단 조회 페이지 관련
         getAllInterviewers,
         getSingleInterviewer,
+        // 서류 평가 관련
+        getEvalutionList,
+        getFinalEvaluationList,
       ],
     },
     controls: {
