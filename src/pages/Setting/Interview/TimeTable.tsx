@@ -5,7 +5,10 @@ import SearchInput from "@/components/Input/SearchInput";
 import ApplicationTable from "@/components/ApplicationTable/ApplicationTable";
 import type { RoleType } from "@/types/role";
 import CheckBox from "@/components/Input/CheckBox";
-import { useFilter } from "@/hooks/Setting/Interview/useFilter";
+import { type InterviewItem } from "@/types/application";
+import { usePagination } from "@/hooks/usePagination";
+import { useFilter } from "@/hooks/useFilter";
+import { useState } from "react";
 
 const tableRows = ["지원 분야", "이름", "성별", "학교", "면접 일자"];
 
@@ -20,21 +23,23 @@ const filters: RoleType[] = [
 
 const TimeTable = () => {
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const { entireList, isLoading, totalPages } = usePagination<InterviewItem>({
+    type: "면접 설정",
+    page: currentPage,
+    size: 7,
+  });
+
   const {
     filteredList,
-    isLoading,
     checkedRoles,
     searchInput,
     setSearchInput,
     handleFilter,
-    searchByName,
-  } = useFilter();
+  } = useFilter<InterviewItem>(entireList);
 
   return (
-    <div
-      className="flex flex-col gap-4"
-      onKeyDown={(e) => e.key === "Enter" && searchByName()}
-    >
+    <div className="flex flex-col gap-4">
       <FlexBox className="justify-between">
         <details className="relative">
           <summary className="flex items-center gap-2 px-4 py-3 rounded-lg bg-white text-gray-700 focus:outline outline-gray-300 font-medium cursor-pointer">
@@ -62,6 +67,9 @@ const TimeTable = () => {
       </FlexBox>
       <ApplicationTable
         applications={filteredList}
+        totalPages={totalPages}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
         rows={tableRows}
         isLoading={isLoading}
         baseUrl="/setting/interview"

@@ -8,7 +8,7 @@ const interviewMockData = [
     name: "홍길동",
     sex: "MALE",
     school: "서울대학교",
-    recruitTime: "2024.03.20 14:30",
+    interviewTime: "2024.03.20 14:30",
   },
   {
     id: "2",
@@ -16,7 +16,7 @@ const interviewMockData = [
     name: "김철수",
     sex: "MALE",
     school: "연세대학교",
-    recruitTime: "2024.03.20 15:00",
+    interviewTime: "2024.03.20 15:00",
   },
   {
     id: "3",
@@ -24,7 +24,7 @@ const interviewMockData = [
     name: "이영희",
     sex: "FEMALE",
     school: "고려대학교",
-    recruitTime: "2024.03.20 15:30",
+    interviewTime: "2024.03.20 15:30",
   },
   {
     id: "4",
@@ -32,7 +32,7 @@ const interviewMockData = [
     name: "박지민",
     sex: "FEMALE",
     school: "성균관대학교",
-    recruitTime: "2024.03.21 09:00",
+    interviewTime: "2024.03.21 09:00",
   },
   {
     id: "5",
@@ -40,7 +40,7 @@ const interviewMockData = [
     name: "최현우",
     sex: "MALE",
     school: "한양대학교",
-    recruitTime: "2024.03.21 09:30",
+    interviewTime: "2024.03.21 09:30",
   },
   {
     id: "6",
@@ -48,7 +48,7 @@ const interviewMockData = [
     name: "서지수",
     sex: "FEMALE",
     school: "서울여자대학교",
-    recruitTime: "2024.03.21 10:00",
+    interviewTime: "2024.03.21 10:00",
   },
   {
     id: "7",
@@ -56,17 +56,15 @@ const interviewMockData = [
     name: "정민호",
     sex: "MALE",
     school: "중앙대학교",
-
-    recruitTime: "2024.03.21 10:30",
+    interviewTime: "2024.03.21 10:30",
   },
   {
     id: "8",
-
     fieldType: "디자인",
     name: "한소희",
     sex: "FEMALE",
     school: "홍익대학교",
-    recruitTime: "2024.03.21 11:00",
+    interviewTime: "2024.03.21 11:00",
   },
   {
     id: "9",
@@ -74,7 +72,7 @@ const interviewMockData = [
     name: "이승기",
     sex: "MALE",
     school: "경희대학교",
-    recruitTime: "2024.03.21 11:30",
+    interviewTime: "2024.03.21 11:30",
   },
   {
     id: "10",
@@ -82,7 +80,7 @@ const interviewMockData = [
     name: "김보라",
     sex: "FEMALE",
     school: "부산대학교",
-    recruitTime: "2024.03.21 12:00",
+    interviewTime: "2024.03.21 12:00",
   },
   {
     id: "11",
@@ -90,7 +88,7 @@ const interviewMockData = [
     name: "장우진",
     sex: "MALE",
     school: "인하대학교",
-    recruitTime: "2024.03.21 12:30",
+    interviewTime: "2024.03.21 12:30",
   },
   {
     id: "12",
@@ -98,7 +96,7 @@ const interviewMockData = [
     name: "오지현",
     sex: "FEMALE",
     school: "동국대학교",
-    recruitTime: "2024.03.21 13:00",
+    interviewTime: "2024.03.21 13:00",
   },
   {
     id: "13",
@@ -106,7 +104,7 @@ const interviewMockData = [
     name: "강다연",
     sex: "FEMALE",
     school: "이화여자대학교",
-    recruitTime: "2024.03.21 13:30",
+    interviewTime: "2024.03.21 13:30",
   },
   {
     id: "14",
@@ -114,7 +112,7 @@ const interviewMockData = [
     name: "류진우",
     sex: "MALE",
     school: "건국대학교",
-    recruitTime: "2024.03.21 14:00",
+    interviewTime: "2024.03.21 14:00",
   },
   {
     id: "15",
@@ -122,7 +120,7 @@ const interviewMockData = [
     name: "배수지",
     sex: "FEMALE",
     school: "경북대학교",
-    recruitTime: "2024.03.21 14:30",
+    interviewTime: "2024.03.21 14:30",
   },
 ];
 
@@ -174,11 +172,33 @@ const mockResumes: Resume[] = interviewMockData.map((app, i) => {
   };
 });
 
-const getAllInterviewers = http.get("/v1/admin/interview", async () => {
-  // const shouldSucceed = Math.random() > 0
-  await delay(1000);
-  return HttpResponse.json(interviewMockData, { status: 200 });
-});
+const getAllInterviewers = http.get(
+  "/v1/admin/interview",
+  async ({ request }) => {
+    const url = new URL(request.url);
+    const page = Number(url.searchParams.get("page") || 0);
+    const size = Number(url.searchParams.get("size") || 7);
+
+    let filtered = interviewMockData;
+
+    const start = page * size;
+    const end = start + size;
+    const paged = filtered.slice(start, end);
+    await delay(800);
+    return HttpResponse.json(
+      {
+        content: paged,
+        page: {
+          size: size,
+          number: 0,
+          totalElement: interviewMockData.length,
+          totalPages: Math.ceil(interviewMockData.length / size),
+        },
+      },
+      { status: 200 }
+    );
+  }
+);
 
 const getSingleInterviewer = http.get(
   "/v1/admin/interview/resume",

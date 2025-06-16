@@ -2,23 +2,26 @@ import Button from "@/components/Button/Button";
 import NotificationTable from "@/components/ApplicationTable/NotificationTable";
 import FlexBox from "@/components/Layout/FlexBox";
 import ToastMessage from "@/components/Modal/ToastMessage";
-import { usePagination } from "@/hooks/usePagination";
 import { useNotification } from "@/hooks/ApplyList/useNotification";
 import Icon from "@/components/Icon/Icon";
-import { useState } from "react";
-import type { NotificationItem } from "@/types/applylist";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-const Notification = () => {
+const NotificationMock = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const {
-    entireList: notificationList,
-    isLoading,
-    totalPages,
-  } = usePagination<NotificationItem>({
-    type: "알림 신청",
-    page: currentPage,
-    size: 7,
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [notificationList, setNotificationList] = useState([]);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const fetcher = async () => {
+      const res = await axios.get("/v1/admin/notification?page=1&size=7");
+      setNotificationList(res.data);
+      setIsLoading(false);
+    };
+    fetcher();
+  }, []);
+
   const {
     postIndividual,
     postNotification,
@@ -47,7 +50,7 @@ const Notification = () => {
         isLoading={isLoading}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
-        totalPages={totalPages}
+        totalPages={1}
         onClick={postIndividual}
       />
       <ToastMessage
@@ -59,4 +62,4 @@ const Notification = () => {
   );
 };
 
-export default Notification;
+export default NotificationMock;

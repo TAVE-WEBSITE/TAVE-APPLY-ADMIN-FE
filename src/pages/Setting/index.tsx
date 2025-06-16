@@ -1,5 +1,5 @@
 import DefaultSetting from "./Default";
-import DocumentSetting from "./Document/Document";
+import DocumentSetting from "./Document";
 import InterviewSetting from "./Interview";
 import FinalPassSetting from "./FinalPass";
 

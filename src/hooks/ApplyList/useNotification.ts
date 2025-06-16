@@ -1,31 +1,10 @@
 import { axiosInstance } from "@/api/axiosInstance";
-import type { NotificationItem } from "@/types/applylist";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export const useNotification = () => {
-  const [notificationList, setNotificationList] = useState<NotificationItem[]>(
-    []
-  );
   const [isPending, setIsPending] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [isToastOpen, setIsToastOpen] = useState(false);
-
-  useEffect(() => {
-    const fetcher = async () => {
-      const list = await fetchNotificationList();
-      setNotificationList(list);
-    };
-    fetcher();
-  }, []);
-
-  const fetchNotificationList = async () => {
-    try {
-      const res = await axiosInstance.get("/v1/admin/notification");
-      return res.data;
-    } catch (error) {
-      return error;
-    }
-  };
 
   const postNotification = async () => {
     setIsPending(true);
@@ -57,7 +36,6 @@ export const useNotification = () => {
   };
 
   return {
-    notificationList,
     isPending,
     isToastOpen,
     toastMessage,

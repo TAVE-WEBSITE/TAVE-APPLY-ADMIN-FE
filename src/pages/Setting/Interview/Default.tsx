@@ -43,7 +43,10 @@ const Default = () => {
           </FlexBox>
           <FlexBox direction="col" className="gap-4 p-4 items-start">
             {Array.from({ length: 4 }, (_, index) => (
-              <Input.TitleContainer title={`${index + 1}일차 (8/10)`}>
+              <Input.TitleContainer
+                key={index}
+                title={`${index + 1}일차 (8/10)`}
+              >
                 <FlexBox className="gap-4">
                   <Input.WithLabel
                     label="오픈채팅방 링크"

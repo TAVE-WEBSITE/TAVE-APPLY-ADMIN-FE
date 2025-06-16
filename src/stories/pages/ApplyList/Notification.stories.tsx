@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import Notification from "@/pages/ApplyList/Notification";
+import NotificationMock from "./NotificationMock";
 import FlexBox from "@/components/Layout/FlexBox";
 
 const meta = {
   title: "Pages/알림 신청 명단",
-  component: Notification,
+  component: NotificationMock,
   parameters: {
     layout: "fullscreen",
   },
@@ -21,7 +21,7 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof Notification>;
+} satisfies Meta<typeof NotificationMock>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
