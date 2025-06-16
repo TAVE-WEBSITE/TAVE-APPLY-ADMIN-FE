@@ -147,6 +147,7 @@ const TimeTableMock = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [checkedRoles, setCheckedRoles] = useState<Set<RoleType>>(new Set());
   const [searchInput, setSearchInput] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [filteredList, setFilteredList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -230,10 +231,12 @@ const TimeTableMock = () => {
         rows={tableRows}
         isLoading={isLoading}
         navigate={() => {}}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={1}
       />
     </div>
   );
 };
 
 export { TimeTableMock };
- 

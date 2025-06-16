@@ -20,7 +20,7 @@ export const fetchList = async (
         break;
       case "지원서":
         // 아직 구현안함
-        url = "/v1/admin/apply";
+        url = "/v1/manager/resume/evaluate";
         break;
       case "면접 설정":
         url = "/v1/admin/interview";
