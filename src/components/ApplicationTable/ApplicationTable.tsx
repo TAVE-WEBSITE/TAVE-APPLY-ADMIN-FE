@@ -81,9 +81,9 @@ const ApplicationTable = ({
               currentItems?.map((application, index) => (
                 <tr
                   key={application.id + index}
-                  className={`hover:bg-slate-600/5 border-b border-gray-200 cursor-pointer ${
-                    index === currentItems.length - 1 ? "rounded-b-xl" : ""
-                  }`}
+                  className={`hover:bg-slate-600/5 border-b border-gray-200 ${
+                    navigate && "cursor-pointer"
+                  } ${index === currentItems.length - 1 ? "rounded-b-xl" : ""}`}
                   onClick={() => {
                     navigate &&
                       baseUrl &&
@@ -124,6 +124,15 @@ const ApplicationTable = ({
                       {formatDateTime(application.recruitTime)}
                     </td>
                   )}
+                  {application.isEvaluated !== undefined && (
+                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-base font-medium">
+                      {application.isEvaluated === true ? (
+                        <span className="text-blue-700 font-bold">완료</span>
+                      ) : (
+                        <span className="text-gray-700 font-medium">대기</span>
+                      )}
+                    </td>
+                  )}
                   {application.status && (
                     <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 text-sm max-w-16">
                       <span
@@ -136,7 +145,7 @@ const ApplicationTable = ({
                               : application.status === "PASS"
                               ? "text-green-600 font-semibold"
                               : application.status === "HOLD"
-                              ? "text-gray-900 font-semibold"
+                              ? "text-orange-500 font-semibold"
                               : application.status === "NOTCHECKED"
                               ? "text-gray-600 font-semibold"
                               : ""
@@ -150,7 +159,7 @@ const ApplicationTable = ({
                           : application.status === "PASS"
                           ? "합격"
                           : application.status === "HOLD"
-                          ? "대기"
+                          ? "보류"
                           : application.status === "NOTCHECKED"
                           ? "평가 진행 전"
                           : ""}

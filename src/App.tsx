@@ -11,7 +11,13 @@ import {
 } from "./pages/Setting";
 import InterviewSetting from "./pages/Setting/Interview";
 import InterviewSettingDetail from "./pages/Setting/Interview/Detail";
-import { EvalutionDocument, EvalutionInterview } from "@/pages/Evaluation";
+import {
+  EvaluationDocument,
+  EvaluationInterview,
+  FinalEvaluationDocument,
+  EvaluationDetail,
+  FinalEvaluationDetail,
+} from "@/pages/Evaluation";
 import Header from "@/components/Header/Header";
 
 function App() {
@@ -37,12 +43,24 @@ function App() {
               />
               <Route path="/setting/final" element={<FinalPassSetting />} />
               <Route
-                path="/evalution/document"
-                element={<EvalutionDocument />}
+                path="/evaluation/document"
+                element={<EvaluationDocument />}
               />
               <Route
-                path="/evalution/interview"
-                element={<EvalutionInterview />}
+                path="/evaluation/document/:id"
+                element={<EvaluationDetail />}
+              />
+              <Route
+                path="/evaluation/document/final"
+                element={<FinalEvaluationDocument />}
+              />
+              <Route
+                path="/evaluation/document/final/:id"
+                element={<FinalEvaluationDetail />}
+              />
+              <Route
+                path="/evaluation/interview"
+                element={<EvaluationInterview />}
               />
             </Routes>
           </main>

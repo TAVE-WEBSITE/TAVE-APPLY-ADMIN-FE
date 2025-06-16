@@ -82,13 +82,13 @@ const Header = ({ redirectionList }: HeaderProps) => {
                   <ul className="absolute top-14 left-0 w-full bg-gray-800 text-gray-400 px-4 py-3 rounded-xl flex flex-col gap-3 text-center hidden group-hover:flex transition-all duration-200">
                     <li
                       className="hover:text-white cursor-pointer"
-                      onClick={() => navigate("/evalution/document")}
+                      onClick={() => navigate("/evaluation/document")}
                     >
                       서류 평가
                     </li>
                     <li
                       className="hover:text-white cursor-pointer"
-                      onClick={() => navigate("/evalution/interview")}
+                      onClick={() => navigate("/evaluation/interview")}
                     >
                       면접 평가
                     </li>

@@ -25,6 +25,7 @@ import {
   postIndividualReservation,
 } from "./ApplyList/notification";
 import { getEvalutionList, getFinalEvaluationList } from "./Evalution/Document";
+import { postApplication } from "./Evalution/Detail";
 
 const genderData: ChartDataWithCount[] = [
   { label: "남성", ratio: 75, count: 34 },
@@ -88,4 +89,5 @@ export const handlers = [
   // 여기부터 EVALUTION/서류평가 관련
   getEvalutionList,
   getFinalEvaluationList,
+  postApplication,
 ];

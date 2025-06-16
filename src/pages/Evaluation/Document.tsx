@@ -1,10 +1,10 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Body from "@/components/Layout/Body";
 import FlexBox from "@/components/Layout/FlexBox";
 import { formatDateTime } from "@/utils/formatDate";
 import CountCard from "@/components/Card/CountCard";
 import Tab from "@/components/Tab/Tab";
-import Modal from "@/components/Modal/Modal";
 import SearchInput from "@/components/Input/SearchInput";
 import FilterButton from "@/components/Button/FilterButton";
 import ApplicationTable from "@/components/ApplicationTable/ApplicationTable";
@@ -13,7 +13,7 @@ import { usePagination } from "@/hooks/usePagination";
 import { useFilter } from "@/hooks/useFilter";
 
 const Document = () => {
-  const dialogRef = useRef<HTMLDialogElement>(null);
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
 
   const { entireList, isLoading, totalPages } = usePagination<EvaluationItem>({
@@ -40,23 +40,14 @@ const Document = () => {
           <p className="text-gray-500">
             {formatDateTime(new Date().toISOString()) + " 기준"}
           </p>
-          <div className="text-xl text-gray-300 underline cursor-pointer">
+          <div
+            className="text-xl text-gray-300 underline cursor-pointer"
+            onClick={() => navigate("/evaluation/document/final")}
+          >
             서류 최종 평가하기
           </div>
         </FlexBox>
       </FlexBox>
-      <Modal
-        dialogRef={dialogRef}
-        buttonCount={2}
-        onConfirm={() => {}}
-        title="최종 서류 평가"
-      >
-        <p className="text-gray-500 text-balance">
-          현재 시간 부로, <br /> 서류 합격 결과를 수정하실 수 없습니다. <br />
-          <br />
-          동의하시겠습니까?
-        </p>
-      </Modal>
       <Body className="pt-4 gap-8">
         <FlexBox className="gap-4 mx-auto">
           <CountCard text="현재 지원자 수" boxColor={"blue"} count={200} />
@@ -86,14 +77,16 @@ const Document = () => {
               "이름",
               "성별",
               "학교",
-              "평가 완료 인원",
-              "최종 평가",
+              "지원 날짜",
+              "평가 여부",
             ]}
             applications={filteredList}
             totalPages={totalPages}
             isLoading={isLoading}
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
+            baseUrl="/evaluation/document"
+            navigate={navigate}
           />
         </div>
       </Body>

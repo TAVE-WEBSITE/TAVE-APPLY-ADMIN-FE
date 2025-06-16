@@ -35,7 +35,7 @@ export type EvaluationItem = Application & {
 export type FinalEvaluationItem = Application & {
   recruitTime: string;
   count: number;
-  status: ApplicationType;
+  status: Status;
 };
 
 export type InterviewItem = Application & {

@@ -1,13 +1,13 @@
 import { delay, http, HttpResponse } from "msw";
 import { type Status } from "@/types/application";
 
-const statusPool: Status[] = ["HOLD", "COMPLETE"];
+//const statusPool: Status[] = ["HOLD", "COMPLETE"];
 const statusFinalPool: Status[] = [
   "FAIL",
   "PASS",
-  "HOLD",
   "NOTCHECKED",
   "COMPLETE",
+  "HOLD",
 ];
 
 const fields = [
@@ -83,13 +83,13 @@ const generateMockData = (type: "final" | "document", count: number) => {
       return {
         ...common,
         count: (i % 5) + 1,
-        status: statusFinalPool[i % statusPool.length],
+        status: statusFinalPool[i % statusFinalPool.length],
       };
     } else {
       return {
         ...common,
         recruitTime: new Date().toISOString(),
-        status: statusPool[i % statusPool.length],
+        isEvaluated: i % 2 === 0 ? true : false,
       };
     }
   });
@@ -106,13 +106,9 @@ export const getEvalutionList = http.get(
     const url = new URL(request.url);
     const page = Number(url.searchParams.get("page") || 0);
     const size = Number(url.searchParams.get("size") || 7);
-    const status = url.searchParams.get("status") as Status | null;
+    //const status = url.searchParams.get("status") as Status | null;
 
     let filtered = DocumentEvalutionMockData;
-
-    if (status) {
-      filtered = filtered.filter((item) => item.status === status);
-    }
 
     const start = page * size;
     const end = start + size;
@@ -140,13 +136,13 @@ export const getFinalEvaluationList = http.get(
     const url = new URL(request.url);
     const page = Number(url.searchParams.get("page") || 0);
     const size = Number(url.searchParams.get("size") || 7);
-    const status = url.searchParams.get("status") as Status | null;
+    //const status = url.searchParams.get("status") as Status | null;
 
     let filtered = DocumentFinalEvalutionMockData;
 
-    if (status) {
-      filtered = filtered.filter((item) => item.status === status);
-    }
+    // if (status) {
+    //   filtered = filtered.filter((item) => item.status === status);
+    // }
 
     const start = page * size;
     const end = start + size;
