@@ -7,7 +7,7 @@ interface CommonQuestionsProps {
 const CommonQuestions = ({ applicant }: CommonQuestionsProps) => {
   return (
     <>
-      {applicant.commonQuestions.map((q) => (
+      {applicant.commonQuestions.map((q: any) => (
         <Accordion key={q.question} title={q.question} className="w-full">
           <TextArea
             value={q.answer}
