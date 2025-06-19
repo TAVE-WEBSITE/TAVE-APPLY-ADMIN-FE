@@ -26,6 +26,11 @@ import {
 } from "./ApplyList/notification";
 import { getEvalutionList, getFinalEvaluationList } from "./Evalution/Document";
 import { postApplication } from "./Evalution/Detail";
+import {
+  getInterviewTimeTable,
+  getTimeTableForm,
+  getSheet,
+} from "./Evalution/Interview";
 
 const genderData: ChartDataWithCount[] = [
   { label: "남성", ratio: 75, count: 34 },
@@ -90,4 +95,8 @@ export const handlers = [
   getEvalutionList,
   getFinalEvaluationList,
   postApplication,
+  // 여기부터 EVALUATION/면접평가 관련
+  getInterviewTimeTable,
+  getTimeTableForm,
+  getSheet,
 ];

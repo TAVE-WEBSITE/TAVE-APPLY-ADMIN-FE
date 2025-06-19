@@ -1,5 +1,7 @@
 /** 면접 설정 페이지에서 사용되는 타입 */
 
+import type { RoleType } from "./role";
+
 // 질문/답변 구조
 export interface Question {
   question: string;
@@ -35,4 +37,34 @@ export interface Resume {
   commonQuestions: Question[];
 }
 
-export { Resume };
+type TotalDateTimeDto = {
+  dateList: string[];
+  timeList: string[];
+  dateListSize: number;
+  timeListSize: number;
+};
+
+type MemberDto = {
+  interviewFinalId: number;
+  field: RoleType;
+  username: string;
+  interviewDate: string;
+  interviewTime: string;
+  memberId: number;
+  resumeId: number;
+};
+
+type GroupByTimeDto = {
+  groupByTime: string;
+  memberDtoList: MemberDto[];
+};
+export type TimeTableList = {
+  groupByDay: string;
+  dayName: string;
+  groupByTimeDtoList: GroupByTimeDto[];
+};
+
+interface TimeTable {
+  totalDateTimeDto: TotalDateTimeDto;
+  timetableList: TimeTableList[];
+}

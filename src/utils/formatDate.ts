@@ -12,6 +12,13 @@ const formatHHMin = (isoString: string) => {
   return `${hh}:${min}`;
 };
 
+const formatKorDate = (isoString: string) => {
+  const date = new Date(isoString);
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${mm}월 ${dd}일`;
+};
+
 /**
  * ISO 문자열을 'YYYY.MM.DD' 형식으로 변환
  */
@@ -83,4 +90,5 @@ export {
   formatDateOnly,
   formatDateTime,
   formatDateTimeInput,
+  formatKorDate,
 };

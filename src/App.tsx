@@ -13,10 +13,12 @@ import InterviewSetting from "./pages/Setting/Interview";
 import InterviewSettingDetail from "./pages/Setting/Interview/Detail";
 import {
   EvaluationDocument,
-  EvaluationInterview,
-  FinalEvaluationDocument,
   EvaluationDetail,
+  EvaluationInterview,
+  EvaluationInterviewDetail,
+  FinalEvaluationDocument,
   FinalEvaluationDetail,
+  FinalEvaluationInterview,
 } from "@/pages/Evaluation";
 import Header from "@/components/Header/Header";
 
@@ -61,6 +63,18 @@ function App() {
               <Route
                 path="/evaluation/interview"
                 element={<EvaluationInterview />}
+              />
+              <Route
+                path="/evaluation/interview/:id"
+                element={<EvaluationInterviewDetail />}
+              />
+              <Route
+                path="/evaluation/interview/final"
+                element={<FinalEvaluationInterview />}
+              />
+              <Route
+                path="/evaluation/interview/final/:id"
+                element={<FinalEvaluationDetail />}
               />
             </Routes>
           </main>
