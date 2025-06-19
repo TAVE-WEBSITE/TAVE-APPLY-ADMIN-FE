@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Body from "@/components/Layout/Body";
 import FlexBox from "@/components/Layout/FlexBox";
 import { formatDateTime } from "@/utils/formatDate";
@@ -13,8 +12,7 @@ import TimeTable from "@/components/TimeTable";
 import Button from "@/components/Button/Button";
 import Icon from "@/components/Icon/Icon";
 
-const Interview = () => {
-  const navigate = useNavigate();
+const InterviewMock = () => {
   const [timeTable, setTimeTable] = useState<TimeTableList[]>([]);
   const [isPending, setIsPending] = useState(false);
   const [isPending2, setIsPending2] = useState(false);
@@ -49,7 +47,7 @@ const Interview = () => {
           </p>
           <div
             className="text-xl text-gray-300 underline cursor-pointer"
-            onClick={() => navigate("/evaluation/document/final")}
+            onClick={() => {}}
           >
             최종 면접 평가하기
           </div>
@@ -82,4 +80,4 @@ const Interview = () => {
   );
 };
 
-export default Interview;
+export default InterviewMock;

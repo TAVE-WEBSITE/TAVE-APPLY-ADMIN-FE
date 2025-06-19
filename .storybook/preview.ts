@@ -23,6 +23,11 @@ import {
   getEvalutionList,
   getFinalEvaluationList,
 } from "./Evaluation/Document";
+import {
+  getInterviewTimeTable,
+  getTimeTableForm,
+  getSheet,
+} from "./Evaluation/Interview";
 
 initialize({
   onUnhandledRequest: "bypass",
@@ -56,6 +61,10 @@ const preview: Preview = {
         // 서류 평가 관련
         getEvalutionList,
         getFinalEvaluationList,
+        // 면접 평가 관련
+        getInterviewTimeTable,
+        getTimeTableForm,
+        getSheet,
       ],
     },
     controls: {

@@ -16,4 +16,33 @@ const postApplication = async (resumeId: string, body: postApplicationBody) => {
   }
 };
 
-export { postApplication };
+const getInterviewTimeTable = async (generation: number | string) => {
+  try {
+    const res = await axiosInstance.get(
+      `/api/interviews/timetable?generation=${generation}`
+    );
+    return res.data;
+  } catch (error) {
+    return error;
+  }
+};
+
+const getTimeTableForm = async () => {
+  try {
+    const res = await axiosInstance.get("/v1/manager/interview-final/form");
+    return res.data;
+  } catch (error) {
+    return error;
+  }
+};
+
+const getSheet = async () => {
+  try {
+    const res = await axiosInstance.get("/v1/manager/interview-final/sheet");
+    return res.data;
+  } catch (error) {
+    return error;
+  }
+};
+
+export { postApplication, getInterviewTimeTable, getTimeTableForm, getSheet };
