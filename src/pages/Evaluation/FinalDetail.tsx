@@ -10,7 +10,6 @@ import SkeletonAccordion from "@/components/Accordion/Skeleton";
 import Icon from "@/components/Icon/Icon";
 import CommonQuestions from "./TabContents/CommonQuestions";
 import PartQuestions from "./TabContents/PartQuestions";
-import AnalysisTab from "./TabContents/AnalysisTab";
 import DecisionTab from "./TabContents/DecisionTab";
 
 const tabCategories = ["파트별 질문", "공통 질문"];
@@ -25,7 +24,6 @@ const FinalDetail = () => {
   const { state } = useLocation();
   const application = state?.application;
   const [activeLeftTab, setActiveLeftTab] = useState("공통 질문");
-  const [activeRightTab, setActiveRightTab] = useState("서류 평가 분석");
 
   const renderLabels = (label: string) => {
     switch (label) {
@@ -56,7 +54,7 @@ const FinalDetail = () => {
             type="ChevronDown"
             size={40}
             className="rotate-90 cursor-pointer"
-            onClick={() => navigate("/evaluation/document/final")}
+            onClick={() => navigate("/evaluation/interview/final")}
           />
           <h1 className="font-bold text-4xl">
             {applicant?.name} ({applicant?.field})
@@ -79,41 +77,43 @@ const FinalDetail = () => {
         ))}
       </div>
       <Body className="py-8 px-12">
-        <FlexBox className="w-2/3 justify-between">
-          <Tab
-            categories={tabCategories}
-            active={activeLeftTab}
-            onChange={setActiveLeftTab}
-          />
-          <Tab
-            categories={["서류 평가 분석", "합격 여부 결정"]}
-            active={activeRightTab}
-            onChange={setActiveRightTab}
-            className="mb-8"
-          />
-        </FlexBox>
         <div className="flex gap-4">
-          <FlexBox
-            direction="col"
-            className="gap-8 w-1/2 h-[650px] overflow-y-scroll px-4 py-6"
-          >
-            {isLoading &&
-              Array.from({ length: 4 }).map((_, index) => (
-                <SkeletonAccordion key={index} />
-              ))}
+          <div className="flex flex-col w-1/2">
+            <Tab
+              categories={tabCategories}
+              active={activeLeftTab}
+              onChange={setActiveLeftTab}
+            />
+            <FlexBox
+              direction="col"
+              className="gap-8 w-full h-[650px] overflow-y-scroll px-4 py-6"
+            >
+              {isLoading &&
+                Array.from({ length: 4 }).map((_, index) => (
+                  <SkeletonAccordion key={index} />
+                ))}
 
-            {applicant && !isLoading && activeLeftTab === "공통 질문" && (
-              <CommonQuestions applicant={applicant} />
-            )}
-            {applicant && !isLoading && activeLeftTab === "파트별 질문" && (
-              <PartQuestions applicant={applicant} application={application} />
-            )}
-          </FlexBox>
-          <div className="rounded-xl flex-1 rounded-xl min-h-[650px] px-6 py-5">
-            <FlexBox direction="col" className="gap-8">
-              {activeRightTab === "서류 평가 분석" && <AnalysisTab />}
-              {activeRightTab === "합격 여부 결정" && <DecisionTab />}
+              {applicant && !isLoading && activeLeftTab === "공통 질문" && (
+                <CommonQuestions applicant={applicant} />
+              )}
+              {applicant && !isLoading && activeLeftTab === "파트별 질문" && (
+                <PartQuestions
+                  applicant={applicant}
+                  application={application}
+                />
+              )}
             </FlexBox>
+          </div>
+          <div className="rounded-xl flex flex-col gap-6 flex-1 rounded-xl min-h-[650px] px-6">
+            <Tab
+              categories={["합격 여부 결정"]}
+              active={"합격 여부 결정"}
+              onChange={() => {}}
+            />
+            <DecisionTab
+              message="면접 전형
+          결과를 선택해주세요"
+            />
           </div>
         </div>
       </Body>

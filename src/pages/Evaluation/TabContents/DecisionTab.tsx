@@ -3,7 +3,10 @@ import Button from "@/components/Button/Button";
 import FlexBox from "@/components/Layout/FlexBox";
 import ToastMessage from "@/components/Modal/ToastMessage";
 
-const DecisionTab = () => {
+interface DecisionTabProps {
+  message: string;
+}
+const DecisionTab = ({ message }: DecisionTabProps) => {
   const [isPassed, setIsPassed] = useState<boolean | null>(null);
   const isDisabled = typeof isPassed !== "boolean";
   const [isPending, setIsPending] = useState(false);
@@ -29,8 +32,7 @@ const DecisionTab = () => {
         className="border border-gray-300 rounded-lg p-4 bg-white w-full gap-16"
       >
         <p className="font-semibold">
-          <span className="font-bold text-blue-700">장진영</span>님의 서류 전형
-          결과를 선택해주세요
+          <span className="font-bold text-blue-700">장진영</span>님의 {message}
         </p>
         <FlexBox className="gap-4 font-semibold">
           <button

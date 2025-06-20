@@ -49,7 +49,7 @@ const Interview = () => {
           </p>
           <div
             className="text-xl text-gray-300 underline cursor-pointer"
-            onClick={() => navigate("/evaluation/document/final")}
+            onClick={() => navigate("/evaluation/interview/final")}
           >
             최종 면접 평가하기
           </div>

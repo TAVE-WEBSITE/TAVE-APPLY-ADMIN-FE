@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import FlexBox from "@/components/Layout/FlexBox";
 import Icon from "@/components/Icon/Icon";
 import Body from "@/components/Layout/Body";
@@ -13,9 +12,7 @@ import type { Resume } from "@/types/interview";
 import { useState } from "react";
 import SkeletonAccordion from "@/components/Accordion/Skeleton";
 
-const InterviewDetail = () => {
-  const navigate = useNavigate();
-  //const { id: date } = useParams();
+const InterviewDetailMock = () => {
   const { data: applicant, isLoading } = useQuery<Resume>({
     queryKey: ["setting", "interviewer"],
     queryFn: () => fetchInterviewer("1"),
@@ -43,7 +40,7 @@ const InterviewDetail = () => {
             type="ChevronDown"
             size={40}
             className="rotate-90 cursor-pointer"
-            onClick={() => navigate("/evaluation/document/final")}
+            onClick={() => {}}
           />
           <h1 className="font-bold text-2xl">면접 현황</h1>
         </FlexBox>
@@ -210,4 +207,4 @@ const InterviewDetail = () => {
   );
 };
 
-export default InterviewDetail;
+export default InterviewDetailMock;

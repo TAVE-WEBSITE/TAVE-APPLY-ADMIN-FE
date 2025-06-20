@@ -113,7 +113,9 @@ const FinalDetailMock = () => {
           <div className="rounded-xl flex-1 rounded-xl min-h-[650px] px-6 py-5">
             <FlexBox direction="col" className="gap-8">
               {activeRightTab === "서류 평가 분석" && <AnalysisTab />}
-              {activeRightTab === "합격 여부 결정" && <DecisionTab />}
+              {activeRightTab === "합격 여부 결정" && (
+                <DecisionTab message="서류 전형 결과를 선택해주세요" />
+              )}
             </FlexBox>
           </div>
         </div>
