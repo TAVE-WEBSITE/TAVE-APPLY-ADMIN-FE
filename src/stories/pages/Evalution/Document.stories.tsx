@@ -6,6 +6,7 @@ import DetailMock from "./DetailMock";
 import FinalDocumentMock from "./FinalMock";
 import FinalDetailMock from "./FinalDetailMock";
 import InterviewMock from "./InterviewMock";
+import InterviewDetailMock from "./InterviewDetailMock";
 
 const createMockQueryClient = () => {
   return new QueryClient({
@@ -70,4 +71,9 @@ export const FinalDocumentEvaluationDetail: Story = {
 export const InterviewEvaluation: Story = {
   name: "면접 평가",
   render: () => <InterviewMock />,
+};
+
+export const InterviewEvaulationDetail: Story = {
+  name: "면접 평가 개별 (2인)",
+  render: () => <InterviewDetailMock />,
 };

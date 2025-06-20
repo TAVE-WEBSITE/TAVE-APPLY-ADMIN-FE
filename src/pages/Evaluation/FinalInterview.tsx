@@ -52,7 +52,7 @@ const FinalInterview = () => {
         </FlexBox>
         <FlexBox className="justify-between w-[1320px] mx-auto">
           <Tab
-            categories={["전체", "대기중", "완료"]}
+            categories={["전체", "평가 진행 전", "불합격", "합격"]}
             active={activeTab}
             onChange={setActiveTab}
           />
@@ -81,7 +81,7 @@ const FinalInterview = () => {
             isLoading={isLoading}
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
-            baseUrl="/evaluation/document"
+            baseUrl="/evaluation/interview/final"
             navigate={navigate}
           />
         </div>
