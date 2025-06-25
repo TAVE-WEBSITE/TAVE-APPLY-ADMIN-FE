@@ -19,12 +19,13 @@ export const fetchList = async (
         url = "/v1/admin/notification";
         break;
       case "지원서":
-        // 아직 구현안함
-        url = "/v1/manager/resume/evaluate";
+        url = `/v1/manager/resume/evaluate`;
+        params.status = status;
         break;
       case "면접 설정":
-        url = "/v1/admin/interview";
-        break;
+        url = `/v1/manager/interview-final?pageNum=${page}&pageSize=${size}`;
+        const res = await axiosInstance.get(url);
+        return res.data;
       case "서류 평가":
         url = "/v1/manager/resume/evaluate";
         params.status = status;
@@ -36,7 +37,7 @@ export const fetchList = async (
         break;
     }
 
-    const res = await axiosInstance.get(url, params);
+    const res = await axiosInstance.get(url);
     return res.data;
   } catch (error) {
     throw error;

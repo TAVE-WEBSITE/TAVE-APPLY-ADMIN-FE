@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Icon from "@/components/Icon/Icon";
+import useAccountStore from "@/hooks/useAccountStore";
 
 type HeaderProps = {
   redirectionList: string[];
@@ -8,6 +9,7 @@ type HeaderProps = {
 const Header = ({ redirectionList }: HeaderProps) => {
   const navigate = useNavigate();
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const { username } = useAccountStore();
 
   // const [openMenu, setOpenMenu] = useState<"SETTING" | "EVALUTION" | null>(
   //   null
@@ -102,7 +104,7 @@ const Header = ({ redirectionList }: HeaderProps) => {
           className="relative group bg-gray-800 py-2 px-4 rounded-[10px] cursor-pointer flex gap-2"
           onClick={() => setIsLogoutOpen(!isLogoutOpen)}
         >
-          홍길동님
+          {username && username}님
           <Icon type="ChevronDown" size={24} />
           <div className="absolute top-full left-0 w-full h-2" />
           <ul

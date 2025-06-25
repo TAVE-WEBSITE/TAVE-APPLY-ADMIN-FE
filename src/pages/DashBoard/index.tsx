@@ -9,8 +9,16 @@ import { useDashBoard } from "@/hooks/DashBoard/useDashBoard";
 export const Page = () => {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const {
-    genderQuery: { data: genderData, isLoading: isGenderLoading },
-    skillQuery: { data: skillData, isLoading: isSkillLoading },
+    genderQuery: {
+      data: genderData,
+      isLoading: isGenderLoading,
+      isError: isGenderError,
+    },
+    skillQuery: {
+      data: skillData,
+      isLoading: isSkillLoading,
+      isError: isSkillError,
+    },
   } = useDashBoard();
 
   const calculateSum = () => {
@@ -53,7 +61,7 @@ export const Page = () => {
 
         <FlexBox className="justify-center gap-4">
           <div className="bg-white rounded-xl px-4 py-5 justify-between w-[640px] border border-gray-200">
-            {isGenderLoading ? (
+            {isGenderLoading || isGenderError ? (
               <SkeletonDonutChart />
             ) : (
               genderData && (
@@ -66,7 +74,7 @@ export const Page = () => {
             )}
           </div>
           <div className="bg-white rounded-xl px-4 py-5 justify-between w-[640px] border border-gray-200">
-            {isSkillLoading ? (
+            {isSkillLoading || isSkillError ? (
               <SkeletonDonutChart />
             ) : (
               skillData && (

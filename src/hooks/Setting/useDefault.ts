@@ -3,12 +3,13 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import type { SettingDefaultResponse } from "@/api/Setting/types";
 import { fetchSettingDefault } from "@/api/Setting/Default";
 import { postSettingDefault } from "@/api/Setting/Default";
-import { formatDateOnly, formatDateTime } from "@/utils/formatDate";
+import { formatDateOnly } from "@/utils/formatDate";
 
 export const useDefaultSetting = () => {
   const { data, isLoading, error } = useQuery<SettingDefaultResponse>({
     queryKey: ["setting", "default"],
     queryFn: fetchSettingDefault,
+    staleTime: 1000 * 60 * 60 * 24,
   });
 
   const {
@@ -33,30 +34,36 @@ export const useDefaultSetting = () => {
 
   useEffect(() => {
     if (!data) return;
-    setNextGeneration(data.generation || "");
-    setDocumentStartDate(formatDateOnly(data.documentRecruitStartDate) || "");
-    setDocumentEndDate(formatDateOnly(data.documentRecruitEndDate) || "");
+    setNextGeneration(data.result.generation || "");
+    setDocumentStartDate(formatDateOnly(data.result.documentRecruitStartDate));
+    setDocumentEndDate(formatDateOnly(data.result.documentRecruitEndDate));
     setDocumentResultDateTime(
-      formatDateTime(data.documentAnnouncementDate) || ""
+      formatDateOnly(data.result.documentAnnouncementDate)
     );
-    setInterviewStartDate(formatDateOnly(data.interviewStartDate) || "");
-    setInterviewEndDate(formatDateOnly(data.interviewEndDate) || "");
-    setFinalResultDateTime(formatDateTime(data.lastAnnouncementDate) || "");
-    setHomepageOpenStartDate(formatDateOnly(data.accessStartDate) || "");
-    setHomepageOpenEndDate(formatDateOnly(data.accessEndDate) || "");
+    setInterviewStartDate(formatDateOnly(data.result.interviewStartDate));
+    setInterviewEndDate(formatDateOnly(data.result.interviewEndDate));
+    setFinalResultDateTime(formatDateOnly(data.result.lastAnnouncementDate));
+    setHomepageOpenStartDate(formatDateOnly(data.result.accessStartDate));
+    setHomepageOpenEndDate(formatDateOnly(data.result.accessEndDate));
   }, [data]);
 
   const updateDefaultSetting = () => {
+    const toLocalDateTime = (date: string, time: string) =>
+      date.replace(/\./g, "-") + "T" + time;
+
     mutate({
       generation: nextGeneration,
-      documentRecruitStartDate: documentStartDate,
-      documentRecruitEndDate: documentEndDate,
-      documentAnnouncementDate: documentResultDateTime,
-      interviewStartDate,
-      interviewEndDate,
-      lastAnnouncementDate: finalResultDateTime,
-      accessStartDate: homepageOpenStartDate,
-      accessEndDate: homepageOpenEndDate,
+      documentRecruitStartDate: toLocalDateTime(documentStartDate, "00:00:00"),
+      documentRecruitEndDate: toLocalDateTime(documentEndDate, "23:59:59"),
+      documentAnnouncementDate: toLocalDateTime(
+        documentResultDateTime,
+        "10:00:00"
+      ),
+      interviewStartDate: toLocalDateTime(interviewStartDate, "09:00:00"),
+      interviewEndDate: toLocalDateTime(interviewEndDate, "18:00:00"),
+      lastAnnouncementDate: toLocalDateTime(finalResultDateTime, "10:00:00"),
+      accessStartDate: toLocalDateTime(homepageOpenStartDate, "00:00:00"),
+      accessEndDate: toLocalDateTime(homepageOpenEndDate, "23:59:59"),
     });
   };
 

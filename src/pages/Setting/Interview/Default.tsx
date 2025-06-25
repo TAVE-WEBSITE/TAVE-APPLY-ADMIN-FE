@@ -1,12 +1,45 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Input from "@/components/Input/Input";
 import Body from "@/components/Layout/Body";
 import FlexBox from "@/components/Layout/FlexBox";
 import Button from "@/components/Button/Button";
+import { fetchAddress, postInterviewPlace } from "@/api/Setting/Interview";
+
+const interviewDays = ["2025-08-11", "2025-08-12", "2025-08-13", "2025-08-14"];
 
 const Default = () => {
+  const { data } = useQuery({
+    queryKey: ["setting", "address", "get"],
+    queryFn: fetchAddress,
+  });
+
+  const { mutate } = useMutation({
+    mutationKey: ["setting", "interview", "post"],
+    mutationFn: postInterviewPlace,
+  });
+
   const [address, setAddress] = useState("");
+
+  useEffect(() => {
+    setAddress(data);
+  }, [data]);
   const [detailAddress, setDetailAddress] = useState("");
+  const [openChatLinks, setOpenChatLinks] = useState(["", "", "", ""]);
+  const [passwords, setPasswords] = useState(["", "", "", ""]);
+
+  const handleSubmit = () => {
+    const payload: any = interviewDays.map((day, idx) => ({
+      interviewDay: day,
+      generalAddress: address,
+      detailAddress: detailAddress[idx],
+      openChatLink: openChatLinks[idx],
+      code: passwords[idx],
+    }));
+
+    mutate(payload);
+  };
+
   return (
     <Body className="py-8 gap-8 px-12">
       <FlexBox className="items-start">
@@ -34,7 +67,7 @@ const Default = () => {
           </FlexBox>
         </section>
 
-        <section className="border border-gray-300 bg-white rounded-xl flex-1 rounded-xl min-h-[650px] px-6 py-5">
+        <section className="border border-gray-300 bg-white flex-1 rounded-xl min-h-[650px] px-6 py-5">
           <h2 className="text-gray-900 font-semibold text-lg">
             면접 안내 오픈채팅방 설정
           </h2>
@@ -53,11 +86,23 @@ const Default = () => {
                     iconType="Link"
                     placeholder="링크를 입력해주세요"
                     width="w-lg"
+                    value={openChatLinks[index]}
+                    onChange={(e) => {
+                      const updated = [...openChatLinks];
+                      updated[index] = e.target.value;
+                      setOpenChatLinks(updated);
+                    }}
                   ></Input.WithLabel>
                   <Input.WithLabel
                     label="비밀번호 설정"
                     iconType="Key"
                     placeholder="비밀번호를 입력해주세요"
+                    value={passwords[index]}
+                    onChange={(e) => {
+                      const updated = [...openChatLinks];
+                      updated[index] = e.target.value;
+                      setPasswords(updated);
+                    }}
                   ></Input.WithLabel>
                 </FlexBox>
               </Input.TitleContainer>
@@ -66,7 +111,9 @@ const Default = () => {
         </section>
       </FlexBox>
       <div className="flex justify-center">
-        <Button className="w-[88px] text-center">등록하기</Button>
+        <Button className="w-[88px] text-center" onClick={handleSubmit}>
+          등록하기
+        </Button>
       </div>
     </Body>
   );

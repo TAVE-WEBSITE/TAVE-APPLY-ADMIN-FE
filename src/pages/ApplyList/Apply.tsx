@@ -25,6 +25,7 @@ const Apply = () => {
     type: "지원서",
     page: currentPage,
     size: 7,
+    status: "NOTCHECKED",
   });
 
   const {
