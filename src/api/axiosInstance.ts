@@ -3,7 +3,7 @@ import axios from "axios";
 const SERVER_URL = import.meta.env.VITE_BASE_URL;
 
 export const axiosInstance = axios.create({
-  baseURL: `${SERVER_URL}/v1`,
+  baseURL: `${SERVER_URL}`,
   headers: {
     "Content-Type": "application/json",
   },

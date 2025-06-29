@@ -19,7 +19,7 @@ const Redirect = () => {
       const data = await res.json();
       const result = data.result;
       sessionStorage.setItem("email", result.email);
-      sessionStorage.setItem("access-token", result.accessToken);
+      sessionStorage.setItem("access_token", result.accessToken);
       sessionStorage.setItem("username", result.username);
     };
     login();
