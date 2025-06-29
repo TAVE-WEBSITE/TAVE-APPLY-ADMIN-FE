@@ -24,6 +24,8 @@ const Redirect = () => {
     };
     login();
   }, []);
+
+  return <></>;
 };
 
 //import { useEffect, useState } from "react";
