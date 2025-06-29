@@ -7,11 +7,12 @@ const Redirect = () => {
   useEffect(() => {
     const handleMessage = (event: any) => {
       if (event.data.type === "SESSION_DATA") {
-        const { accessToken, email } = event.data.data;
+        const { accessToken, email, username } = event.data.data;
 
         // 받은 세션 정보를 sessionStorage에 저장
         sessionStorage.setItem("access_token", accessToken);
         sessionStorage.setItem("email", email);
+        sessionStorage.setItem("username", username);
 
         setEmail(email);
         setSessionReceived(true);
@@ -47,8 +48,10 @@ const Redirect = () => {
           const data = await response.json();
           if (data.result) {
             console.log("토큰 리프레시 성공");
-            // 필요시 새로운 토큰 저장
+            // 필요시 새로운 세션 정보 저장
             sessionStorage.setItem("access_token", data.result.accessToken);
+            sessionStorage.setItem("email", data.result.email);
+            sessionStorage.setItem("username", data.username.username);
           } else {
             console.error("토큰 리프레시 실패:", data.message);
           }

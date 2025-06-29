@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Icon from "@/components/Icon/Icon";
-import useAccountStore from "@/hooks/useAccountStore";
 
 type HeaderProps = {
   redirectionList: string[];
@@ -9,7 +8,6 @@ type HeaderProps = {
 const Header = ({ redirectionList }: HeaderProps) => {
   const navigate = useNavigate();
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
-  const { username } = useAccountStore();
 
   // 로그아웃 로직 (정확히는 iframe 창 닫기)
   const handleLogout = () => {
@@ -104,7 +102,9 @@ const Header = ({ redirectionList }: HeaderProps) => {
           className="relative group bg-gray-800 py-2 px-4 rounded-[10px] cursor-pointer flex gap-2"
           onClick={() => setIsLogoutOpen(!isLogoutOpen)}
         >
-          {username && username}님
+          {sessionStorage.getItem("username") &&
+            sessionStorage.getItem("username")}
+          님
           <Icon type="ChevronDown" size={24} />
           <div className="absolute top-full left-0 w-full h-2" />
           <ul
