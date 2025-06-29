@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { axiosInstance } from "@/api/axiosInstance";
 
 const Redirect = () => {
   const [sessionReceived, setSessionReceived] = useState(false);
@@ -29,23 +30,13 @@ const Redirect = () => {
     if (sessionReceived && email) {
       const refreshToken = async () => {
         try {
-          const res = await fetch(
-            "https://test.api.tave-wave.com/v1/auth/refresh",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${sessionStorage.getItem(
-                  "access_token"
-                )}`,
-              },
-              body: JSON.stringify({ email }),
-            }
-          );
+          const res = await axiosInstance.post("/auth/refresh", {
+            email: email,
+          });
 
-          const data = await res.json();
+          const data = res.data;
 
-          if (res.ok && data.result) {
+          if (data.result) {
             console.log("토큰 리프레시 성공");
             // 필요시 새로운 토큰 저장
             sessionStorage.setItem("adminAccessToken", data.result.accessToken);
