@@ -5,12 +5,23 @@ import FlexBox from "../Layout/FlexBox";
 import Icon from "@/components/Icon/Icon";
 import Switch from "../Input/Switch";
 import ChipController from "@/pages/Setting/Document/ChipController";
-
 import WordLimitModal from "@/pages/Setting/Document/WordLimitModal";
 import InterviewScheduleModal from "@/pages/Setting/Document/InterviewScheduleModal";
+import type { FieldType } from "@/pages/Setting/api/Document";
+import type { SkillSet } from "@/hooks/Setting/Document/useDocumentStore";
 
+type Item = {
+  id: any;
+  content: string;
+  fieldType: FieldType;
+  ordered: number;
+  textLength: number;
+  answerType: string;
+  mode: string;
+};
 interface DraggableItemProps {
-  item: any;
+  item: Item;
+  skills?: SkillSet[];
   onStartEdit: (itemId: string) => void;
   onEndEdit: () => void;
   onEdit: (itemId: string, value: string) => void;
@@ -20,6 +31,7 @@ interface DraggableItemProps {
 
 const DraggableItem = ({
   item,
+  skills = [],
   onStartEdit,
   onEndEdit,
   onEdit,
@@ -29,7 +41,7 @@ const DraggableItem = ({
   const wordLimitModalRef = useRef<HTMLDialogElement>(null);
   const interviewScheduleModal = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [inputValue, setInputValue] = useState(item.question);
+  const [inputValue, setInputValue] = useState(item.content);
 
   const {
     attributes,
@@ -88,7 +100,7 @@ const DraggableItem = ({
   return (
     <li
       onKeyDown={handleKeyDown}
-      className={`flex flex-col justify-between w-full border border-gray-300 rounded-xl bg-white pr-4 justify-between hover:bg-gray-100 ${
+      className={`flex flex-col justify-between w-full border border-gray-300 rounded-xl bg-white pr-4 hover:bg-gray-100 ${
         item.mode === "focused"
           ? "outline outline-blue-500 shadow-lg scale-103"
           : item.mode === "blurred"
@@ -119,24 +131,24 @@ const DraggableItem = ({
               isDragging ? "cursor-grabbing" : ""
             }`}
             onChange={handleInputChange}
-            style={{ width: `${item.question.length + 5}ch` }}
+            style={{ width: `${item.content.length + 5}ch` }}
           />
-          {item.maxLength && (
-            <p className="text-gray-500 text-sm">{`(${item.maxLength}자 이내)`}</p>
+          {item.textLength && (
+            <p className="text-gray-500 text-sm">{`(${item.textLength}자 이내)`}</p>
           )}
         </div>
 
         <FlexBox className="gap-4">
           <Switch
             title="필수 질문"
-            isOn={item.required}
             setIsOn={handleToggleRequired}
+            isOn={false}
           />
 
           <button
             className="p-2 border border-gray-300 rounded-lg hover:bg-blue-100 cursor-pointer"
             onClick={() => {
-              item.question === "가능한 오프라인 면접 시간"
+              item.content === "가능한 오프라인 면접 시간"
                 ? interviewScheduleModal.current?.showModal()
                 : handleFocus();
             }}
@@ -144,7 +156,7 @@ const DraggableItem = ({
             <Icon type="Pen" size={20} />
           </button>
 
-          {item.maxLength && (
+          {item.textLength && (
             <button
               className="p-2 border border-gray-300 rounded-lg hover:bg-blue-100 cursor-pointer"
               onClick={() => wordLimitModalRef.current?.showModal()}
@@ -163,15 +175,11 @@ const DraggableItem = ({
         <WordLimitModal ref={wordLimitModalRef} />
         <InterviewScheduleModal ref={interviewScheduleModal} />
       </div>
-      {item.question === "홍길동님의 프로그래밍 실력은 어느 정도 인가요?" &&
-        item.chips && (
-          <div className="px-4 pt-2 pb-4">
-            <ChipController
-              chips={item.chips}
-              focused={item.mode === "focused"}
-            />
-          </div>
-        )}
+      {item.ordered === 1 && skills.length > 0 && (
+        <div className="px-4 pb-4">
+          <ChipController chips={skills} focused={item.mode === "focused"} />
+        </div>
+      )}
     </li>
   );
 };

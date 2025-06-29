@@ -5,7 +5,7 @@ import FlexBox from "@/components/Layout/FlexBox";
 import Body from "@/components/Layout/Body";
 import Tab from "@/components/Tab/Tab";
 import Accordion from "@/components/Accordion/Accordion";
-import { fetchInterviewer } from "@/api/Setting/Interview";
+import { fetchDocumentDetail } from "./api";
 import type { Resume } from "@/types/interview";
 import TextArea from "@/components/Input/TextArea";
 import StepCounter from "@/components/StepCounter/StepCounter";
@@ -13,7 +13,7 @@ import SkeletonAccordion from "@/components/Accordion/Skeleton";
 import ToastMessage from "@/components/Modal/ToastMessage";
 import Icon from "@/components/Icon/Icon";
 import Input from "@/components/Input/Input";
-import { postApplication } from "@/api/Evaluation";
+import { postApplication } from "@/pages/Evaluation/api";
 import Button from "@/components/Button/Button";
 
 const tabCategories = ["파트별 질문", "공통 질문"];
@@ -24,7 +24,7 @@ const Detail = () => {
   const { id } = useParams();
   const { data: applicant, isLoading } = useQuery<Resume>({
     queryKey: ["evaluation", "detail"],
-    queryFn: () => fetchInterviewer(id!),
+    queryFn: () => fetchDocumentDetail(id || "1"),
   });
   const { state } = useLocation();
   const application = state?.application;
@@ -159,7 +159,7 @@ const Detail = () => {
                 </Accordion>
               ))}
           </FlexBox>
-          <div className="border border-gray-300 bg-white rounded-xl flex-1 rounded-xl min-h-[650px] px-6 py-5">
+          <div className="border border-gray-300 bg-white flex-1 rounded-xl min-h-[650px] px-6 py-5">
             <p className="text-gray-900 font-semibold text-lg">서류 평가</p>
             <FlexBox direction="col" className="gap-8">
               <div className="w-full border-t border-gray-300 mt-6"></div>

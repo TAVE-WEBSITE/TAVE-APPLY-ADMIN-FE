@@ -3,11 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Body from "@/components/Layout/Body";
 import FlexBox from "@/components/Layout/FlexBox";
 import { formatDateTime } from "@/utils/formatDate";
-import {
-  getInterviewTimeTable,
-  getTimeTableForm,
-  getSheet,
-} from "@/api/Evaluation";
+import { getInterviewTimeTable, getTimeTableForm, getSheet } from "./api";
 import type { TimeTableList } from "@/types/interview";
 import TimeTable from "@/components/TimeTable";
 import Button from "@/components/Button/Button";

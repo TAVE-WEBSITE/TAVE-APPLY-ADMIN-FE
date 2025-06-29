@@ -6,7 +6,7 @@ import Input from "@/components/Input/Input";
 import Tab from "@/components/Tab/Tab";
 import Body from "@/components/Layout/Body";
 import Modal from "@/components/Modal/Modal";
-import { postInterviewFile } from "@/api/Setting/Interview";
+import { postInterviewFile } from "@/pages/Setting/api/Interview";
 import { useMutation } from "@tanstack/react-query";
 import ToastMessage from "@/components/Modal/ToastMessage";
 import Default from "./Default";

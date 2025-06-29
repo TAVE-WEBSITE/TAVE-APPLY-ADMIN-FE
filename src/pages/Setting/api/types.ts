@@ -1,4 +1,8 @@
 export interface SettingDefaultResponse {
+  result: SettingBody;
+}
+
+export interface SettingBody {
   generation: string;
   documentRecruitStartDate: string;
   documentRecruitEndDate: string;

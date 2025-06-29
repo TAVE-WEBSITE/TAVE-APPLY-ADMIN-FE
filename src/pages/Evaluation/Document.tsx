@@ -20,6 +20,7 @@ const Document = () => {
     type: "서류 평가",
     page: currentPage,
     size: 7,
+    status: "NOTCHECKED",
   });
 
   const {
