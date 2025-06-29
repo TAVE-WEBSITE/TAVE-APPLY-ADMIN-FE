@@ -29,10 +29,26 @@ const getInterviewTimeTable = async (generation: number | string) => {
 
 const getTimeTableForm = async () => {
   try {
-    const res = await axiosInstance.get("/v1/manager/interview-final/form");
-    return res.data;
+    const res = await axiosInstance.get("/v1/manager/interview-final/form", {
+      responseType: "blob", // 👈 중요: 파일 다운로드할 때 blob으로 설정
+    });
+
+    // 다운로드 처리
+    const blob = new Blob([res.data]);
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+
+    // 서버에서 파일명을 내려주는 경우 Content-Disposition 파싱 필요
+    const disposition = res.headers["content-disposition"];
+    const match = disposition?.match(/filename="?(.+)"?/);
+    const filename = match?.[1] || "form.xlsx";
+
+    link.download = decodeURIComponent(filename);
+    link.click();
+    window.URL.revokeObjectURL(url);
   } catch (error) {
-    return error;
+    console.error("다운로드 실패:", error);
   }
 };
 

@@ -19,7 +19,7 @@ const DraggableList = () => {
     deleteQuestion,
     toggleRequired,
   } = useDocument();
-  const { questions, setQuestions } = useDocumentStore();
+  const { questions, setQuestions, skillSets } = useDocumentStore();
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -58,6 +58,7 @@ const DraggableList = () => {
             <DraggableItem
               key={item.id}
               item={item}
+              skills={skillSets}
               onStartEdit={startEditQuestion}
               onEndEdit={endEditQuestion}
               onEdit={editQuestion}

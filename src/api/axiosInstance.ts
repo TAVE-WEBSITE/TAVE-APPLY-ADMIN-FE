@@ -2,7 +2,7 @@ import axios from "axios";
 
 /** 추후에 baseURL은 백엔드 주소로 대체예정 */
 export const axiosInstance = axios.create({
-  baseURL: "https://api.tave-wave.com",
+  baseURL: "https://test.api.tave-wave.com",
   headers: {
     "Content-Type": "application/json",
   },
@@ -28,7 +28,7 @@ axiosInstance.interceptors.response.use(
         const originalRequest = error.config;
         try {
           const tokenResponse = await fetch(
-            "https://api.tave-wave.com/v1/auth/refresh",
+            "https://test.api.tave-wave.com/v1/auth/refresh",
             {
               method: "POST",
               body: JSON.stringify({ email: "zlzmwkwldn@naver.com" }),

@@ -14,6 +14,7 @@ import { type FinalEvaluationItem } from "@/types/application";
 import { usePagination } from "@/hooks/usePagination";
 import { useFilter } from "@/hooks/useFilter";
 import Button from "@/components/Button/Button";
+import { updateStatusByDocumentEvaluation } from "./api";
 
 const Final = () => {
   const dialogRefFirst = useRef<HTMLDialogElement>(null);
@@ -53,6 +54,11 @@ const Final = () => {
   const notCheckedCount = useMemo(() => {
     return entireList.filter((e) => e.status === "NOTCHECKED").length;
   }, [entireList]);
+
+  const handleUpdate = async () => {
+    await updateStatusByDocumentEvaluation();
+    dialogRefSecond.current?.close();
+  };
 
   return (
     <div className="text-white">
@@ -99,7 +105,7 @@ const Final = () => {
       <Modal
         dialogRef={dialogRefSecond}
         buttonCount={2}
-        onConfirm={() => dialogRefSecond.current?.close()}
+        onConfirm={() => handleUpdate()}
         title="최종 서류 평가"
       >
         <p className="text-gray-500 text-balance">

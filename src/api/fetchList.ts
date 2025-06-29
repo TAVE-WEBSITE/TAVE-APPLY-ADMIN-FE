@@ -1,4 +1,4 @@
-import { axiosInstance } from "./axiosInstance";
+import { axiosInstance } from "@/api/axiosInstance";
 import { type ApplicationType, type Status } from "@/types/application";
 
 export interface Pagination {
@@ -37,7 +37,7 @@ export const fetchList = async (
         break;
     }
 
-    const res = await axiosInstance.get(url);
+    const res = await axiosInstance.get(url, { params });
     return res.data;
   } catch (error) {
     throw error;

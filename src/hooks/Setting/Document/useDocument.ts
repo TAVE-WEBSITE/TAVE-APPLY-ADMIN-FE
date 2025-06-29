@@ -1,22 +1,34 @@
 import { useEffect } from "react";
 import useDocumentStore from "./useDocumentStore";
-import { fetchItems } from "@/api/Setting/Document";
+import {
+  fetchSkillSetByField,
+  fetchQuestionsByField,
+} from "@/pages/Setting/Document/api";
+import { useQuery } from "@tanstack/react-query";
 
 const useDocument = () => {
-  const { questions, setQuestions } = useDocumentStore();
+  const { questions, setQuestions, currentType, setSkillSets } =
+    useDocumentStore();
+
+  const { data } = useQuery({
+    queryKey: ["setting", "document", "questions", currentType],
+    queryFn: () => fetchQuestionsByField(currentType),
+  });
+
+  const { data: currentSkills } = useQuery({
+    queryKey: ["setting", "document", "skills", currentType],
+    queryFn: () => fetchSkillSetByField(currentType),
+    enabled: currentType !== "COMMON",
+  });
 
   useEffect(() => {
-    const initializeData = async () => {
-      const items = await fetchItems("공통 질문");
-      const editableItems = items.map((item: any) => ({
-        ...item,
-        mode: "default",
-      }));
-      setQuestions(editableItems);
-    };
-
-    initializeData();
-  }, []);
+    if (data) {
+      setQuestions(data.result);
+    }
+    if (currentSkills) {
+      setSkillSets(currentSkills.result);
+    }
+  }, [data, currentSkills]);
 
   const addNewQuestion = () => {
     const newQuestion = {

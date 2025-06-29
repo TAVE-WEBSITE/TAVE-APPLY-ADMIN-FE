@@ -34,8 +34,6 @@ const NotificationTable = ({
     setCurrentPage(pageNumber);
   };
 
-  console.log(applications);
-
   return (
     <div className="w-full overflow-x-auto pb-8">
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden h-[670px]">
