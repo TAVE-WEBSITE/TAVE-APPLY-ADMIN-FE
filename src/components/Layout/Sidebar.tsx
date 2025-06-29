@@ -2,9 +2,7 @@ import Icon from "../Icon/Icon";
 import { useEffect, useRef, useState } from "react";
 import FlexBox from "./FlexBox";
 import type { RoleType } from "@/types/role";
-import { fetchItems } from "@/api/Setting/Document";
 import useDocumentStore from "@/hooks/Setting/Document/useDocumentStore";
-import type { DocumentKey } from "@/types/document";
 
 export type SideBarLabel = "" | "공통 질문" | "파트별 질문" | RoleType;
 interface SidebarItem {
@@ -69,7 +67,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const { setQuestions } = useDocumentStore();
+  const { setCurrentType } = useDocumentStore();
 
   const handleToggle = () => {
     setIsOpen(!isOpen);
@@ -88,9 +86,20 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
     }
   }, [isOpen]);
 
-  const fetchNewItems = async (label: DocumentKey) => {
-    const data = await fetchItems(label);
-    setQuestions(data);
+  const handleQuestionTypeChange = async (label: string) => {
+    if (label === "디자인") {
+      setCurrentType("DESIGN");
+    } else if (label === "웹 프론트") {
+      setCurrentType("WEBFRONTEND");
+    } else if (label === "앱 프론트") {
+      setCurrentType("APPFRONTEND");
+    } else if (label === "백엔드") {
+      setCurrentType("BACKEND");
+    } else if (label === "딥러닝") {
+      setCurrentType("DEEPLEARNING");
+    } else if (label === "데이터 분석") {
+      setCurrentType("DATAANALYSIS");
+    }
   };
 
   return (
@@ -136,7 +145,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
                   key={child.label}
                   onClick={() => {
                     onSectionClick(child.label);
-                    fetchNewItems(child.label as DocumentKey);
+                    handleQuestionTypeChange(child.label);
                   }}
                   className={`block py-2 px-4 text-sm ${
                     selectedItem === child.label
@@ -152,9 +161,9 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
         </FlexBox>
       ) : (
         <button
-          onClick={() => {
+          onClick={async () => {
             onSectionClick(item.label);
-            fetchNewItems(item.label as DocumentKey);
+            setCurrentType("COMMON");
           }}
           className={`w-full px-6 py-4 flex items-start cursor-pointer ${
             selectedItem === item.label

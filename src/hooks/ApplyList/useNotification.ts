@@ -9,9 +9,7 @@ export const useNotification = () => {
   const postNotification = async () => {
     setIsPending(true);
     try {
-      const res = await axiosInstance.post(
-        "/v1/admin/notification/reservation"
-      );
+      const res = await axiosInstance.get("/v1/admin/notification/reservation");
       setToastMessage("전체 메일 전송했습니다");
       setIsToastOpen(true);
       return res.data;

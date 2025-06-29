@@ -2,7 +2,7 @@ import { axiosInstance } from "@/api/axiosInstance";
 
 const fetchAllInterviewers = async () => {
   try {
-    const res = await axiosInstance.get("/v1/admin/interview");
+    const res = await axiosInstance.get("/v1/manager/interview-final");
     return res.data;
   } catch (error) {
     throw error;
@@ -52,9 +52,29 @@ const postInterviewFile = async ({ file }: { file: File }) => {
   }
 };
 
+const fetchAddress = async () => {
+  try {
+    const res = await axiosInstance.get("/v1/manager/interview-place");
+    return res.data;
+  } catch (error) {
+    return error;
+  }
+};
+
+const postInterviewPlace = async () => {
+  try {
+    const res = await axiosInstance.post("/v1/manager/interview-place");
+    return res.data;
+  } catch (error) {
+    return error;
+  }
+};
+
 export {
   fetchAllInterviewers,
   fetchInterviewer,
   postInterviewDate,
   postInterviewFile,
+  fetchAddress,
+  postInterviewPlace,
 };
