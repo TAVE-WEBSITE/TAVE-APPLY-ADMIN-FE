@@ -11,12 +11,12 @@ const Header = ({ redirectionList }: HeaderProps) => {
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const { username } = useAccountStore();
 
-  // const [openMenu, setOpenMenu] = useState<"SETTING" | "EVALUTION" | null>(
-  //   null
-  // );
-  // const handleMouseEnter = (menu: "SETTING" | "EVALUTION") => setOpenMenu(menu);
-  // const handleMouseLeave = () => setOpenMenu(null);
-  // const handleClick = () => setOpenMenu(null); // 클릭 시 닫기
+  // 로그아웃 로직 (정확히는 iframe 창 닫기)
+  const handleLogout = () => {
+    // 부모 창에 로그아웃 신호 전송
+    window.parent.postMessage({ type: "EXIT_FROM_APPLY_ADMIN" }, "*");
+    window.close();
+  };
 
   const handleNavigate = (url: string) => {
     switch (url) {
@@ -112,7 +112,12 @@ const Header = ({ redirectionList }: HeaderProps) => {
               isLogoutOpen ? "flex" : "hidden"
             } transition-all duration-200`}
           >
-            <li className="hover:text-white cursor-pointer">로그아웃</li>
+            <li
+              className="hover:text-white cursor-pointer"
+              onClick={handleLogout}
+            >
+              로그아웃
+            </li>
           </ul>
         </button>
       </div>
