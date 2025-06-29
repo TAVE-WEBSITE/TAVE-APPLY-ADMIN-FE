@@ -7,7 +7,7 @@ import Switch from "../Input/Switch";
 import ChipController from "@/pages/Setting/Document/ChipController";
 import WordLimitModal from "@/pages/Setting/Document/WordLimitModal";
 import InterviewScheduleModal from "@/pages/Setting/Document/InterviewScheduleModal";
-import type { FieldType } from "@/pages/Setting/Document/api";
+import type { FieldType } from "@/pages/Setting/api/Document";
 import type { SkillSet } from "@/hooks/Setting/Document/useDocumentStore";
 
 type Item = {

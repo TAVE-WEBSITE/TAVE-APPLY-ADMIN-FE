@@ -23,7 +23,7 @@ const AnalysisTab = () => {
                   <span className="text-gray-500">(5명)</span>
                 </p>
                 <div className="w-full border-t border-gray-300"></div>
-                <div className="grid grid-cols-2 font-medium gap-4 w-full font-normal justify-between">
+                <div className="grid grid-cols-2 gap-4 w-full font-normal justify-between">
                   <p>장진영: 8.2점</p>
                   <p>전주현: 8.2점</p>
                   <p>심새벽: 8.2점</p>

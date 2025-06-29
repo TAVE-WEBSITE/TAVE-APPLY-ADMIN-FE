@@ -53,10 +53,7 @@ const FinalPassSetting = () => {
       </FlexBox>
 
       <Body>
-        <FlexBox
-          direction="col"
-          className="gap-4 justify-center mx-auto pt-8 gap-8"
-        >
+        <FlexBox direction="col" className="justify-center mx-auto pt-8 gap-8">
           <Input.NumberContainer number={1} className="items-start">
             <Input.TitleContainer title="회비">
               <Input.WithLabel

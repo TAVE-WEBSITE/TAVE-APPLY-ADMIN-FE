@@ -4,7 +4,7 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import FlexBox from "@/components/Layout/FlexBox";
 import Body from "@/components/Layout/Body";
 import Tab from "@/components/Tab/Tab";
-import { fetchInterviewer } from "@/api/Setting/Interview";
+import { fetchInterviewer } from "@/pages/Setting/api/Interview";
 import type { Resume } from "@/types/interview";
 import SkeletonAccordion from "@/components/Accordion/Skeleton";
 import Icon from "@/components/Icon/Icon";
@@ -39,7 +39,6 @@ const FinalDetail = () => {
         return `${applicant?.major} / ${applicant?.subMajor}`;
       case "이메일 주소":
         return applicant?.email;
-        break;
       default:
         return "";
     }
@@ -104,7 +103,7 @@ const FinalDetail = () => {
               )}
             </FlexBox>
           </div>
-          <div className="rounded-xl flex flex-col gap-6 flex-1 rounded-xl min-h-[650px] px-6">
+          <div className="flex flex-col gap-6 flex-1 rounded-xl min-h-[650px] px-6">
             <Tab
               categories={["합격 여부 결정"]}
               active={"합격 여부 결정"}

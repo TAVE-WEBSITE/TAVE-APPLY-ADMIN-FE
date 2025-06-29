@@ -13,7 +13,7 @@ import SkeletonAccordion from "@/components/Accordion/Skeleton";
 import ToastMessage from "@/components/Modal/ToastMessage";
 import Icon from "@/components/Icon/Icon";
 import Input from "@/components/Input/Input";
-import { postApplication } from "@/api/Evaluation";
+import { postApplication } from "@/pages/Evaluation/api";
 import Button from "@/components/Button/Button";
 
 const tabCategories = ["파트별 질문", "공통 질문"];

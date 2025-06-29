@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { SettingDefaultResponse } from "@/api/Setting/types";
-import { fetchSettingDefault } from "@/api/Setting/Default";
-import { postSettingDefault } from "@/api/Setting/Default";
+import type { SettingDefaultResponse } from "@/pages/Setting/api/types";
+import { fetchSettingDefault } from "@/pages/Setting/api/Default";
+import { postSettingDefault } from "@/pages/Setting/api/Default";
 import { formatDateOnly } from "@/utils/formatDate";
 
 export const useDefaultSetting = () => {

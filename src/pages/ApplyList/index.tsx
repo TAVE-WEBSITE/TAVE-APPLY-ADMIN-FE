@@ -1,6 +1,7 @@
 import FlexBox from "@/components/Layout/FlexBox";
 import Apply from "./Apply";
 import Notification from "./Notification";
+import { formatDateTime } from "@/utils/formatDate";
 
 type ApplyListPages = "알림 신청 명단" | "지원 명단";
 
@@ -21,7 +22,9 @@ export const Page = () => {
         <h1 className="font-bold text-4xl">
           {isRecruiting ? "16기 지원서 명단" : "다음 기수 알림 신청 명단"}
         </h1>
-        <p className="text-gray-500">2025.08.11 14:00 기준</p>
+        <p className="text-gray-500">
+          {formatDateTime(new Date().toISOString()) + " 기준"}
+        </p>
       </FlexBox>
       <section className="min-h-[calc(100vh-244px)] bg-gray-100 flex flex-col gap-8">
         <CurrentPage />

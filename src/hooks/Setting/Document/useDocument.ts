@@ -3,7 +3,8 @@ import useDocumentStore from "./useDocumentStore";
 import {
   fetchSkillSetByField,
   fetchQuestionsByField,
-} from "@/pages/Setting/Document/api";
+} from "@/pages/Setting/api/Document";
+
 import { useQuery } from "@tanstack/react-query";
 
 const useDocument = () => {

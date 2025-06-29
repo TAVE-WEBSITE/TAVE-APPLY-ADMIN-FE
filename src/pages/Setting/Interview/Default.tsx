@@ -4,7 +4,10 @@ import Input from "@/components/Input/Input";
 import Body from "@/components/Layout/Body";
 import FlexBox from "@/components/Layout/FlexBox";
 import Button from "@/components/Button/Button";
-import { fetchAddress, postInterviewPlace } from "@/api/Setting/Interview";
+import {
+  fetchAddress,
+  postInterviewPlace,
+} from "@/pages/Setting/api/Interview";
 
 const interviewDays = ["2025-08-11", "2025-08-12", "2025-08-13", "2025-08-14"];
 

@@ -5,7 +5,7 @@ import Body from "@/components/Layout/Body";
 import Chip from "@/components/Chip/Chip";
 import Tab from "@/components/Tab/Tab";
 import StepCounter from "@/components/StepCounter/StepCounter";
-import { fetchInterviewer } from "@/api/Setting/Interview";
+import { fetchInterviewer } from "@/pages/Setting/api/Interview";
 import { useQuery } from "@tanstack/react-query";
 import TextArea from "@/components/Input/TextArea";
 import Accordion from "@/components/Accordion/Accordion";

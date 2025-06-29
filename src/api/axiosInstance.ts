@@ -1,8 +1,9 @@
 import axios from "axios";
 
-/** 추후에 baseURL은 백엔드 주소로 대체예정 */
+const SERVER_URL = process.env.VITE_BASE_URL;
+
 export const axiosInstance = axios.create({
-  baseURL: "https://test.api.tave-wave.com",
+  baseURL: `${SERVER_URL}/v1`,
   headers: {
     "Content-Type": "application/json",
   },

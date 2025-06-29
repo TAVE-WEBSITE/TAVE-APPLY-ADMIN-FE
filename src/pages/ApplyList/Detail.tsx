@@ -5,7 +5,7 @@ import FlexBox from "@/components/Layout/FlexBox";
 import Body from "@/components/Layout/Body";
 import Tab from "@/components/Tab/Tab";
 import Accordion from "@/components/Accordion/Accordion";
-import { fetchInterviewer } from "@/api/Setting/Interview";
+import { fetchInterviewer } from "@/pages/Setting/api/Interview";
 import type { Resume } from "@/types/interview";
 import TextArea from "@/components/Input/TextArea";
 import TimePicker from "@/components/DatePicker/TimePicker";

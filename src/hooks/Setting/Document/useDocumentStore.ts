@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { FieldType } from "@/pages/Setting/Document/api";
+import type { FieldType } from "@/pages/Setting/api/Document";
 
 export type SkillSet = {
   id: any;
