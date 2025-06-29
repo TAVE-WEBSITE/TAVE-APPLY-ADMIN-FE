@@ -40,8 +40,6 @@ axiosInstance.interceptors.response.use(
               },
             }
           );
-
-          console.log(tokenResponse);
           if (tokenResponse.status === 200) {
             const newAccessTokenData = await tokenResponse.json();
             const newAccessToken = newAccessTokenData.result.accessToken;
