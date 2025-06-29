@@ -39,7 +39,7 @@ const Redirect = () => {
           if (data.result) {
             console.log("토큰 리프레시 성공");
             // 필요시 새로운 토큰 저장
-            sessionStorage.setItem("adminAccessToken", data.result.accessToken);
+            sessionStorage.setItem("access_token", data.result.accessToken);
           } else {
             console.error("토큰 리프레시 실패:", data.message);
           }
