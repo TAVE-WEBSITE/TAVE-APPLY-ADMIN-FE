@@ -30,7 +30,7 @@ const Redirect = () => {
     if (sessionReceived && email) {
       const refreshToken = async () => {
         try {
-          const res = await axiosInstance.post("/auth/refresh", {
+          const res = await axiosInstance.post("/v1/auth/refresh", {
             email: email,
           });
 
