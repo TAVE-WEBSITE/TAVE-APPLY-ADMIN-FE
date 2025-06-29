@@ -21,7 +21,7 @@ import {
   FinalEvaluationInterview,
 } from "@/pages/Evaluation";
 import Header from "@/components/Header/Header";
-// import Redirect from "./pages/DashBoard/Redirect";
+import Redirect from "./pages/DashBoard/Redirect";
 
 function App() {
   const queryClient = new QueryClient();
@@ -31,7 +31,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <HashRouter>
         <div className="h-screen bg-[#121826]">
-          {/* <Redirect /> */}
+          <Redirect />
           <Header redirectionList={redirectionList} />
           <main className="h-[calc(100vh-112px)]">
             <Routes>

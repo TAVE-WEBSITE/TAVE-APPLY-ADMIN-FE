@@ -12,7 +12,7 @@ export const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   async (config) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("adminAccessToken");
+      const token = sessionStorage.getItem("access_token");
       config.headers.set("Authorization", `Bearer ${token}`);
     }
     return config;
@@ -31,11 +31,11 @@ axiosInstance.interceptors.response.use(
             "https://test.api.tave-wave.com/v1/auth/refresh",
             {
               method: "POST",
-              body: JSON.stringify({ email: "zlzmwkwldn@naver.com" }),
+              body: JSON.stringify({ email: sessionStorage.getItem("email") }),
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem(
-                  "adminAccessToken"
+                Authorization: `Bearer ${sessionStorage.getItem(
+                  "access_token"
                 )}`,
               },
             }
@@ -43,7 +43,7 @@ axiosInstance.interceptors.response.use(
           if (tokenResponse.status === 200) {
             const newAccessTokenData = await tokenResponse.json();
             const newAccessToken = newAccessTokenData.result.accessToken;
-            localStorage.setItem("adminAccessToken", newAccessToken);
+            sessionStorage.setItem("access_token", newAccessToken);
             originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
             return axiosInstance(originalRequest);
