@@ -7,20 +7,20 @@ import Switch from "../Input/Switch";
 import ChipController from "@/pages/Setting/Document/ChipController";
 import WordLimitModal from "@/pages/Setting/Document/WordLimitModal";
 import InterviewScheduleModal from "@/pages/Setting/Document/InterviewScheduleModal";
-import type { FieldType } from "@/pages/Setting/api/Document";
+
+import useDocumentStore from "@/hooks/Setting/Document/useDocumentStore";
 import type { SkillSet } from "@/hooks/Setting/Document/useDocumentStore";
 
-type Item = {
-  id: any;
-  content: string;
-  fieldType: FieldType;
-  ordered: number;
-  textLength: number;
-  answerType: string;
-  mode: string;
+type QuestionItem = {
+  id: string;
+  question: string;
+  required: boolean;
+  maxLength?: number;
+  mode?: string;
 };
+
 interface DraggableItemProps {
-  item: Item;
+  item: QuestionItem;
   skills?: SkillSet[];
   onStartEdit: (itemId: string) => void;
   onEndEdit: () => void;
@@ -41,7 +41,7 @@ const DraggableItem = ({
   const wordLimitModalRef = useRef<HTMLDialogElement>(null);
   const interviewScheduleModal = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [inputValue, setInputValue] = useState(item.content);
+  const [inputValue, setInputValue] = useState(item.question || "");
 
   const {
     attributes,
@@ -58,7 +58,7 @@ const DraggableItem = ({
   };
 
   const handleFocus = useCallback(() => {
-    if (item.mode === "default") {
+    if (item.mode === "default" || !item.mode) {
       onStartEdit(item.id);
       requestAnimationFrame(() => {
         inputRef.current?.focus();
@@ -131,10 +131,10 @@ const DraggableItem = ({
               isDragging ? "cursor-grabbing" : ""
             }`}
             onChange={handleInputChange}
-            style={{ width: `${item.content.length + 5}ch` }}
+            style={{ width: `${(item.question || "").length + 5}ch` }}
           />
-          {item.textLength && (
-            <p className="text-gray-500 text-sm">{`(${item.textLength}자 이내)`}</p>
+          {item.maxLength && (
+            <p className="text-gray-500 text-sm">{`(${item.maxLength}자 이내)`}</p>
           )}
         </div>
 
@@ -142,13 +142,13 @@ const DraggableItem = ({
           <Switch
             title="필수 질문"
             setIsOn={handleToggleRequired}
-            isOn={false}
+            isOn={item.required}
           />
 
           <button
             className="p-2 border border-gray-300 rounded-lg hover:bg-blue-100 cursor-pointer"
             onClick={() => {
-              item.content === "가능한 오프라인 면접 시간"
+              (item.question || "") === "가능한 오프라인 면접 시간"
                 ? interviewScheduleModal.current?.showModal()
                 : handleFocus();
             }}
@@ -156,7 +156,7 @@ const DraggableItem = ({
             <Icon type="Pen" size={20} />
           </button>
 
-          {item.textLength && (
+          {item.maxLength && (
             <button
               className="p-2 border border-gray-300 rounded-lg hover:bg-blue-100 cursor-pointer"
               onClick={() => wordLimitModalRef.current?.showModal()}
@@ -175,7 +175,7 @@ const DraggableItem = ({
         <WordLimitModal ref={wordLimitModalRef} />
         <InterviewScheduleModal ref={interviewScheduleModal} />
       </div>
-      {item.ordered === 1 && skills.length > 0 && (
+      {skills.length > 0 && (
         <div className="px-4 pb-4">
           <ChipController chips={skills} focused={item.mode === "focused"} />
         </div>

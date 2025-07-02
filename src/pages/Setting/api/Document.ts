@@ -14,6 +14,7 @@ export const fetchQuestionsByField = async (fieldType: FieldType) => {
     const res = await axiosInstance.get(`/v1/manager/question/${fieldType}`);
     return res.data;
   } catch (error) {
+    console.error("Failed to fetch questions:", error);
     return error;
   }
 };
@@ -38,6 +39,16 @@ export const postSkillSetByField = async (
     });
     return res.data;
   } catch (error) {
+    return error;
+  }
+};
+
+export const deleteSkillSetById = async (id: string | number) => {
+  try {
+    const res = await axiosInstance.delete(`/v1/manager/lan/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error("프로그래밍 언어 삭제 실패:", error);
     return error;
   }
 };

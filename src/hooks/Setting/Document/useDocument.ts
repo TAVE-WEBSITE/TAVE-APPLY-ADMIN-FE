@@ -23,6 +23,7 @@ const useDocument = () => {
   });
 
   useEffect(() => {
+   
     if (data) {
       setQuestions(data.result);
     }
@@ -33,17 +34,20 @@ const useDocument = () => {
 
   const addNewQuestion = () => {
     const newQuestion = {
-      id: questions.length + 1,
+      id: (questions?.length ?? 0) + 1,
       question: "",
       maxLength: 100,
       required: false,
     };
-    const temp = [...questions, newQuestion];
+    const temp = [...(questions ?? []), newQuestion];
     setQuestions(temp);
+
   };
 
   const deleteQuestion = (itemId: string) => {
     const temp = questions.filter((question) => question.id !== itemId);
+    console.log("Deleting question with ID:", itemId);
+    console.log("Updated questions array:", temp);
     setQuestions(temp);
   };
 
@@ -52,6 +56,7 @@ const useDocument = () => {
       ...question,
       mode: question.id === itemId ? "focused" : "blurred",
     }));
+    console.log("Starting edit for question ID:", itemId);
     setQuestions(newQuestions);
   };
 
@@ -60,6 +65,7 @@ const useDocument = () => {
       ...item,
       question: item.id === itemId ? updatedQuestion : item.question,
     }));
+    console.log("Editing question ID:", itemId, "New text:", updatedQuestion);
     setQuestions(newQuestions);
   };
 
@@ -68,6 +74,7 @@ const useDocument = () => {
       ...question,
       mode: "default",
     }));
+    console.log("Ending edit mode");
     setQuestions(newQuestions);
   };
 
@@ -76,6 +83,7 @@ const useDocument = () => {
       ...question,
       required: question.id === itemId ? !question.required : question.required,
     }));
+    console.log("Toggling required for question ID:", itemId);
     setQuestions(newQuestions);
   };
 

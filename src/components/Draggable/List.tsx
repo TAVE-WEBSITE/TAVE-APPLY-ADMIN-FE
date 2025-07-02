@@ -24,7 +24,7 @@ const DraggableList = () => {
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
-      if (!over || active.id === over.id) return;
+      if (!over || active.id === over.id || !questions) return;
 
       const oldIndex = questions.findIndex((item) => item.id === active.id);
       const newIndex = questions.findIndex((item) => item.id === over.id);
@@ -43,6 +43,19 @@ const DraggableList = () => {
     },
     [endEditQuestion]
   );
+  if (!questions || questions.length === 0) {
+    return (
+      <ul className="flex flex-col items-center p-8 gap-4 w-full">
+        <li
+          className="w-full flex items-center border border-dotted border-gray-300 rounded-xl bg-white p-4 justify-center text-gray-900 gap-2 cursor-pointer hover:bg-gray-100"
+          onClick={addNewQuestion}
+        >
+          <Icon type="Plus" size={20} className="text-gray-900" />
+          질문 추가하기
+        </li>
+      </ul>
+    );
+  }
 
   return (
     <ul
