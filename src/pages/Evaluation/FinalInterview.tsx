@@ -18,7 +18,7 @@ const FinalInterview = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const { entireList, isLoading, totalPages } = usePagination<EvaluationItem>({
-    type: "서류 평가",
+    type: "최종 면접 평가",
     page: currentPage,
     size: 7,
   });
