@@ -1,5 +1,14 @@
 import { axiosInstance } from "@/api/axiosInstance";
 
+export interface InterviewAddress {
+  id: number;
+  interviewDay: string;
+  generalAddress: string;
+  detailAddress: string;
+  openChatLink: string;
+  code: string;
+}
+
 const fetchAllInterviewers = async () => {
   try {
     const res = await axiosInstance.get("/v1/manager/interview-final");
@@ -61,9 +70,14 @@ const fetchAddress = async () => {
   }
 };
 
-const postInterviewPlace = async () => {
+const postInterviewPlace = async (
+  updatedInterviewPlace: Omit<InterviewAddress, "id">[]
+) => {
   try {
-    const res = await axiosInstance.post("/v1/manager/interview-place");
+    const res = await axiosInstance.post(
+      "/v1/manager/interview-place",
+      updatedInterviewPlace
+    );
     return res.data;
   } catch (error) {
     return error;
