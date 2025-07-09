@@ -9,6 +9,8 @@ import DraggableItem from "./Item";
 import Icon from "@/components/Icon/Icon";
 import useDocument from "@/hooks/Setting/Document/useDocument";
 import useDocumentStore from "@/hooks/Setting/Document/useDocumentStore";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAllQuestions } from "@/pages/Setting/api/Document";
 
 const DraggableList = () => {
   const {
@@ -18,21 +20,45 @@ const DraggableList = () => {
     editQuestion,
     deleteQuestion,
     toggleRequired,
+    swapQuestions,
   } = useDocument();
   const { questions, setQuestions, skillSets } = useDocumentStore();
 
+  // 전체 질문 조회
+  const { data: allQuestionsData } = useQuery({
+    queryKey: ["setting", "document", "all-questions"],
+    queryFn: () => fetchAllQuestions(),
+  });
+
+  // 조회된 전체 질문들
+  const allQuestions = allQuestionsData?.result || [];
+  
+  // 전체 질문 데이터 로깅
+  // console.log("DraggableList - 전체 질문 데이터:", allQuestions);
+  // console.log("DraggableList - 현재 questions:", questions);
+
   const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
+    async (event: DragEndEvent) => {
       const { active, over } = event;
       if (!over || active.id === over.id || !questions) return;
 
       const oldIndex = questions.findIndex((item) => item.id === active.id);
       const newIndex = questions.findIndex((item) => item.id === over.id);
 
+      // 로컬 상태 업데이트
       const newItems = arrayMove(questions, oldIndex, newIndex);
       setQuestions(newItems);
+
+      // API 호출을 위한 ID 추출
+      const activeId = parseInt(active.id as string);
+      const overId = parseInt(over.id as string);
+
+      // 순서 변경 API 호출
+      if (!isNaN(activeId) && !isNaN(overId)) {
+        await swapQuestions(activeId, overId);
+      }
     },
-    [questions]
+    [questions, swapQuestions]
   );
 
   const handleKeyDown = useCallback(
@@ -67,18 +93,24 @@ const DraggableList = () => {
           items={questions}
           strategy={verticalListSortingStrategy}
         >
-          {questions.map((item) => (
-            <DraggableItem
-              key={item.id}
-              item={item}
-              skills={skillSets}
-              onStartEdit={startEditQuestion}
-              onEndEdit={endEditQuestion}
-              onEdit={editQuestion}
-              onDelete={deleteQuestion}
-              onToggleRequired={toggleRequired}
-            />
-          ))}
+          {questions.map((item) => {
+            // 현재 item과 매칭되는 전체 질문 데이터 찾기
+            const matchingQuestion = allQuestions.find((q: any) => q.id === item.id);
+            
+            return (
+              <DraggableItem
+                key={item.id}
+                item={item}
+                skills={skillSets}
+                questionData={matchingQuestion}
+                onStartEdit={startEditQuestion}
+                onEndEdit={endEditQuestion}
+                onEdit={editQuestion}
+                onDelete={deleteQuestion}
+                onToggleRequired={toggleRequired}
+              />
+            );
+          })}
         </SortableContext>
       </DndContext>
 

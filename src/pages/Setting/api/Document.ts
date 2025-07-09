@@ -19,6 +19,16 @@ export const fetchQuestionsByField = async (fieldType: FieldType) => {
   }
 };
 
+export const fetchAllQuestions = async () => {
+  try {
+    const res = await axiosInstance.get("/v1/manager/question");
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch all questions:", error);
+    return error;
+  }
+};
+
 export const fetchSkillSetByField = async (fieldType: FieldType) => {
   try {
     const res = await axiosInstance.get(`/v1/manager/lan/${fieldType}`);
@@ -49,6 +59,79 @@ export const deleteSkillSetById = async (id: string | number) => {
     return res.data;
   } catch (error) {
     console.error("프로그래밍 언어 삭제 실패:", error);
+    return error;
+  }
+};
+
+export const postQuestionByField = async (
+  fieldType: FieldType,
+  question: string,
+  required: boolean = false,
+  maxLength?: number
+) => {
+  try {
+    const requestBody = {
+      content: question,
+      fieldType: fieldType,
+      textLength: maxLength || 500,
+      answerType: "TEXTAREA",
+      required: required,
+    };
+
+    const res = await axiosInstance.post("/v1/manager/question", requestBody);
+    return res.data;
+  } catch (error) {
+    console.error("질문 생성 실패:", error);
+    return error;
+  }
+};
+
+export const updateQuestion = async (
+  id: number,
+  content: string,
+  fieldType: FieldType,
+  ordered: number,
+  textLength: number = 500
+) => {
+  try {
+    const requestBody = {
+      id: id,
+      content: content,
+      fieldType: fieldType,
+      ordered: ordered,
+      textLength: textLength,
+      answerType: "TEXTAREA",
+    };
+
+    const res = await axiosInstance.patch("/v1/manager/question", requestBody);
+    return res.data;
+  } catch (error) {
+    console.error("질문 수정 실패:", error);
+    return error;
+  }
+};
+
+export const swapQuestionOrder = async (id1: number, id2: number) => {
+  try {
+    const requestBody = {
+      id1: id1,
+      id2: id2,
+    };
+
+    const res = await axiosInstance.patch("/v1/manager/question/swap", requestBody);
+    return res.data;
+  } catch (error) {
+    console.error("질문 순서 변경 실패:", error);
+    return error;
+  }
+};
+
+export const deleteQuestionById = async (questionId: number) => {
+  try {
+    const res = await axiosInstance.delete(`/v1/manager/question/${questionId}`);
+    return res.data;
+  } catch (error) {
+    console.error("질문 삭제 실패:", error);
     return error;
   }
 };

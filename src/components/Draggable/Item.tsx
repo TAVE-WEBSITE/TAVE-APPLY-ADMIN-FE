@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import FlexBox from "../Layout/FlexBox";
 import Icon from "@/components/Icon/Icon";
 import Switch from "../Input/Switch";
@@ -22,6 +22,7 @@ type QuestionItem = {
 interface DraggableItemProps {
   item: QuestionItem;
   skills?: SkillSet[];
+  questionData?: any;
   onStartEdit: (itemId: string) => void;
   onEndEdit: () => void;
   onEdit: (itemId: string, value: string) => void;
@@ -32,16 +33,22 @@ interface DraggableItemProps {
 const DraggableItem = ({
   item,
   skills = [],
+  questionData,
   onStartEdit,
   onEndEdit,
   onEdit,
   onDelete,
   onToggleRequired,
 }: DraggableItemProps) => {
+  // 전달받은 데이터 로깅
+  // console.log("DraggableItem - item:", item);
+  // console.log("DraggableItem - questionData:", questionData);
   const wordLimitModalRef = useRef<HTMLDialogElement>(null);
   const interviewScheduleModal = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [inputValue, setInputValue] = useState(item.question || "");
+  const [inputValue, setInputValue] = useState(
+    questionData?.content || item.question || ""
+  );
 
   const {
     attributes,
@@ -57,6 +64,13 @@ const DraggableItem = ({
     transition,
   };
 
+  // questionData가 변경될 때 inputValue 업데이트
+  useEffect(() => {
+    if (questionData?.content) {
+      setInputValue(questionData.content);
+    }
+  }, [questionData]);
+
   const handleFocus = useCallback(() => {
     if (item.mode === "default" || !item.mode) {
       onStartEdit(item.id);
@@ -68,12 +82,16 @@ const DraggableItem = ({
     }
   }, [item.id, item.mode, onStartEdit, onEndEdit]);
 
-  const handleEdit = useCallback(() => {
-    onEdit(item.id, inputValue);
-  }, [item.id, inputValue, onEdit]);
+  const handleEdit = useCallback(async () => {
+    console.log("질문 편집 완료:", inputValue);
+    console.log("현재 질문 데이터:", questionData);
+    
+    await onEdit(item.id, inputValue);
+  }, [item.id, inputValue, onEdit, questionData]);
 
-  const handleDelete = useCallback(() => {
-    onDelete(item.id);
+  const handleDelete = useCallback(async () => {
+    console.log("질문 삭제 시작:", item.id);
+    await onDelete(item.id);
   }, [item.id, onDelete]);
 
   const handleToggleRequired = useCallback(() => {
@@ -89,9 +107,10 @@ const DraggableItem = ({
   );
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    async (e: React.KeyboardEvent) => {
       if (e.key === "Enter") {
-        handleEdit();
+        e.preventDefault(); // Enter 키의 기본 동작 방지
+        await handleEdit();
       }
     },
     [handleEdit]
@@ -99,7 +118,6 @@ const DraggableItem = ({
 
   return (
     <li
-      onKeyDown={handleKeyDown}
       className={`flex flex-col justify-between w-full border border-gray-300 rounded-xl bg-white pr-4 hover:bg-gray-100 ${
         item.mode === "focused"
           ? "outline outline-blue-500 shadow-lg scale-103"
@@ -131,7 +149,8 @@ const DraggableItem = ({
               isDragging ? "cursor-grabbing" : ""
             }`}
             onChange={handleInputChange}
-            style={{ width: `${(item.question || "").length + 5}ch` }}
+            onKeyDown={handleKeyDown}
+            style={{ width: `${(questionData?.content || item.question || "").length + 5}ch` }}
           />
           {item.maxLength && (
             <p className="text-gray-500 text-sm">{`(${item.maxLength}자 이내)`}</p>
