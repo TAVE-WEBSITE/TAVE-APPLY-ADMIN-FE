@@ -12,34 +12,82 @@ import {
 const interviewDays = ["2025-08-11", "2025-08-12", "2025-08-13", "2025-08-14"];
 
 const Default = () => {
-  const { data } = useQuery({
+  const { data: addressData, isLoading } = useQuery({
     queryKey: ["setting", "address", "get"],
     queryFn: fetchAddress,
   });
 
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationKey: ["setting", "interview", "post"],
     mutationFn: postInterviewPlace,
+    onSuccess: (data) => {
+      console.log("면접 설정 등록 성공:", data);
+      alert("면접 설정이 성공적으로 등록되었습니다.");
+    },
+    onError: (error) => {
+      console.error("면접 설정 등록 실패:", error);
+      alert("면접 설정 등록에 실패했습니다. 다시 시도해주세요.");
+    },
   });
 
   const [address, setAddress] = useState("");
-
-  useEffect(() => {
-    setAddress(data);
-  }, [data]);
-  const [detailAddress, setDetailAddress] = useState("");
+  const [detailAddress, setDetailAddress] = useState(["", "", "", ""]);
   const [openChatLinks, setOpenChatLinks] = useState(["", "", "", ""]);
   const [passwords, setPasswords] = useState(["", "", "", ""]);
 
+  // 기존 면접 설정 데이터 로드
+  useEffect(() => {
+    if (addressData?.result) {
+      const existingData = addressData.result;
+      console.log("기존 면접 설정 데이터:", existingData);
+      
+      // 기존 데이터가 있으면 폼에 설정
+      if (Array.isArray(existingData) && existingData.length > 0) {
+        // 첫 번째 데이터의 주소 정보 설정
+        setAddress(existingData[0]?.generalAddress || "");
+        
+        // 각 일차별 데이터 설정
+        existingData.forEach((item, index) => {
+          if (index < 4) {
+            setDetailAddress(prev => {
+              const updated = [...prev];
+              updated[index] = item?.detailAddress || "";
+              return updated;
+            });
+            
+            setOpenChatLinks(prev => {
+              const updated = [...prev];
+              updated[index] = item?.openChatLink || "";
+              return updated;
+            });
+            
+            setPasswords(prev => {
+              const updated = [...prev];
+              updated[index] = item?.code || "";
+              return updated;
+            });
+          }
+        });
+      }
+    }
+  }, [addressData]);
+
   const handleSubmit = () => {
+    // 필수 필드 검증
+    if (!address.trim()) {
+      alert("주소를 입력해주세요.");
+      return;
+    }
+
     const payload: any = interviewDays.map((day, idx) => ({
       interviewDay: day,
       generalAddress: address,
-      detailAddress: detailAddress[idx],
-      openChatLink: openChatLinks[idx],
-      code: passwords[idx],
+      detailAddress: detailAddress[idx] || "",
+      openChatLink: openChatLinks[idx] || "",
+      code: passwords[idx] || "",
     }));
 
+    console.log("면접 설정 등록 데이터:", payload);
     mutate(payload);
   };
 
@@ -62,8 +110,12 @@ const Default = () => {
               className="w-full"
             />
             <Input
-              value={detailAddress}
-              onChange={(e) => setDetailAddress(e.target.value)}
+              value={detailAddress[0]}
+              onChange={(e) => {
+                const updated = [...detailAddress];
+                updated[0] = e.target.value;
+                setDetailAddress(updated);
+              }}
               placeholder="상세 주소를 입력해주세요 (예시: 강의실 호수)"
               className="w-full"
             />
@@ -102,7 +154,7 @@ const Default = () => {
                     placeholder="비밀번호를 입력해주세요"
                     value={passwords[index]}
                     onChange={(e) => {
-                      const updated = [...openChatLinks];
+                      const updated = [...passwords];
                       updated[index] = e.target.value;
                       setPasswords(updated);
                     }}
@@ -114,8 +166,12 @@ const Default = () => {
         </section>
       </FlexBox>
       <div className="flex justify-center">
-        <Button className="w-[88px] text-center" onClick={handleSubmit}>
-          등록하기
+        <Button 
+          className="w-[88px] text-center" 
+          onClick={handleSubmit}
+          disabled={isPending}
+        >
+          {isPending ? "등록 중..." : "등록하기"}
         </Button>
       </div>
     </Body>

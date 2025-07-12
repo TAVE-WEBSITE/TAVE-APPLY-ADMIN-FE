@@ -137,17 +137,6 @@ const TypeChangeModal = forwardRef<HTMLDialogElement | null, TypeChangeModalProp
               <input
                 type="radio"
                 name="questionType"
-                value="INPUT"
-                checked={selectedType === "INPUT"}
-                onChange={() => handleTypeChange("INPUT")}
-                className="text-blue-600 focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-700">기타 프로그래밍 (INPUT)</span>
-            </label>
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="radio"
-                name="questionType"
                 value="URL"
                 checked={selectedType === "URL"}
                 onChange={() => handleTypeChange("URL")}

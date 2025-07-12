@@ -61,11 +61,14 @@ const fetchAddress = async () => {
   }
 };
 
-const postInterviewPlace = async () => {
+const postInterviewPlace = async (payload: any) => {
   try {
-    const res = await axiosInstance.post("/v1/manager/interview-place");
+    console.log("면접 설정 등록 API 호출:", payload);
+    const res = await axiosInstance.post("/v1/manager/interview-place", payload);
+    console.log("면접 설정 등록 성공:", res.data);
     return res.data;
   } catch (error) {
+    console.error("면접 설정 등록 실패:", error);
     return error;
   }
 };
