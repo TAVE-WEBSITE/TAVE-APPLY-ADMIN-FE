@@ -44,7 +44,7 @@ const Interview = () => {
             {formatDateTime(new Date().toISOString()) + " 기준"}
           </p>
           <div
-            className="text-xl text-gray-300 underline cursor-pointer"
+            className="text-lg text-gray-300 bg-blue-600 px-4 py-2 rounded-lg font-semibold cursor-pointer"
             onClick={() => navigate("/evaluation/interview/final")}
           >
             최종 면접 평가하기
@@ -55,17 +55,17 @@ const Interview = () => {
         <FlexBox className="justify-between w-[1320px] rounded-xl border border-gray-300 mx-auto">
           <TimeTable timeTable={timeTable} />
         </FlexBox>
-        <FlexBox className="w-[1320px] mx-auto gap-4 justify-center pb-12">
+        <FlexBox className="mx-auto gap-4 justify-center pb-12">
           <Button
             isPending={isPending2}
             onClick={() => downloadSheet()}
-            className="bg-gray-300 w-[220px]"
+            className="bg-gray-300 w-64"
           >
             <Icon type={"DownLoad"} size={18} />
             <span className="text-gray-900">면접 평가 시트 다운로드</span>
           </Button>
           <Button
-            className="w-[200px]"
+            className="w-64"
             isPending={isPending}
             onClick={() => downloadTimeTableForm()}
           >

@@ -7,6 +7,7 @@ import Tab from "@/components/Tab/Tab";
 import Body from "@/components/Layout/Body";
 import Modal from "@/components/Modal/Modal";
 import { postInterviewFile } from "@/pages/Setting/api/Interview";
+import { getTimeTableForm } from "@/pages/Evaluation/api";
 import { useMutation } from "@tanstack/react-query";
 import ToastMessage from "@/components/Modal/ToastMessage";
 import Default from "./Default";
@@ -33,6 +34,11 @@ const InterviewSetting = () => {
     useState<File | null>(null);
   const [evaluationSheetTemplateFile, setEvaluationSheetTemplateFile] =
     useState<File | null>(null);
+
+  // 파일 선택을 위한 ref들
+  const intervieweeFileRef = useRef<HTMLInputElement>(null);
+  const interviewerFileRef = useRef<HTMLInputElement>(null);
+  const evaluationFileRef = useRef<HTMLInputElement>(null);
 
   const {
     mutate,
@@ -121,20 +127,26 @@ const InterviewSetting = () => {
 
             <div className="pl-13">
               <div className="grid grid-cols-2 gap-2 max-w-lg">
-                <button className="px-4 py-2 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center">
+                <button className="whitespace-nowrap px-2 h-14 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center">
                   면접자 시간 파악
                   <Icon type="Upload" size={16} />
                 </button>
-                <button className="px-4 py-2 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center">
-                  면접자 시간 파악
+                <button 
+                  className="whitespace-nowrap px-1 h-14 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center hover:bg-gray-50"
+                  onClick={() => {
+                    console.log("면접자 시간표 양식 다운로드 시작");
+                    getTimeTableForm();
+                  }}
+                >
+                  면접자 시간표 양식
                   <Icon type="Upload" size={16} />
                 </button>
-                <button className="px-4 py-2 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center">
-                  면접자 시간 파악
+                <button className="whitespace-nowrap px-1 h-14 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center">
+                  면접관 시간표 포함
                   <Icon type="Upload" size={16} />
                 </button>
-                <button className="px-4 py-2 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center">
-                  면접자 시간 파악
+                <button className="whitespace-nowrap px-1 h-14 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center">
+                  면접 평가 시트 양식
                   <Icon type="Upload" size={16} />
                 </button>
               </div>
@@ -156,19 +168,34 @@ const InterviewSetting = () => {
               <p className="text-gray-500 text-sm mb-2">
                 면접자 시간표 양식에 맞게 올려주시면, 자동으로 등록됩니다 :)
               </p>
-              <div className="flex items-center gap-3 max-w-lg">
-                <Input
-                  type="file"
-                  placeholder="파일을 업로드해주세요"
-                  className="flex-1"
-                  allowFile={true}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setIntervieweeScheduleFile(file);
-                    }
-                  }}
-                />
+              <div className="flex gap-2 items-center justify-between">
+                <div className="flex-1">
+                  <Input
+                    type="text"
+                    placeholder="파일을 업로드해주세요"
+                    className="w-full"
+                    value={intervieweeScheduleFile?.name || ""}
+                    readOnly
+                  />
+                  <input
+                    ref={intervieweeFileRef}
+                    type="file"
+                    className="hidden"
+                    accept=".csv"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setIntervieweeScheduleFile(file);
+                      }
+                    }}
+                  />
+                </div>
+                <button 
+                  className="cursor-pointer px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap"
+                  onClick={() => intervieweeFileRef.current?.click()}
+                >
+                  파일 선택
+                </button>
               </div>
             </div>
           </div>
@@ -188,19 +215,34 @@ const InterviewSetting = () => {
               <p className="text-gray-500 text-sm mb-2">
                 면접에 참여할 운영진이 보게 될 시간표를 업로드해주세요.
               </p>
-              <div className="flex items-center gap-3 max-w-lg">
-                <Input
-                  type="file"
-                  placeholder="파일을 업로드해주세요"
-                  className="flex-1"
-                  allowFile={true}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setInterviewerScheduleFile(file);
-                    }
-                  }}
-                />
+              <div className="flex gap-2 items-center justify-between">
+                <div className="flex-1">
+                  <Input
+                    type="text"
+                    placeholder="파일을 업로드해주세요"
+                    className="w-full"
+                    value={interviewerScheduleFile?.name || ""}
+                    readOnly
+                  />
+                  <input
+                    ref={interviewerFileRef}
+                    type="file"
+                    className="hidden"
+                    accept=".csv"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setInterviewerScheduleFile(file);
+                      }
+                    }}
+                  />
+                </div>
+                <button 
+                  className="cursor-pointer px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap"
+                  onClick={() => interviewerFileRef.current?.click()}
+                >
+                  파일 선택
+                </button>
               </div>
             </div>
           </div>
@@ -220,19 +262,34 @@ const InterviewSetting = () => {
               <p className="text-gray-500 text-sm mb-2">
                 운영진이 평가할 시트 템플릿을 업로드해주세요.
               </p>
-              <div className="flex items-center max-w-lg">
-                <Input
-                  type="file"
-                  placeholder="파일을 업로드해주세요"
-                  className="flex-1"
-                  allowFile={true}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setEvaluationSheetTemplateFile(file);
-                    }
-                  }}
-                />
+              <div className="flex gap-2 items-center justify-between">
+                <div className="flex-1">
+                  <Input
+                    type="text"
+                    placeholder="파일을 업로드해주세요"
+                    className="w-full"
+                    value={evaluationSheetTemplateFile?.name || ""}
+                    readOnly
+                  />
+                  <input
+                    ref={evaluationFileRef}
+                    type="file"
+                    className="hidden"
+                    accept=".csv"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setEvaluationSheetTemplateFile(file);
+                      }
+                    }}
+                  />
+                </div>
+                <button 
+                  className="cursor-pointer px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap"
+                  onClick={() => evaluationFileRef.current?.click()}
+                >
+                  파일 선택
+                </button>
               </div>
             </div>
           </div>
