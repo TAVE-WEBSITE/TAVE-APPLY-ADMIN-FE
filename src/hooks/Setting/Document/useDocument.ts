@@ -40,7 +40,6 @@ const useDocument = () => {
 
   useEffect(() => {
     if (data) {
-      console.log(`[${currentType}] 분야 질문 리스트:`, data.result);
       setQuestions(data.result);
     }
     if (currentSkills) {
@@ -48,11 +47,6 @@ const useDocument = () => {
     }
   }, [data, currentSkills, currentType]);
 
-
-    // 분야 변경 시 로깅
-  useEffect(() => {
-   
-  }, [currentType, questions?.length, skillSets?.length]);
 
   const addNewQuestion = () => {
     const existingIds = new Set([
@@ -72,8 +66,7 @@ const useDocument = () => {
       required: false,
       mode: "default", 
     };
-    
-    console.log("새 질문 생성:", newQuestion);
+
     const temp = [...(questions ?? []), newQuestion];
     setQuestions(temp);
   };
@@ -83,14 +76,12 @@ const useDocument = () => {
       const questionId = parseInt(itemId);
       
       if (!isNaN(questionId)) {
-        // 기존 질문 데이터가 있는지 확인
         const existingQuestion = allQuestions?.find((q: any) => q.id === questionId);
         
         if (existingQuestion) {
-          // 기존 질문이 있으면 삭제 API 호출
-          console.log("질문 삭제 API 호출 시작:", { questionId });
+       
           await deleteQuestionById(questionId);
-          console.log("질문이 성공적으로 삭제되었습니다:", questionId);
+         
         } else {
           console.log("기존 질문이 없어서 로컬에서만 삭제:", questionId);
         }
@@ -98,8 +89,6 @@ const useDocument = () => {
       
       // 로컬 상태에서도 제거
       const temp = questions.filter((question) => question.id !== itemId);
-      console.log("Deleting question with ID:", itemId);
-      console.log("Updated questions array:", temp);
       setQuestions(temp);
       
     } catch (error) {
@@ -120,7 +109,6 @@ const useDocument = () => {
   };
 
   const editQuestion = async (itemId: string, updatedQuestion: string, required?: boolean) => {
-    // 로컬 상태 업데이트
     const newQuestions = questions.map((item) => ({
       ...item,
       question: item.id === itemId ? updatedQuestion : item.question,
@@ -130,24 +118,14 @@ const useDocument = () => {
     console.log("Current field type:", currentType);
     setQuestions(newQuestions);
 
-    // 질문이 비어있지 않고 현재 필드 타입이 있을 때 API 호출
     if (updatedQuestion.trim() && currentType) {
       try {
         const questionItem = newQuestions.find(q => q.id === itemId);
         if (questionItem) {
-          // 기존 질문 데이터가 있는지 확인 (questionData에서 찾기)
           const existingQuestion = allQuestions?.find((q: any) => q.id === parseInt(itemId));
           
           if (existingQuestion) {
-            // 기존 질문이 있으면 수정 API 호출
-            console.log("질문 수정 API 호출 시작:", {
-              id: existingQuestion.id,
-              content: updatedQuestion.trim(),
-              fieldType: currentType,
-              ordered: existingQuestion.ordered,
-              textLength: existingQuestion.textLength || 500,
-              required: required !== undefined ? required : existingQuestion.required
-            });
+
             
             const response = await updateQuestion(
               existingQuestion.id,
@@ -160,28 +138,17 @@ const useDocument = () => {
             console.log("질문이 성공적으로 수정되었습니다:", updatedQuestion);
             console.log("API 응답:", response);
             
-            // 데이터 무효화하여 다시 조회
             await queryClient.invalidateQueries({ queryKey: ["setting", "document", "questions", currentType] });
             await queryClient.invalidateQueries({ queryKey: ["setting", "document", "all-questions"] });
           } else {
-            // 기존 질문이 없으면 생성 API 호출
-            console.log("질문 생성 API 호출 시작:", {
-              fieldType: currentType,
-              question: updatedQuestion.trim(),
-              required: required !== undefined ? required : questionItem.required,
-              maxLength: questionItem.maxLength
-            });
-            
+           
             const response = await postQuestionByField(
               currentType,
               updatedQuestion.trim(),
               required !== undefined ? required : questionItem.required,
               questionItem.maxLength
             );
-            console.log("질문이 성공적으로 생성되었습니다:", updatedQuestion);
-            console.log("API 응답:", response);
-            
-            // 데이터 무효화하여 다시 조회
+
             await queryClient.invalidateQueries({ queryKey: ["setting", "document", "questions", currentType] });
             await queryClient.invalidateQueries({ queryKey: ["setting", "document", "all-questions"] });
           }
@@ -203,7 +170,6 @@ const useDocument = () => {
       ...question,
       mode: "default",
     }));
-    console.log("Ending edit mode");
     setQuestions(newQuestions);
   };
 
@@ -212,15 +178,12 @@ const useDocument = () => {
       ...question,
       required: question.id === itemId ? !question.required : question.required,
     }));
-    console.log("Toggling required for question ID:", itemId);
     setQuestions(newQuestions);
   };
 
   const swapQuestions = async (id1: number, id2: number) => {
     try {
-      console.log("질문 순서 변경 API 호출:", { id1, id2 });
       await swapQuestionOrder(id1, id2);
-      console.log("질문 순서 변경 성공");
     } catch (error) {
       console.error("질문 순서 변경 실패:", error);
     }
@@ -228,9 +191,7 @@ const useDocument = () => {
 
   const getProgrammingLevel = async (id: number) => {
     try {
-      console.log("프로그래밍 레벨 조회 시작:", { id });
       const result = await fetchProgrammingLevel(id);
-      console.log("프로그래밍 레벨 조회 결과:", result);
       return result;
     } catch (error) {
       console.error("프로그래밍 레벨 조회 실패:", error);

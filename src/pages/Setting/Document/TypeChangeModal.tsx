@@ -29,16 +29,16 @@ const TypeChangeModal = forwardRef<HTMLDialogElement | null, TypeChangeModalProp
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  // currentAnswerType이 변경될 때마다 selectedType 상태 업데이트
+ 
   useEffect(() => {
-    console.log("currentAnswerType 변경됨:", currentAnswerType);
+  
     if (currentAnswerType) {
       setSelectedType(currentAnswerType);
     }
   }, [currentAnswerType]);
 
   const handleTypeChange = (value: string) => {
-    console.log("라디오 버튼 선택됨:", value);
+
     setSelectedType(value);
   };
 
