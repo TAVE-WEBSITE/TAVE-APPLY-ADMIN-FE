@@ -52,6 +52,7 @@ const postInterviewFile = async ({ file }: { file: File }) => {
   }
 };
 
+// 면접 장소 조회 API 없음 -> 필요하면 백엔드 요청 필요
 const fetchAddress = async () => {
   try {
     const res = await axiosInstance.get("/v1/manager/interview-place");
@@ -61,6 +62,14 @@ const fetchAddress = async () => {
   }
 };
 
+const fetchInterviewTime = async () => {
+  try {
+    const res = await axiosInstance.get("/v1/manager/config/interview-time");
+    return res.data;
+  } catch (error) {
+    return error;
+  }
+};
 const postInterviewPlace = async (payload: any) => {
   try {
     console.log("면접 설정 등록 API 호출:", payload);
@@ -80,4 +89,5 @@ export {
   postInterviewFile,
   fetchAddress,
   postInterviewPlace,
+  fetchInterviewTime,
 };

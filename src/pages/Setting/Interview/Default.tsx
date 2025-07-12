@@ -7,14 +7,24 @@ import Button from "@/components/Button/Button";
 import {
   fetchAddress,
   postInterviewPlace,
+  fetchInterviewTime,
 } from "@/pages/Setting/api/Interview";
 
-const interviewDays = ["2025-08-11", "2025-08-12", "2025-08-13", "2025-08-14"];
-
 const Default = () => {
-  const { data: addressData, isLoading } = useQuery({
+  const [interviewDays, setInterviewDays] = useState<string[]>([]);
+  const [formattedDates, setFormattedDates] = useState<string[]>([]);
+  const { data: addressData, isLoading, error } = useQuery({
     queryKey: ["setting", "address", "get"],
     queryFn: fetchAddress,
+    retry: 1, // 재시도 횟수 제한
+    retryDelay: 1000, // 재시도 간격
+  });
+
+  const { data: interviewTimeData } = useQuery({
+    queryKey: ["setting", "interview", "time"],
+    queryFn: fetchInterviewTime,
+    retry: 1,
+    retryDelay: 1000,
   });
 
   const { mutate, isPending } = useMutation({
@@ -37,23 +47,36 @@ const Default = () => {
 
   // 기존 면접 설정 데이터 로드
   useEffect(() => {
+    console.log("addressData 변경됨:", addressData);
+    
+    // 에러가 있거나 데이터가 없으면 초기화
+    if (error || !addressData) {
+      console.log("에러가 있거나 데이터가 없음:", { error, addressData });
+      return;
+    }
+    
     if (addressData?.result) {
       const existingData = addressData.result;
       console.log("기존 면접 설정 데이터:", existingData);
       
       // 기존 데이터가 있으면 폼에 설정
       if (existingData) {
-        // 주소 정보 설정
+        console.log("주소 설정:", existingData.generalAddress);
         setAddress(existingData.generalAddress || "");
         
-        // 상세주소 설정 (모든 일차에 동일 적용)
+        console.log("상세주소 설정:", existingData.detailAddress);
         setDetailAddress(prev => {
           const updated = [...prev];
           updated[0] = existingData.detailAddress || "";
           return updated;
         });
         
-        // 오픈채팅방 링크 설정
+        console.log("오픈채팅방 링크 설정:", {
+          first: existingData.firstOpenChatLink,
+          second: existingData.secondOpenChatLink,
+          third: existingData.thirdOpenChatLink,
+          fourth: existingData.fourthOpenChatLink
+        });
         setOpenChatLinks([
           existingData.firstOpenChatLink || "",
           existingData.secondOpenChatLink || "",
@@ -61,7 +84,12 @@ const Default = () => {
           existingData.fourthOpenChatLink || ""
         ]);
         
-        // 문서 링크 설정
+        console.log("문서 링크 설정:", {
+          first: existingData.firstDocumentLink,
+          second: existingData.secondDocumentLink,
+          third: existingData.thirdDocumentLink,
+          fourth: existingData.fourthDocumentLink
+        });
         setDocumentLinks([
           existingData.firstDocumentLink || "",
           existingData.secondDocumentLink || "",
@@ -69,8 +97,28 @@ const Default = () => {
           existingData.fourthDocumentLink || ""
         ]);
       }
+    } else {
+      console.log("addressData.result가 없음:", addressData);
     }
-  }, [addressData]);
+  }, [addressData, error]);
+
+  // 면접 시간 데이터 로드
+  useEffect(() => {
+    if (interviewTimeData?.result) {
+      const timeData = interviewTimeData.result;
+      console.log("면접 시간 데이터:", timeData);
+      
+      // 날짜 데이터 추출
+      const dates = timeData.map((item: any) => item.originalDate);
+      const formatted = timeData.map((item: any) => item.formattedDate);
+      
+      setInterviewDays(dates);
+      setFormattedDates(formatted);
+      
+      console.log("설정된 면접 날짜:", dates);
+      console.log("설정된 포맷된 날짜:", formatted);
+    }
+  }, [interviewTimeData]);
 
   const handleSubmit = () => {
     // 필수 필드 검증
@@ -79,8 +127,13 @@ const Default = () => {
       return;
     }
 
+    if (interviewDays.length === 0) {
+      alert("면접 날짜 데이터를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
     const payload = interviewDays.map((day, idx) => ({
-      interviewDay: day,
+      interviewDate: day,
       generalAddress: address,
       detailAddress: detailAddress[0] || "", // 모든 일차에 동일한 상세주소 적용
       openChatLink: openChatLinks[idx] || "",
@@ -93,6 +146,22 @@ const Default = () => {
 
   return (
     <Body className="py-8 gap-8 px-12">
+      {isLoading && (
+        <div className="text-center py-4">
+          <p className="text-gray-600">면접 설정 데이터를 불러오는 중...</p>
+        </div>
+      )}
+      {interviewDays.length === 0 && !isLoading && (
+        <div className="text-center py-4">
+          <p className="text-gray-600">면접 날짜 정보를 불러오는 중...</p>
+        </div>
+      )}
+      {error && (
+        <div className="text-center py-4">
+          <p className="text-red-600">면접 설정 데이터 조회에 실패했습니다. 새로고침 후 다시 시도해주세요.</p>
+          <p className="text-sm text-gray-500 mt-1">에러: {error.message}</p>
+        </div>
+      )}
       <FlexBox className="items-start">
         <section className="w-[650px]">
           <FlexBox className="gap-2 text-gray-900 mb-2">
@@ -130,10 +199,10 @@ const Default = () => {
             <div className="w-full border-t border-gray-300 mt-6"></div>
           </FlexBox>
           <FlexBox direction="col" className="gap-4 p-4 items-start">
-            {Array.from({ length: 4 }, (_, index) => (
+            {Array.from({ length: Math.max(interviewDays.length, 4) }, (_, index) => (
               <Input.TitleContainer
                 key={index}
-                title={`${index + 1}일차 (8/10)`}
+                title={`${index + 1}일차 (${formattedDates[index] || '날짜 로딩 중...'})`}
               >
                 <FlexBox className="gap-4">
                   <Input.WithLabel
