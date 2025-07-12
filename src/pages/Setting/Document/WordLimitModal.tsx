@@ -3,6 +3,7 @@ import Modal from "@/components/Modal/Modal";
 import Input from "@/components/Input/Input";
 import ToastMessage from "@/components/Modal/ToastMessage";
 import { updateQuestion, type FieldType } from "@/pages/Setting/api/Document";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface WordLimitModalProps {
   questionId?: number;
@@ -22,6 +23,7 @@ const WordLimitModal = forwardRef<HTMLDialogElement | null, WordLimitModalProps>
   onUpdateSuccess
 }, ref) => {
   const [wordLimit, setWordLimit] = useState("");
+  const queryClient = useQueryClient();
 
   // currentTextLength가 변경될 때마다 wordLimit 상태 업데이트
   useEffect(() => {
@@ -48,16 +50,27 @@ const WordLimitModal = forwardRef<HTMLDialogElement | null, WordLimitModalProps>
         textLength: parseInt(wordLimit)
       });
 
-      await updateQuestion(
+      const response = await updateQuestion(
         questionId,
         currentContent,
         currentFieldType,
         currentOrdered || 0,
-        parseInt(wordLimit)
+        parseInt(wordLimit),
+        undefined // required는 기존 값 유지
       );
 
       console.log("글자수 제한 업데이트 성공");
-      setIsOpen(true);
+      console.log("API 응답:", response);
+      
+      // 데이터 무효화하여 다시 조회
+      await queryClient.invalidateQueries({ queryKey: ["setting", "document", "questions", currentFieldType] });
+      await queryClient.invalidateQueries({ queryKey: ["setting", "document", "all-questions"] });
+      
+      // 모달 닫기
+      if (ref && 'current' in ref && ref.current) {
+        ref.current.close();
+      }
+      
       onUpdateSuccess?.();
     } catch (error) {
       console.error("글자수 제한 업데이트 실패:", error);

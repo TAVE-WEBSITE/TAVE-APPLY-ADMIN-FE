@@ -1,11 +1,13 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useRef, useState, useCallback, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import FlexBox from "../Layout/FlexBox";
 import Icon from "@/components/Icon/Icon";
 import Switch from "../Input/Switch";
 import ChipController from "@/pages/Setting/Document/ChipController";
 import WordLimitModal from "@/pages/Setting/Document/WordLimitModal";
+import TypeChangeModal from "@/pages/Setting/Document/TypeChangeModal";
 import InterviewScheduleModal from "@/pages/Setting/Document/InterviewScheduleModal";
 
 import useDocumentStore from "@/hooks/Setting/Document/useDocumentStore";
@@ -25,7 +27,7 @@ interface DraggableItemProps {
   questionData?: any;
   onStartEdit: (itemId: string) => void;
   onEndEdit: () => void;
-  onEdit: (itemId: string, value: string) => void;
+  onEdit: (itemId: string, value: string, required?: boolean) => void;
   onDelete: (itemId: string) => void;
   onToggleRequired: (itemId: string) => void;
 }
@@ -43,7 +45,9 @@ const DraggableItem = ({
   // 전달받은 데이터 로깅
   // console.log("DraggableItem - item:", item);
   // console.log("DraggableItem - questionData:", questionData);
+  const queryClient = useQueryClient();
   const wordLimitModalRef = useRef<HTMLDialogElement>(null);
+  const typeChangeModalRef = useRef<HTMLDialogElement>(null);
   const interviewScheduleModal = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = useState(
@@ -121,9 +125,35 @@ const DraggableItem = ({
     await onDelete(item.id);
   }, [item.id, onDelete]);
 
-  const handleToggleRequired = useCallback(() => {
-    onToggleRequired(item.id);
-  }, [item.id, onToggleRequired]);
+  const handleToggleRequired = useCallback(async () => {
+    console.log("필수 질문 토글:", { itemId: item.id, currentRequired: item.required });
+    
+    const newRequiredValue = !item.required;
+    
+    // API 호출을 위한 데이터 준비
+    if (questionData?.id && questionData?.content && questionData?.fieldType) {
+      try {
+        console.log("필수 질문 API 호출:", {
+          id: questionData.id,
+          content: questionData.content,
+          fieldType: questionData.fieldType,
+          ordered: questionData.ordered,
+          textLength: questionData.textLength || 500,
+          required: newRequiredValue
+        });
+        
+        // updateQuestion API 호출 (required 필드 포함)
+        await onEdit(item.id, questionData.content, newRequiredValue);
+        console.log("필수 질문 상태 업데이트 성공");
+      } catch (error) {
+        console.error("필수 질문 상태 업데이트 실패:", error);
+      }
+    } else {
+      // API 호출 조건이 안 되면 로컬 상태만 업데이트
+      onToggleRequired(item.id);
+      console.log("API 호출 조건 불충족, 로컬 상태만 업데이트:", { questionData });
+    }
+  }, [item.id, item.required, onToggleRequired, questionData, onEdit]);
 
   const handleDropdownToggle = useCallback(() => {
     setShowDropdown(prev => !prev);
@@ -219,7 +249,7 @@ const DraggableItem = ({
                     <span className="whitespace-nowrap">질문 수정하기</span>
                   </button>
                   <button
-                    className="w-full px-4 py-2 text-left text-sm text-gray-900 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
+                    className="w-full px-4 py-2 text-left text-sm text-gray-900 hover:bg-gray-100 border-b border-gray-200 flex items-center gap-2 cursor-pointer"
                     onClick={() => {
                       wordLimitModalRef.current?.showModal();
                       setShowDropdown(false);
@@ -227,6 +257,16 @@ const DraggableItem = ({
                   >
                     <Icon type="TextLength" size={20} />
                     <span className="whitespace-nowrap">글자수 제한하기</span>
+                  </button>
+                  <button
+                    className="w-full px-4 py-2 text-left text-sm text-gray-900 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
+                    onClick={() => {
+                      typeChangeModalRef.current?.showModal();
+                      setShowDropdown(false);
+                    }}
+                  >
+                    <Icon type="Type" size={20} />
+                    <span className="whitespace-nowrap">타입 변경하기</span>
                   </button>
               </div>
             )}
@@ -257,6 +297,23 @@ const DraggableItem = ({
           currentTextLength={questionData?.textLength || item.maxLength}
           onUpdateSuccess={() => {
             console.log("글자수 제한 업데이트 완료");
+          }}
+        />
+        <TypeChangeModal 
+          ref={typeChangeModalRef}
+          questionId={questionData?.id}
+          currentContent={questionData?.content || item.question}
+          currentFieldType={questionData?.fieldType}
+          currentOrdered={questionData?.ordered}
+          currentTextLength={questionData?.textLength || item.maxLength}
+          currentAnswerType={questionData?.answerType}
+          currentRequired={questionData?.required}
+          onUpdateSuccess={async () => {
+            console.log("타입 변경 업데이트 완료");
+            // 데이터 무효화하여 다시 조회
+            await queryClient.invalidateQueries({ queryKey: ["setting", "document", "questions", questionData?.fieldType] });
+            await queryClient.invalidateQueries({ queryKey: ["setting", "document", "all-questions"] });
+            console.log("데이터 무효화 완료");
           }}
         />
         <InterviewScheduleModal ref={interviewScheduleModal} />

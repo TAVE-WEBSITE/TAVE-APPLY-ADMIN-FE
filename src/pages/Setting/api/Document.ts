@@ -67,14 +67,15 @@ export const postQuestionByField = async (
   fieldType: FieldType,
   question: string,
   required: boolean = false,
-  maxLength?: number
+  maxLength?: number,
+  answerType: string = "TEXTAREA"
 ) => {
   try {
     const requestBody = {
       content: question,
       fieldType: fieldType,
       textLength: maxLength || 500,
-      answerType: "TEXTAREA",
+      answerType: answerType,
       required: required,
     };
 
@@ -91,7 +92,9 @@ export const updateQuestion = async (
   content: string,
   fieldType: FieldType,
   ordered: number,
-  textLength: number = 500
+  textLength: number = 500,
+  required: boolean = false,
+  answerType: string = "TEXTAREA"
 ) => {
   try {
     const requestBody = {
@@ -100,10 +103,13 @@ export const updateQuestion = async (
       fieldType: fieldType,
       ordered: ordered,
       textLength: textLength,
-      answerType: "TEXTAREA",
+      answerType: answerType,
+      required: required,
     };
 
+    console.log("updateQuestion API 요청 데이터:", requestBody);
     const res = await axiosInstance.patch("/v1/manager/question", requestBody);
+    console.log("updateQuestion API 응답:", res.data);
     return res.data;
   } catch (error) {
     console.error("질문 수정 실패:", error);

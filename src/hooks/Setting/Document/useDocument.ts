@@ -11,11 +11,12 @@ import {
   fetchProgrammingLevel,
 } from "@/pages/Setting/api/Document";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useDocument = () => {
   const { questions, setQuestions, currentType, skillSets, setSkillSets } =
     useDocumentStore();
+  const queryClient = useQueryClient();
 
 
 
@@ -118,13 +119,14 @@ const useDocument = () => {
     setQuestions(newQuestions);
   };
 
-  const editQuestion = async (itemId: string, updatedQuestion: string) => {
+  const editQuestion = async (itemId: string, updatedQuestion: string, required?: boolean) => {
     // 로컬 상태 업데이트
     const newQuestions = questions.map((item) => ({
       ...item,
       question: item.id === itemId ? updatedQuestion : item.question,
+      required: required !== undefined && item.id === itemId ? required : item.required,
     }));
-    console.log("Editing question ID:", itemId, "New text:", updatedQuestion);
+    console.log("Editing question ID:", itemId, "New text:", updatedQuestion, "Required:", required);
     console.log("Current field type:", currentType);
     setQuestions(newQuestions);
 
@@ -143,33 +145,45 @@ const useDocument = () => {
               content: updatedQuestion.trim(),
               fieldType: currentType,
               ordered: existingQuestion.ordered,
-              textLength: existingQuestion.textLength || 500
+              textLength: existingQuestion.textLength || 500,
+              required: required !== undefined ? required : existingQuestion.required
             });
             
-            await updateQuestion(
+            const response = await updateQuestion(
               existingQuestion.id,
               updatedQuestion.trim(),
               currentType,
               existingQuestion.ordered,
-              existingQuestion.textLength || 500
+              existingQuestion.textLength || 500,
+              required !== undefined ? required : existingQuestion.required
             );
             console.log("질문이 성공적으로 수정되었습니다:", updatedQuestion);
+            console.log("API 응답:", response);
+            
+            // 데이터 무효화하여 다시 조회
+            await queryClient.invalidateQueries({ queryKey: ["setting", "document", "questions", currentType] });
+            await queryClient.invalidateQueries({ queryKey: ["setting", "document", "all-questions"] });
           } else {
             // 기존 질문이 없으면 생성 API 호출
             console.log("질문 생성 API 호출 시작:", {
               fieldType: currentType,
               question: updatedQuestion.trim(),
-              required: questionItem.required,
+              required: required !== undefined ? required : questionItem.required,
               maxLength: questionItem.maxLength
             });
             
-            await postQuestionByField(
+            const response = await postQuestionByField(
               currentType,
               updatedQuestion.trim(),
-              questionItem.required,
+              required !== undefined ? required : questionItem.required,
               questionItem.maxLength
             );
             console.log("질문이 성공적으로 생성되었습니다:", updatedQuestion);
+            console.log("API 응답:", response);
+            
+            // 데이터 무효화하여 다시 조회
+            await queryClient.invalidateQueries({ queryKey: ["setting", "document", "questions", currentType] });
+            await queryClient.invalidateQueries({ queryKey: ["setting", "document", "all-questions"] });
           }
         }
       } catch (error) {
