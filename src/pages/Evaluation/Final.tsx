@@ -27,6 +27,7 @@ const Final = () => {
       type: "최종 서류 평가",
       page: currentPage,
       size: 7,
+      status: "PASS",
     });
 
   const {
@@ -55,6 +56,44 @@ const Final = () => {
     return entireList.filter((e) => e.status === "NOTCHECKED").length;
   }, [entireList]);
 
+  // 최종 서류 평가 API 조회 결과 콘솔 로그
+  console.log("=== 최종 서류 평가 API 조회 결과 ===");
+  console.log("전체 리스트 길이:", entireList.length);
+  console.log("전체 리스트:", entireList);
+  console.log("현재 페이지:", currentPage);
+  console.log("전체 페이지 수:", totalPages);
+  console.log("활성 탭:", activeTab);
+  console.log("검색어:", searchInput);
+
+  // 개별 항목 상세 정보
+  if (entireList.length > 0) {
+    console.log("=== 첫 번째 항목 상세 정보 ===");
+    console.log(entireList[0]);
+    
+    console.log("=== 모든 항목 요약 ===");
+    entireList.forEach((item, index) => {
+      console.log(`항목 ${index + 1}:`, {
+        id: item.id,
+        name: item.name,
+        fieldType: item.fieldType,
+        sex: item.sex,
+        school: item.school,
+        recruitTime: item.recruitTime,
+        count: item.count,
+        status: item.status
+      });
+    });
+  } else {
+    console.log("조회된 최종 서류 평가 데이터가 없습니다.");
+  }
+
+  // 상태별 통계
+  console.log("=== 상태별 통계 ===");
+  console.log("보류 중인 서류:", holdCount);
+  console.log("진행하지 않은 서류:", notCheckedCount);
+  console.log("합격자 수:", entireList.filter(e => e.status === "PASS").length);
+  console.log("불합격자 수:", entireList.filter(e => e.status === "FAIL").length);
+
   const handleUpdate = async () => {
     await updateStatusByDocumentEvaluation();
     dialogRefSecond.current?.close();
@@ -81,27 +120,29 @@ const Final = () => {
         </FlexBox>
       </FlexBox>
       <Modal
-        dialogRef={dialogRefFirst}
-        buttonCount={2}
-        onConfirm={() => dialogRefFirst.current?.close()}
-        title="최종 서류 평가"
-      >
-        <p className="text-gray-500 text-balance">
-          모든 서류 평가가 완료되지 않았습니다. <br /> <br />
-          현재 서류 평가 진행 현황입니다. <br />
-          <ul>
-            <li>
-              - 보류 중인 서류{" "}
-              <span className="text-blue-500 font-bold">{holdCount}</span>건
-            </li>{" "}
-            <li>
-              - 진행하지 않은 서류{" "}
-              <span className="text-blue-500 font-bold">{notCheckedCount}</span>
-              건
-            </li>
-          </ul>
-        </p>
-      </Modal>
+  dialogRef={dialogRefFirst}
+  buttonCount={2}
+  onConfirm={() => dialogRefFirst.current?.close()}
+  title="최종 서류 평가"
+>
+  <div className="text-gray-500 text-balance">
+    <p>
+      모든 서류 평가가 완료되지 않았습니다. <br /> <br />
+      현재 서류 평가 진행 현황입니다.
+    </p>
+    <ul className="mt-4 space-y-1">
+      <li>
+        - 보류 중인 서류{" "}
+        <span className="text-blue-500 font-bold">{holdCount}</span>건
+      </li>
+      <li>
+        - 진행하지 않은 서류{" "}
+        <span className="text-blue-500 font-bold">{notCheckedCount}</span>건
+      </li>
+    </ul>
+  </div>
+</Modal>
+
       <Modal
         dialogRef={dialogRefSecond}
         buttonCount={2}

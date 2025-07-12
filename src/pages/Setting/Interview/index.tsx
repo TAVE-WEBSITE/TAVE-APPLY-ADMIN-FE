@@ -6,7 +6,7 @@ import Input from "@/components/Input/Input";
 import Tab from "@/components/Tab/Tab";
 import Body from "@/components/Layout/Body";
 import Modal from "@/components/Modal/Modal";
-import { postInterviewFile } from "@/pages/Setting/api/Interview";
+import { postInterviewFile, downloadInterviewTimeTableForm, downloadInterviewerTimeTableForm } from "@/pages/Setting/api/Interview";
 import { getTimeTableForm } from "@/pages/Evaluation/api";
 import { useMutation } from "@tanstack/react-query";
 import ToastMessage from "@/components/Modal/ToastMessage";
@@ -26,6 +26,8 @@ const InterviewSetting = () => {
 
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [isToastOpen, setIsToastOpen] = useState(false);
+  const [isDownloadingTimeTable, setIsDownloadingTimeTable] = useState(false);
+  const [isDownloadingInterviewer, setIsDownloadingInterviewer] = useState(false);
 
   /** 파일 */
   const [intervieweeScheduleFile, setIntervieweeScheduleFile] =
@@ -61,23 +63,66 @@ const InterviewSetting = () => {
     }
   };
 
+  const handleDownloadTimeTableForm = async () => {
+    try {
+      setIsDownloadingTimeTable(true);
+      await downloadInterviewTimeTableForm();
+    } catch (error) {
+      console.error("면접자 시간표 양식 다운로드 실패:", error);
+    } finally {
+      setIsDownloadingTimeTable(false);
+    }
+  };
+
+  const handleDownloadInterviewerTimeTableForm = async () => {
+    try {
+      setIsDownloadingInterviewer(true);
+      await downloadInterviewerTimeTableForm();
+    } catch (error) {
+      console.error("면접관 시간표 포함 다운로드 실패:", error);
+    } finally {
+      setIsDownloadingInterviewer(false);
+    }
+  };
+
   const postFiles = async () => {
-    if (
-      intervieweeScheduleFile &&
-      interviewerScheduleFile &&
-      evaluationSheetTemplateFile
-    ) {
-      await Promise.all([
+    // 업로드된 파일들을 개별적으로 처리
+    const uploadPromises = [];
+    
+    if (intervieweeScheduleFile) {
+      console.log("면접자 시간표 파일 업로드 중...");
+      uploadPromises.push(
         mutate({
           file: intervieweeScheduleFile,
-        }),
+        })
+      );
+    }
+    
+    if (interviewerScheduleFile) {
+      console.log("면접관 시간표 파일 업로드 중...");
+      uploadPromises.push(
         mutate({
           file: interviewerScheduleFile,
-        }),
+        })
+      );
+    }
+    
+    if (evaluationSheetTemplateFile) {
+      console.log("평가 시트 템플릿 파일 업로드 중...");
+      uploadPromises.push(
         mutate({
           file: evaluationSheetTemplateFile,
-        }),
-      ]);
+        })
+      );
+    }
+
+    // 최소 하나의 파일이라도 업로드된 경우에만 실행
+    if (uploadPromises.length > 0) {
+      console.log(`총 ${uploadPromises.length}개 파일 업로드 시작`);
+      await Promise.all(uploadPromises);
+      console.log("모든 파일 업로드 완료");
+    } else {
+      console.log("업로드할 파일이 없습니다.");
     }
   };
   return (
@@ -121,7 +166,7 @@ const InterviewSetting = () => {
                 1
               </div>
               <h3 className="font-semibold text-base">
-                면접자 시간표 파일 다운로드 (CSV)
+                면접자 시간표 파일 다운로드 (EXCEL)
               </h3>
             </div>
 
@@ -132,17 +177,19 @@ const InterviewSetting = () => {
                   <Icon type="Upload" size={16} />
                 </button>
                 <button 
-                  className="whitespace-nowrap px-1 h-14 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center hover:bg-gray-50"
-                  onClick={() => {
-                    console.log("면접자 시간표 양식 다운로드 시작");
-                    getTimeTableForm();
-                  }}
+                  className="whitespace-nowrap px-1 h-14 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleDownloadTimeTableForm}
+                  disabled={isDownloadingTimeTable}
                 >
-                  면접자 시간표 양식
+                  {isDownloadingTimeTable ? "다운로드 중..." : "면접자 시간표 양식"}
                   <Icon type="Upload" size={16} />
                 </button>
-                <button className="whitespace-nowrap px-1 h-14 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center">
-                  면접관 시간표 포함
+                <button 
+                  className="whitespace-nowrap px-1 h-14 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleDownloadInterviewerTimeTableForm}
+                  disabled={isDownloadingInterviewer}
+                >
+                  {isDownloadingInterviewer ? "다운로드 중..." : "면접관 시간표 포함"}
                   <Icon type="Upload" size={16} />
                 </button>
                 <button className="whitespace-nowrap px-1 h-14 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center">
@@ -160,7 +207,7 @@ const InterviewSetting = () => {
                 2
               </div>
               <h3 className="font-semibold text-base">
-                면접자 시간표 파일 업로드 (CSV)
+                면접자 시간표 파일 업로드 (Excel)
               </h3>
             </div>
 
@@ -181,7 +228,7 @@ const InterviewSetting = () => {
                     ref={intervieweeFileRef}
                     type="file"
                     className="hidden"
-                    accept=".csv"
+                    accept=".,.xlsx,.xls"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
@@ -207,7 +254,7 @@ const InterviewSetting = () => {
                 3
               </div>
               <h3 className="font-semibold text-base">
-                면접관 시간표 파일 업로드 (CSV)
+                면접관 시간표 파일 업로드 (Excel)
               </h3>
             </div>
 
@@ -228,7 +275,7 @@ const InterviewSetting = () => {
                     ref={interviewerFileRef}
                     type="file"
                     className="hidden"
-                    accept=".csv"
+                    accept=".xlsx,.xls"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
@@ -254,7 +301,7 @@ const InterviewSetting = () => {
                 4
               </div>
               <h3 className="font-semibold text-base">
-                면접 평가 시트 템플릿 업로드 (CSV)
+                면접 평가 시트 템플릿 업로드 (Excel)
               </h3>
             </div>
 
@@ -275,7 +322,7 @@ const InterviewSetting = () => {
                     ref={evaluationFileRef}
                     type="file"
                     className="hidden"
-                    accept=".csv"
+                    accept=".,.xlsx,.xls"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
