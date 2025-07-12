@@ -18,7 +18,7 @@ const Document = () => {
 
   const { entireList, isLoading, totalPages } = usePagination<EvaluationItem>({
     type: "서류 평가",
-    page: currentPage,
+    page: currentPage - 1,
     size: 7,
     status: "NOTCHECKED",
   });
@@ -33,39 +33,6 @@ const Document = () => {
     handleFilter,
   } = useFilter<EvaluationItem>(entireList);
 
-  // API 조회 결과 콘솔 로그
-  console.log("=== 서류 평가 API 조회 결과 ===");
-  console.log("로딩 상태:", isLoading);
-  console.log("전체 리스트 길이:", entireList.length);
-  console.log("전체 리스트:", entireList);
-  console.log("필터링된 리스트 길이:", filteredList.length);
-  console.log("필터링된 리스트:", filteredList);
-  console.log("현재 페이지:", currentPage);
-  console.log("전체 페이지 수:", totalPages);
-  console.log("활성 탭:", activeTab);
-  console.log("검색어:", searchInput);
-  console.log("선택된 역할:", checkedRoles);
-
-  // 개별 항목 상세 정보
-  if (entireList.length > 0) {
-    console.log("=== 첫 번째 항목 상세 정보 ===");
-    console.log(entireList[0]);
-    
-    console.log("=== 모든 항목 요약 ===");
-    entireList.forEach((item, index) => {
-      console.log(`항목 ${index + 1}:`, {
-        id: item.id,
-        name: item.name,
-        fieldType: item.fieldType,
-        sex: item.sex,
-        school: item.school,
-        recruitTime: item.recruitTime,
-        isEvaluated: item.isEvaluated
-      });
-    });
-  } else {
-    console.log("조회된 서류가 없습니다.");
-  }
 
   return (
     <div className="text-white">

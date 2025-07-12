@@ -28,22 +28,49 @@ const ApplicationTable = ({
 }: ApplicationTableProps) => {
   const itemsPerPage = 7;
 
-  const getFieldColor = (field: string) => {
-    switch (field) {
+  const getFieldColor = (field: string | number) => {
+    const fieldStr = String(field);
+    switch (fieldStr) {
       case "웹 프론트":
+      case "WEBFRONTEND":
         return "bg-blue-600";
       case "앱 프론트":
+      case "APPFRONTEND":
         return "bg-blue-400";
       case "백엔드":
+      case "BACKEND":
         return "bg-orange-400";
       case "디자인":
+      case "DESIGN":
         return "bg-pink-500";
       case "데이터 분석":
+      case "DATAANALYSIS":
         return "bg-orange-300";
       case "딥러닝":
+      case "DEEPLEARNING":
         return "bg-green-400";
       default:
         return "bg-gray-300";
+    }
+  };
+
+  const getFieldDisplayName = (field: string | number) => {
+    const fieldStr = String(field);
+    switch (fieldStr) {
+      case "WEBFRONTEND":
+        return "웹 프론트";
+      case "APPFRONTEND":
+        return "앱 프론트";
+      case "BACKEND":
+        return "백엔드";
+      case "DESIGN":
+        return "디자인";
+      case "DATAANALYSIS":
+        return "데이터 분석";
+      case "DEEPLEARNING":
+        return "딥러닝";
+      default:
+        return fieldStr || "기타";
     }
   };
 
@@ -78,7 +105,9 @@ const ApplicationTable = ({
           </thead>
           <tbody className="bg-white">
             {currentItems && !isLoading ? (
-              currentItems?.map((application, index) => (
+              currentItems?.map((application, index) => {
+              
+                return (
                 <tr
                   key={application.id + index}
                   className={`hover:bg-slate-600/5 border-b border-gray-200 ${
@@ -98,30 +127,30 @@ const ApplicationTable = ({
                         application.fieldType
                       )}`}
                     />
-                    {application.fieldType}
+                    <span>{getFieldDisplayName(application.fieldType)}</span>
                   </td>
                   <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium min-w-32">
-                    {application.name}
+                    <span>{application.name || ''}</span>
                   </td>
                   <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium min-w-32">
-                    {getGenderText(application.sex)}
+                    <span>{getGenderText(application.sex) || ''}</span>
                   </td>
                   <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
-                    {application.school}
+                    <span>{application.school || ''}</span>
                   </td>
-                  {application.count && (
+                  {application.count !== undefined && application.count !== null && application.count !== 0 && (
                     <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
-                      {application.count}
+                      <span>{String(application.count)}</span>
                     </td>
                   )}
                   {application.interviewTime && (
                     <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
-                      {formatDateTime(application.interviewTime)}
+                      <span>{formatDateTime(application.interviewTime)}</span>
                     </td>
                   )}
                   {application.recruitTime && (
                     <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
-                      {formatDateTime(application.recruitTime)}
+                      <span>{formatDateTime(application.recruitTime)}</span>
                     </td>
                   )}
                   {application.isEvaluated !== undefined && (
@@ -133,7 +162,7 @@ const ApplicationTable = ({
                       )}
                     </td>
                   )}
-                  {application.status && (
+                  {application.status !== undefined && application.status !== null && (
                     <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 text-sm max-w-16">
                       <span
                         className={`px-2 justify-start text-base leading-5 font-semibold rounded-full
@@ -152,7 +181,7 @@ const ApplicationTable = ({
                           }
                           `}
                       >
-                        {application.status === "COMPLETE"
+                        {/* {application.status === "COMPLETE"
                           ? "완료"
                           : application.status === "FAIL"
                           ? "불합격"
@@ -162,23 +191,30 @@ const ApplicationTable = ({
                           ? "보류"
                           : application.status === "NOTCHECKED"
                           ? "평가 진행 전"
-                          : ""}
+                          : ""} */}
                       </span>
                     </td>
                   )}
                 </tr>
-              ))
+              );
+              })
             ) : isLoading ? (
-              <InterviewersLoading />
-            ) : (
               <tr className="h-[500px]">
-                <td colSpan={6}>
-                  <div className="flex flex-col justify-center items-center gap-4 p-4 text-gray-700 w-full h-full text-center">
-                    <Icon type="Alert" size={28} />
-                    데이터를 불러오는데 실패했습니다 <br />
-                  </div>
+                <td colSpan={rows.length}>
+                  <InterviewersLoading />
                 </td>
               </tr>
+            ) : (
+<tr className="h-[500px]">
+  <td colSpan={rows.length}>
+    <div className="flex flex-col justify-center items-center gap-4 p-4 text-gray-700 w-full h-full text-center">
+      <Icon type="Alert" size={28} />
+      <p>데이터를 불러오는데 실패했습니다</p>
+      <p>잠시 후 다시 시도해주세요</p>
+    </div>
+  </td>
+</tr>
+
             )}
           </tbody>
         </table>

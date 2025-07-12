@@ -14,15 +14,16 @@ export const usePagination = <T>({
   const totalPagesRef = useRef<number>(undefined);
   const maxPageRef = useRef<number>(0);
   // 현재 페이지가 이전 최대 페이지보다 클 때만 새로운 쿼리 생성
-  const currentMaxPage = Math.max(page, maxPageRef.current);
+  const currentMaxPage = Math.max(page, maxPageRef.current, 1);
   maxPageRef.current = currentMaxPage;
 
   const pageQueries = useQueries({
+    
     queries: Array.from({ length: currentMaxPage }, (_, index) => {
-      const pageNum = index + 1;
+      const pageNum = index ;
       const queryParams =
-        status === "ALL"
-          ? { page: pageNum, size }
+        status === "NOTCHECKED"
+          ? { page: pageNum, size, status: status }
           : { page: pageNum, size, status: status };
 
       return {
@@ -37,14 +38,21 @@ export const usePagination = <T>({
     const allData: T[] = [];
 
     pageQueries.forEach((query) => {
-      if (query.isSuccess && query.data?.content) {
-        allData.push(...query.data.content);
-        totalPagesRef.current = query?.data?.page?.totalPages;
+      if (query.isSuccess && query.data?.result?.resumeResDtos?.content) {
+        const transformedData = query.data.result.resumeResDtos.content.map((item: any) => ({
+          ...item,
+          id: String(item.id), 
+          recruitTime: item.recruitTime || new Date().toISOString(), 
+          isEvaluated: item.isEvaluated || false,
+        }));
+        
+        allData.push(...transformedData);
+        totalPagesRef.current = query?.data?.result?.resumeResDtos?.page?.totalPages;
       }
     });
     return allData;
   }, [
-    pageQueries.map((q) => q.isSuccess && q.data?.content?.length).join(","),
+    pageQueries.map((q) => q.isSuccess && q.data?.result?.resumeResDtos?.content?.length).join(","),
   ]); // 실제 변화만 감지
 
   const isLoading = pageQueries.some((query) => query.isLoading);

@@ -24,10 +24,9 @@ export const fetchList = async (
         break;
       case "면접 설정":
         url = `/v1/manager/interview-final?pageNum=${page}&pageSize=${size}`;
-        const res = await axiosInstance.get(url);
-        return res.data;
+        break;
       case "서류 평가":
-        url = "/v1/manager/resume/evaluate";
+        url = `/v1/manager/resume/evaluate`;
         params.status = status;
         break;
       case "최종 서류 평가":
@@ -38,8 +37,15 @@ export const fetchList = async (
     }
 
     const res = await axiosInstance.get(url, { params });
+   
     return res.data;
-  } catch (error) {
+  } catch (error: any) {
+    console.error("=== API 에러 정보 ===");
+    console.error("에러:", error);
+    if (error.response) {
+      console.error("에러 상태:", error.response.status);
+      console.error("에러 데이터:", error.response.data);
+    }
     throw error;
   }
 };
