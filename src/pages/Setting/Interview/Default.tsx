@@ -33,7 +33,7 @@ const Default = () => {
   const [address, setAddress] = useState("");
   const [detailAddress, setDetailAddress] = useState(["", "", "", ""]);
   const [openChatLinks, setOpenChatLinks] = useState(["", "", "", ""]);
-  const [passwords, setPasswords] = useState(["", "", "", ""]);
+  const [documentLinks, setDocumentLinks] = useState(["", "", "", ""]);
 
   // 기존 면접 설정 데이터 로드
   useEffect(() => {
@@ -42,32 +42,32 @@ const Default = () => {
       console.log("기존 면접 설정 데이터:", existingData);
       
       // 기존 데이터가 있으면 폼에 설정
-      if (Array.isArray(existingData) && existingData.length > 0) {
-        // 첫 번째 데이터의 주소 정보 설정
-        setAddress(existingData[0]?.generalAddress || "");
+      if (existingData) {
+        // 주소 정보 설정
+        setAddress(existingData.generalAddress || "");
         
-        // 각 일차별 데이터 설정
-        existingData.forEach((item, index) => {
-          if (index < 4) {
-            setDetailAddress(prev => {
-              const updated = [...prev];
-              updated[index] = item?.detailAddress || "";
-              return updated;
-            });
-            
-            setOpenChatLinks(prev => {
-              const updated = [...prev];
-              updated[index] = item?.openChatLink || "";
-              return updated;
-            });
-            
-            setPasswords(prev => {
-              const updated = [...prev];
-              updated[index] = item?.code || "";
-              return updated;
-            });
-          }
+        // 상세주소 설정 (모든 일차에 동일 적용)
+        setDetailAddress(prev => {
+          const updated = [...prev];
+          updated[0] = existingData.detailAddress || "";
+          return updated;
         });
+        
+        // 오픈채팅방 링크 설정
+        setOpenChatLinks([
+          existingData.firstOpenChatLink || "",
+          existingData.secondOpenChatLink || "",
+          existingData.thirdOpenChatLink || "",
+          existingData.fourthOpenChatLink || ""
+        ]);
+        
+        // 문서 링크 설정
+        setDocumentLinks([
+          existingData.firstDocumentLink || "",
+          existingData.secondDocumentLink || "",
+          existingData.thirdDocumentLink || "",
+          existingData.fourthDocumentLink || ""
+        ]);
       }
     }
   }, [addressData]);
@@ -79,12 +79,12 @@ const Default = () => {
       return;
     }
 
-    const payload: any = interviewDays.map((day, idx) => ({
+    const payload = interviewDays.map((day, idx) => ({
       interviewDay: day,
       generalAddress: address,
-      detailAddress: detailAddress[idx] || "",
+      detailAddress: detailAddress[0] || "", // 모든 일차에 동일한 상세주소 적용
       openChatLink: openChatLinks[idx] || "",
-      code: passwords[idx] || "",
+      code: documentLinks[idx] || "",
     }));
 
     console.log("면접 설정 등록 데이터:", payload);
@@ -116,7 +116,7 @@ const Default = () => {
                 updated[0] = e.target.value;
                 setDetailAddress(updated);
               }}
-              placeholder="상세 주소를 입력해주세요 (예시: 강의실 호수)"
+              placeholder="상세 주소를 입력해주세요 (예시: 강의실 호수) - 모든 일차에 동일 적용"
               className="w-full"
             />
           </FlexBox>
@@ -149,14 +149,14 @@ const Default = () => {
                     }}
                   ></Input.WithLabel>
                   <Input.WithLabel
-                    label="비밀번호 설정"
-                    iconType="Key"
-                    placeholder="비밀번호를 입력해주세요"
-                    value={passwords[index]}
+                    label="문서 링크"
+                    iconType="Link"
+                    placeholder="문서 링크를 입력해주세요"
+                    value={documentLinks[index]}
                     onChange={(e) => {
-                      const updated = [...passwords];
+                      const updated = [...documentLinks];
                       updated[index] = e.target.value;
-                      setPasswords(updated);
+                      setDocumentLinks(updated);
                     }}
                   ></Input.WithLabel>
                 </FlexBox>
@@ -167,7 +167,7 @@ const Default = () => {
       </FlexBox>
       <div className="flex justify-center">
         <Button 
-          className="w-[88px] text-center" 
+          className="w-36 text-center" 
           onClick={handleSubmit}
           disabled={isPending}
         >
