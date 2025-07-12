@@ -142,7 +142,18 @@ const TypeChangeModal = forwardRef<HTMLDialogElement | null, TypeChangeModalProp
                 onChange={() => handleTypeChange("URL")}
                 className="text-blue-600 focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700">링크, 포트폴리오 (URL)</span>
+              <span className="text-sm text-gray-700">링크 (URL)</span>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="radio"
+                name="questionType"
+                value="FILE"
+                checked={selectedType === "FILE"}
+                onChange={() => handleTypeChange("FILE")}
+                className="text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">포트폴리오 (FILE)</span>
             </label>
             <label className="flex items-center space-x-2 cursor-pointer">
               <input
