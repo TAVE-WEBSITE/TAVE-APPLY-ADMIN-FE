@@ -239,14 +239,22 @@ const DraggableItem = ({
                     className="w-full px-4 py-2 text-left text-sm text-gray-900 hover:bg-gray-100 border-b border-gray-200 flex items-center gap-2 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log("질문 수정하기 버튼 클릭됨");
-                      console.log("현재 item 상태:", item);
-                      handleFocus();
-                      setShowDropdown(false);
+                      
+                      // answerType이 TIME인 경우 InterviewScheduleModal 띄우기
+                      if (questionData?.answerType === "TIME") {
+                        interviewScheduleModal.current?.showModal();
+                        setShowDropdown(false);
+                      } else {
+                        // 일반적인 질문 수정 모드
+                        handleFocus();
+                        setShowDropdown(false);
+                      }
                     }}
                   >
                     <Icon type="Pen" size={20} />
-                    <span className="whitespace-nowrap">질문 수정하기</span>
+                    <span className="whitespace-nowrap">
+                      {questionData?.answerType === "TIME" ? "면접 일정 설정" : "질문 수정하기"}
+                    </span>
                   </button>
                   <button
                     className="w-full px-4 py-2 text-left text-sm text-gray-900 hover:bg-gray-100 border-b border-gray-200 flex items-center gap-2 cursor-pointer"
@@ -309,8 +317,6 @@ const DraggableItem = ({
           currentAnswerType={questionData?.answerType}
           currentRequired={questionData?.required}
           onUpdateSuccess={async () => {
-            console.log("타입 변경 업데이트 완료");
-            // 데이터 무효화하여 다시 조회
             await queryClient.invalidateQueries({ queryKey: ["setting", "document", "questions", questionData?.fieldType] });
             await queryClient.invalidateQueries({ queryKey: ["setting", "document", "all-questions"] });
             console.log("데이터 무효화 완료");

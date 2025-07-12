@@ -173,3 +173,29 @@ export const fetchItems = async (roleType: DocumentKey) => {
     return [];
   }
 };
+
+
+export const fetchInterviewTime = async () => {
+  try {
+    const res = await axiosInstance.get("/v1/manager/config/interview-time");
+    return res.data;
+  } catch (error) {
+    return error;
+  }
+};
+
+export const updateInterviewTime = async (payload: {
+  startDate: string;
+  endDate: string;
+  progressTime: string;
+  startTime: string;
+  endTime: string;
+}) => {
+  try {
+    const res = await axiosInstance.post("/v1/admin/config/interview-time", payload);
+    return res.data;
+  } catch (error) {
+    console.error("면접 시간 설정 실패:", error);
+    return error;
+  }
+};

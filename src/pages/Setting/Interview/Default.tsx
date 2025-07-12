@@ -45,63 +45,6 @@ const Default = () => {
   const [openChatLinks, setOpenChatLinks] = useState(["", "", "", ""]);
   const [documentLinks, setDocumentLinks] = useState(["", "", "", ""]);
 
-  // 기존 면접 설정 데이터 로드
-  useEffect(() => {
-    console.log("addressData 변경됨:", addressData);
-    
-    // 에러가 있거나 데이터가 없으면 초기화
-    if (error || !addressData) {
-      console.log("에러가 있거나 데이터가 없음:", { error, addressData });
-      return;
-    }
-    
-    if (addressData?.result) {
-      const existingData = addressData.result;
-      console.log("기존 면접 설정 데이터:", existingData);
-      
-      // 기존 데이터가 있으면 폼에 설정
-      if (existingData) {
-        console.log("주소 설정:", existingData.generalAddress);
-        setAddress(existingData.generalAddress || "");
-        
-        console.log("상세주소 설정:", existingData.detailAddress);
-        setDetailAddress(prev => {
-          const updated = [...prev];
-          updated[0] = existingData.detailAddress || "";
-          return updated;
-        });
-        
-        console.log("오픈채팅방 링크 설정:", {
-          first: existingData.firstOpenChatLink,
-          second: existingData.secondOpenChatLink,
-          third: existingData.thirdOpenChatLink,
-          fourth: existingData.fourthOpenChatLink
-        });
-        setOpenChatLinks([
-          existingData.firstOpenChatLink || "",
-          existingData.secondOpenChatLink || "",
-          existingData.thirdOpenChatLink || "",
-          existingData.fourthOpenChatLink || ""
-        ]);
-        
-        console.log("문서 링크 설정:", {
-          first: existingData.firstDocumentLink,
-          second: existingData.secondDocumentLink,
-          third: existingData.thirdDocumentLink,
-          fourth: existingData.fourthDocumentLink
-        });
-        setDocumentLinks([
-          existingData.firstDocumentLink || "",
-          existingData.secondDocumentLink || "",
-          existingData.thirdDocumentLink || "",
-          existingData.fourthDocumentLink || ""
-        ]);
-      }
-    } else {
-      console.log("addressData.result가 없음:", addressData);
-    }
-  }, [addressData, error]);
-
   // 면접 시간 데이터 로드
   useEffect(() => {
     if (interviewTimeData?.result) {
