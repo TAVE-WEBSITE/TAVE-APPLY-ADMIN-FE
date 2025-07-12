@@ -6,7 +6,11 @@ import Input from "@/components/Input/Input";
 import Tab from "@/components/Tab/Tab";
 import Body from "@/components/Layout/Body";
 import Modal from "@/components/Modal/Modal";
-import { postInterviewFile, downloadInterviewTimeTableForm, downloadInterviewerTimeTableForm } from "@/pages/Setting/api/Interview";
+import { postInterviewFile, 
+  downloadInterviewTimeTableForm, 
+  downloadInterviewerTimeTableForm, 
+  generateInterviewTimeTable, 
+  downloadInterviewerTimeTable } from "@/pages/Setting/api/Interview";
 import { getTimeTableForm } from "@/pages/Evaluation/api";
 import { useMutation } from "@tanstack/react-query";
 import ToastMessage from "@/components/Modal/ToastMessage";
@@ -28,6 +32,9 @@ const InterviewSetting = () => {
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [isDownloadingTimeTable, setIsDownloadingTimeTable] = useState(false);
   const [isDownloadingInterviewer, setIsDownloadingInterviewer] = useState(false);
+  const [isGeneratingTimeTable, setIsGeneratingTimeTable] = useState(false);
+  const [isDownloadingInterviewerTime, setIsDownloadingInterviewerTime] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
   /** 파일 */
   const [intervieweeScheduleFile, setIntervieweeScheduleFile] =
@@ -82,6 +89,36 @@ const InterviewSetting = () => {
       console.error("면접관 시간표 포함 다운로드 실패:", error);
     } finally {
       setIsDownloadingInterviewer(false);
+    }
+  };
+
+  const handleGenerateInterviewTimeTable = async () => {
+    try {
+      setIsGeneratingTimeTable(true);
+      await generateInterviewTimeTable();
+      setToastMessage("면접 가능 시간표가 성공적으로 생성되었습니다.");
+      setIsToastOpen(true);
+    } catch (error) {
+      console.error("면접 가능 시간표 생성 실패:", error);
+      setToastMessage("면접 가능 시간표 생성에 실패했습니다.");
+      setIsToastOpen(true);
+    } finally {
+      setIsGeneratingTimeTable(false);
+    }
+  };
+
+  const handleDownloadInterviewerTime = async () => {
+    try {
+      setIsDownloadingInterviewerTime(true);
+      await downloadInterviewerTimeTable();
+      setToastMessage("면접자 시간 파악 파일이 성공적으로 다운로드되었습니다.");
+      setIsToastOpen(true);
+    } catch (error) {
+      console.error("면접자 시간 파악 다운로드 실패:", error);
+      setToastMessage("면접자 시간 파악 다운로드에 실패했습니다.");
+      setIsToastOpen(true);
+    } finally {
+      setIsDownloadingInterviewerTime(false);
     }
   };
 
@@ -151,9 +188,9 @@ const InterviewSetting = () => {
         confirmText="등록"
         title="면접 시간표 등록"
       >
-        {postFileResult && (
+        {(postFileResult || toastMessage) && (
           <ToastMessage
-            message={postFileResult.message}
+            message={postFileResult?.message || toastMessage}
             isOpen={isToastOpen}
             setIsOpen={setIsToastOpen}
           />
@@ -166,14 +203,49 @@ const InterviewSetting = () => {
                 1
               </div>
               <h3 className="font-semibold text-base">
+              면접 가능 시간표 생성 (EXCEL)
+              </h3>
+              
+            </div>
+
+            <div className="pl-13">
+            <p className="text-gray-500 text-sm mb-2">
+                자주 생성 시 서버에 무리가 가므로, <br/> 
+                최대 10분 주기로 생성해주세요.
+              </p>
+              <div className="w-full">
+                <button 
+                  className="w-full whitespace-nowrap px-2 h-14 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleGenerateInterviewTimeTable}
+                  disabled={isGeneratingTimeTable}
+                >
+                  {isGeneratingTimeTable ? "생성 중..." : "면접 가능 시간표 생성"}
+                  <Icon type="Upload" size={16} className="rotate-180"/>
+                </button>
+                
+                
+              </div>
+            </div>
+          </div>
+          {/* Step 1 */}
+          <div className="w-full">
+            <div className="flex items-center gap-2 mb-2 text-gray-900">
+              <div className="bg-gray-200 py-2 px-4 rounded-full font-semibold min-w-[32px] text-center">
+                2
+              </div>
+              <h3 className="font-semibold text-base">
                 면접자 시간표 파일 다운로드 (EXCEL)
               </h3>
             </div>
 
             <div className="pl-13">
               <div className="grid grid-cols-2 gap-2 max-w-lg">
-                <button className="whitespace-nowrap px-2 h-14 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center">
-                  면접자 시간 파악
+                <button 
+                  className="whitespace-nowrap px-2 h-14 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleDownloadInterviewerTime}
+                  disabled={isDownloadingInterviewerTime}
+                >
+                  {isDownloadingInterviewerTime ? "다운로드 중..." : "면접자 시간 파악"}
                   <Icon type="Upload" size={16} />
                 </button>
                 <button 
@@ -204,7 +276,7 @@ const InterviewSetting = () => {
           <div className="w-full">
             <div className="flex items-center gap-2 text-gray-900">
               <div className="bg-gray-200 py-2 px-4 rounded-full font-semibold min-w-[32px] text-center">
-                2
+                3
               </div>
               <h3 className="font-semibold text-base">
                 면접자 시간표 파일 업로드 (Excel)
@@ -251,7 +323,7 @@ const InterviewSetting = () => {
           <div className="w-full">
             <div className="flex items-center gap-2 text-gray-900">
               <div className="bg-gray-200 py-2 px-4 rounded-full font-semibold min-w-[32px] text-center">
-                3
+                4
               </div>
               <h3 className="font-semibold text-base">
                 면접관 시간표 파일 업로드 (Excel)
@@ -298,7 +370,7 @@ const InterviewSetting = () => {
           <div className="w-full">
             <div className="flex items-center gap-2 text-gray-900">
               <div className="bg-gray-200 py-2 px-4 rounded-full font-semibold min-w-[32px] text-center">
-                4
+                5
               </div>
               <h3 className="font-semibold text-base">
                 면접 평가 시트 템플릿 업로드 (Excel)
@@ -347,3 +419,4 @@ const InterviewSetting = () => {
 };
 
 export default InterviewSetting;
+

@@ -110,6 +110,47 @@ const downloadInterviewerTimeTableForm = async () => {
   }
 };
 
+// 면접 가능 시간표 생성 (POST - 생성만)
+const generateInterviewTimeTable = async () => {
+  try {
+    const res = await axiosInstance.post("/v1/manager/excel/interviewer/time-table");
+
+  } catch (error) {
+    console.error("면접 가능 시간표 생성 실패:", error);
+    throw error;
+  }
+};
+
+// 면접자 시간 파악 다운로드 (GET - 파일 다운로드)
+const downloadInterviewerTimeTable = async () => {
+  try {
+    const res = await axiosInstance.get("/v1/manager/excel/interviewer/time-table", {
+      responseType: "blob", // 파일 다운로드를 위해 blob으로 설정
+    });
+
+    // 다운로드 처리
+    const blob = new Blob([res.data]);
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+
+    // 서버에서 파일명을 내려주는 경우 Content-Disposition 파싱
+    const disposition = res.headers["content-disposition"];
+    const match = disposition?.match(/filename="?(.+)"?/);
+    const filename = match?.[1] || "interviewer-time-table.xlsx";
+
+    link.download = decodeURIComponent(filename);
+    link.click();
+    window.URL.revokeObjectURL(url);
+    
+  } catch (error) {
+    console.error("면접자 시간 파악 다운로드 실패:", error);
+    throw error;
+  }
+};
+
+
+
 // 면접 장소 조회 API 없음 -> 필요하면 백엔드 요청 필요
 const fetchAddress = async () => {
   try {
@@ -150,4 +191,6 @@ export {
   fetchInterviewTime,
   downloadInterviewTimeTableForm,
   downloadInterviewerTimeTableForm,
+  generateInterviewTimeTable,
+  downloadInterviewerTimeTable,
 };
