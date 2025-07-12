@@ -8,12 +8,13 @@ import {
   updateQuestion,
   swapQuestionOrder,
   deleteQuestionById,
+  fetchProgrammingLevel,
 } from "@/pages/Setting/api/Document";
 
 import { useQuery } from "@tanstack/react-query";
 
 const useDocument = () => {
-  const { questions, setQuestions, currentType, setSkillSets } =
+  const { questions, setQuestions, currentType, skillSets, setSkillSets } =
     useDocumentStore();
 
 
@@ -46,17 +47,11 @@ const useDocument = () => {
     }
   }, [data, currentSkills, currentType]);
 
-  // 전체 질문 데이터 로깅
-  useEffect(() => {
-    if (allQuestions.length > 0) {
-      console.log("전체 질문 조회 결과:", allQuestions);
-    }
-  }, [allQuestions]);
 
-  // 분야 변경 시 로깅
+    // 분야 변경 시 로깅
   useEffect(() => {
    
-  }, [currentType, questions?.length]);
+  }, [currentType, questions?.length, skillSets?.length]);
 
   const addNewQuestion = () => {
     const existingIds = new Set([
@@ -217,6 +212,18 @@ const useDocument = () => {
     }
   };
 
+  const getProgrammingLevel = async (id: number) => {
+    try {
+      console.log("프로그래밍 레벨 조회 시작:", { id });
+      const result = await fetchProgrammingLevel(id);
+      console.log("프로그래밍 레벨 조회 결과:", result);
+      return result;
+    } catch (error) {
+      console.error("프로그래밍 레벨 조회 실패:", error);
+      return null;
+    }
+  };
+
   return {
     questions,
     setQuestions,
@@ -227,6 +234,7 @@ const useDocument = () => {
     endEditQuestion,
     toggleRequired,
     swapQuestions,
+    getProgrammingLevel,
   };
 };
 

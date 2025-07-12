@@ -49,6 +49,7 @@ const DraggableItem = ({
   const [inputValue, setInputValue] = useState(
     questionData?.content || item.question || ""
   );
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const {
     attributes,
@@ -71,13 +72,39 @@ const DraggableItem = ({
     }
   }, [questionData]);
 
+  // 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      // 드롭다운 내부 클릭인지 확인
+      if (target.closest('.dropdown-container')) {
+        return;
+      }
+      
+      if (showDropdown) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
+
   const handleFocus = useCallback(() => {
+    console.log("handleFocus 함수 실행됨", { itemId: item.id, mode: item.mode });
     if (item.mode === "default" || !item.mode) {
+      console.log("편집 모드로 전환 중...");
       onStartEdit(item.id);
       requestAnimationFrame(() => {
         inputRef.current?.focus();
       });
     } else {
+      console.log("편집 모드 종료 중...");
       onEndEdit();
     }
   }, [item.id, item.mode, onStartEdit, onEndEdit]);
@@ -97,6 +124,10 @@ const DraggableItem = ({
   const handleToggleRequired = useCallback(() => {
     onToggleRequired(item.id);
   }, [item.id, onToggleRequired]);
+
+  const handleDropdownToggle = useCallback(() => {
+    setShowDropdown(prev => !prev);
+  }, []);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,7 +181,7 @@ const DraggableItem = ({
             }`}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            style={{ width: `${(questionData?.content || item.question || "").length + 5}ch` }}
+            style={{ width: `${inputValue.length + 5}ch` }}
           />
           {item.maxLength && (
             <p className="text-gray-500 text-sm">{`(${item.maxLength}자 이내)`}</p>
@@ -164,16 +195,42 @@ const DraggableItem = ({
             isOn={item.required}
           />
 
-          <button
-            className="p-2 border border-gray-300 rounded-lg hover:bg-blue-100 cursor-pointer"
-            onClick={() => {
-              (item.question || "") === "가능한 오프라인 면접 시간"
-                ? interviewScheduleModal.current?.showModal()
-                : handleFocus();
-            }}
-          >
-            <Icon type="Pen" size={20} />
-          </button>
+          <div className="relative">
+            <button
+              className="p-2 border border-gray-300 rounded-lg hover:bg-blue-100 cursor-pointer"
+              onClick={handleDropdownToggle}
+            >
+              <Icon type="Dots" size={20} />
+            </button>
+            
+            {showDropdown && (
+                              <div className="dropdown-container absolute right-0 top-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-[150px]">
+                  <button
+                    className="w-full px-4 py-2 text-left text-sm text-gray-900 hover:bg-gray-100 border-b border-gray-200 flex items-center gap-2 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log("질문 수정하기 버튼 클릭됨");
+                      console.log("현재 item 상태:", item);
+                      handleFocus();
+                      setShowDropdown(false);
+                    }}
+                  >
+                    <Icon type="Pen" size={20} />
+                    <span className="whitespace-nowrap">질문 수정하기</span>
+                  </button>
+                  <button
+                    className="w-full px-4 py-2 text-left text-sm text-gray-900 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
+                    onClick={() => {
+                      wordLimitModalRef.current?.showModal();
+                      setShowDropdown(false);
+                    }}
+                  >
+                    <Icon type="TextLength" size={20} />
+                    <span className="whitespace-nowrap">글자수 제한하기</span>
+                  </button>
+              </div>
+            )}
+          </div>
 
           {item.maxLength && (
             <button
@@ -191,7 +248,17 @@ const DraggableItem = ({
             <Icon type="Trash" size={20} />
           </button>
         </FlexBox>
-        <WordLimitModal ref={wordLimitModalRef} />
+        <WordLimitModal 
+          ref={wordLimitModalRef}
+          questionId={questionData?.id}
+          currentContent={questionData?.content || item.question}
+          currentFieldType={questionData?.fieldType}
+          currentOrdered={questionData?.ordered}
+          currentTextLength={questionData?.textLength || item.maxLength}
+          onUpdateSuccess={() => {
+            console.log("글자수 제한 업데이트 완료");
+          }}
+        />
         <InterviewScheduleModal ref={interviewScheduleModal} />
       </div>
       {skills.length > 0 && (

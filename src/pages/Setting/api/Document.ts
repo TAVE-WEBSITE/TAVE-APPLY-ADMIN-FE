@@ -136,6 +136,16 @@ export const deleteQuestionById = async (questionId: number) => {
   }
 };
 
+export const fetchProgrammingLevel = async (id: number) => {
+  try {
+    const res = await axiosInstance.get(`/v1/member/lan/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error("프로그래밍 레벨 조회 실패:", error);
+    return error;
+  }
+};
+
 const documentMap: Record<DocumentKey, DocumentType> = {
   "공통 질문": "COMMON",
   "앱 프론트": "APPFRONTEND",
