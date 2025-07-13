@@ -1,25 +1,72 @@
 import { axiosInstance } from "@/api/axiosInstance";
 
-export const fetchDocumentDetail = async (resumeId: string) => {
-  try {
-    console.log("=== fetchDocumentDetail API 호출 ===");
-    console.log("resumeId:", resumeId);
-    console.log("요청 URL:", `/v1/manager/resume/evaluate/${resumeId}`);
-    
-    const res = await axiosInstance.post(
-      `/v1/manager/resume/evaluate/${resumeId}`
-    );
+interface DocumentEvaluationBody {
+  score: number;
+  opinion: string;
+}
 
-    
+export const fetchDocumentDetail = async (resumeId: string, body?: DocumentEvaluationBody) => {
+  try {
+    const requestBody = body || {};
+
+    const res = await axiosInstance.post(
+      `/v1/manager/resume/evaluate/${resumeId}`,
+      requestBody
+    );
     return res.data;
   } catch (error: any) {
-    console.error("=== fetchDocumentDetail API 에러 ===");
-    console.error("에러:", error);
-    if (error.response) {
       console.error("에러 상태:", error.response.status);
       console.error("에러 데이터:", error.response.data);
-    }
     throw error; 
+  }
+};
+
+// 지원자 정보 조회 API
+export const fetchMemberInfo = async (memberId: string) => {
+  try {
+    const res = await axiosInstance.get(
+      `/v1/member/info/${memberId}`
+    );
+     
+    return res.data;
+  } catch (error: any) {
+    console.error("에러:", error);
+    throw error;
+  }
+};
+
+// 지원서 질문 & 답변 정보 API
+export const fetchResumeQuestions = async (resumeId: string) => {
+  try {
+    const allQuestions = [];
+    
+    for (let page = 1; page <= 2; page++) {
+      const res = await axiosInstance.get(
+        `/v1/member/resumes/${resumeId}/questions?page=${page}`
+      );
+      const pageData = res.data?.result || [];
+      allQuestions.push(...pageData);
+    }
+    
+ 
+    const transformedQuestions = allQuestions.map((q: any) => ({
+      question: q.question,
+      answer: q.answer || "답변이 없습니다."
+    }));
+    
+    // page 1 = 파트별 질문 / [age 2 =공통 질문
+    const partQuestions = transformedQuestions.slice(0, transformedQuestions.length / 2);
+    const commonQuestions = transformedQuestions.slice(transformedQuestions.length / 2);
+    
+    return {
+      result: {
+        commonQuestions: commonQuestions,
+        partQuestions: partQuestions
+      }
+    };
+  } catch (error: any) {
+    console.error("에러:", error);
+    throw error;
   }
 };
 
@@ -48,18 +95,10 @@ export const postApplication = async (
       `/v1/manager/resume/evaluate/${resumeId}`,
       body
     );
-    
-    console.log("=== postApplication API 응답 ===");
-    console.log("응답 상태:", res.status);
-    console.log("응답 데이터:", res.data);
-    
+
     return res.data;
   } catch (error: any) {
-    console.error("=== postApplication API 에러 ===");
     console.error("에러:", error);
-    if (error.response) {
-      console.error("에러 데이터:", error.response.data);
-    }
     throw error;
   }
 };

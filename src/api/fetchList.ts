@@ -37,15 +37,9 @@ export const fetchList = async (
     }
 
     const res = await axiosInstance.get(url, { params });
-    console.log(res.data);
     return res.data;
   } catch (error: any) {
-    console.error("=== API 에러 정보 ===");
     console.error("에러:", error);
-    if (error.response) {
-      console.error("에러 상태:", error.response.status);
-      console.error("에러 데이터:", error.response.data);
-    }
     throw error;
   }
 };

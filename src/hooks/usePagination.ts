@@ -44,6 +44,8 @@ export const usePagination = <T>({
           id: String(item.id), 
           recruitTime: item.recruitTime || new Date().toISOString(), 
           isEvaluated: item.isEvaluated || false,
+          memberId: item.memberId, 
+          resumeId: item.resumeId,
         }));
         
         allData.push(...transformedData);

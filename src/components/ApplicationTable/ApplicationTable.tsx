@@ -116,8 +116,12 @@ const ApplicationTable = ({
                   onClick={() => {
                     navigate &&
                       baseUrl &&
-                      navigate(`${baseUrl}/${application.id}`, {
-                        state: { application },
+                      navigate(`${baseUrl}/${application.memberId}`, {
+                        state: { 
+                          application,
+                          // 지원서 질문 정보도 함께 전달
+                          resumeQuestions: null // 실제로는 API에서 불러올 예정
+                        },
                       });
                   }}
                 >
