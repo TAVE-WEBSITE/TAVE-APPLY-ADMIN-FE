@@ -16,7 +16,6 @@ const Document = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
 
-  // 탭에 따른 status 매핑
   const getStatusFromTab = (tab: string) => {
     switch (tab) {
       case "전체":
@@ -39,6 +38,7 @@ const Document = () => {
     size: 7,
     status: currentStatus,
   });
+  
 
   const {
     filteredList,
@@ -50,15 +50,7 @@ const Document = () => {
     handleFilter,
   } = useFilter<EvaluationItem>(entireList);
 
-  // 탭 변경 시 페이지를 1로 리셋
-  const handleTabChange = (tab: string) => {
-    const newStatus = getStatusFromTab(tab);
-    
-    console.log("=== 탭 변경 정보 ===");
-    console.log("선택된 탭:", tab);
-    console.log("전달하는 status:", newStatus);
-    console.log("현재 페이지:", currentPage);
-    
+  const handleTabChange = (tab: string) => { 
     setActiveTab(tab);
     setFilterActiveTab(tab);
     setCurrentPage(1);
