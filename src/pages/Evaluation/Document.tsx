@@ -16,22 +16,53 @@ const Document = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { entireList, isLoading, totalPages } = usePagination<EvaluationItem>({
+  // 탭에 따른 status 매핑
+  const getStatusFromTab = (tab: string) => {
+    switch (tab) {
+      case "전체":
+        return "ALL";
+      case "대기중":
+        return "NOTCHECKED";
+      case "완료":
+        return "COMPLETE";
+      default:
+        return "NOTCHECKED";
+    }
+  };
+
+  const [activeTab, setActiveTab] = useState("전체");
+  const currentStatus = getStatusFromTab(activeTab);
+
+  const { entireList, isLoading, totalPages, countData } = usePagination<EvaluationItem>({
     type: "서류 평가",
     page: currentPage - 1,
     size: 7,
-    status: "NOTCHECKED",
+    status: currentStatus,
   });
 
   const {
     filteredList,
     checkedRoles,
     searchInput,
-    activeTab,
-    setActiveTab,
+    activeTab: filterActiveTab,
+    setActiveTab: setFilterActiveTab,
     setSearchInput,
     handleFilter,
   } = useFilter<EvaluationItem>(entireList);
+
+  // 탭 변경 시 페이지를 1로 리셋
+  const handleTabChange = (tab: string) => {
+    const newStatus = getStatusFromTab(tab);
+    
+    console.log("=== 탭 변경 정보 ===");
+    console.log("선택된 탭:", tab);
+    console.log("전달하는 status:", newStatus);
+    console.log("현재 페이지:", currentPage);
+    
+    setActiveTab(tab);
+    setFilterActiveTab(tab);
+    setCurrentPage(1);
+  };
 
 
   return (
@@ -52,15 +83,15 @@ const Document = () => {
       </FlexBox>
       <Body className="pt-4 gap-8">
         <FlexBox className="gap-4 mx-auto">
-          <CountCard text="현재 지원자 수" boxColor={"blue"} count={200} />
-          <CountCard text="남은 평가 서류 수" boxColor={"green"} count={37} />
-          <CountCard text="합격자 수" boxColor={"orange"} count={80} />
+          <CountCard text="현재 지원자 수" boxColor={"blue"} count={countData.totalRecruiter} />
+          <CountCard text="남은 평가 서류 수" boxColor={"green"} count={countData.notCompletedRecruiter} />
+          <CountCard text="평가 완료 수" boxColor={"orange"} count={countData.completedRecruiter} />
         </FlexBox>
         <FlexBox className="justify-between w-[1320px] mx-auto">
           <Tab
             categories={["전체", "대기중", "완료"]}
             active={activeTab}
-            onChange={setActiveTab}
+            onChange={handleTabChange}
           />
 
           <FlexBox className="gap-4">

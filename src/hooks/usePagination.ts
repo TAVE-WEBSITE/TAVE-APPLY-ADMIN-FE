@@ -22,8 +22,8 @@ export const usePagination = <T>({
     queries: Array.from({ length: currentMaxPage }, (_, index) => {
       const pageNum = index ;
       const queryParams =
-        status === "NOTCHECKED"
-          ? { page: pageNum, size, status: status }
+        status === "ALL"
+          ? { page: pageNum, size}
           : { page: pageNum, size, status: status };
 
       return {
@@ -51,9 +51,24 @@ export const usePagination = <T>({
       }
     });
     return allData;
-  }, [
-    pageQueries.map((q) => q.isSuccess && q.data?.result?.resumeResDtos?.content?.length).join(","),
-  ]); // 실제 변화만 감지
+  }, [pageQueries.map(q => q.dataUpdatedAt).join(',')]); // dataUpdatedAt을 사용하여 더 안정적인 의존성
+
+  // API 응답에서 count 데이터 추출
+  const countData = useMemo(() => {
+    const firstQuery = pageQueries[0];
+    if (firstQuery?.isSuccess && firstQuery.data?.result) {
+      return {
+        totalRecruiter: firstQuery.data.result.totalRecruiter || 0,
+        notCompletedRecruiter: firstQuery.data.result.notCompletedRecruiter || 0,
+        completedRecruiter: firstQuery.data.result.completedRecruiter || 0,
+      };
+    }
+    return {
+      totalRecruiter: 0,
+      notCompletedRecruiter: 0,
+      completedRecruiter: 0,
+    };
+  }, [pageQueries[0]?.dataUpdatedAt]); // 첫 번째 쿼리의 dataUpdatedAt만 사용
 
   const isLoading = pageQueries.some((query) => query.isLoading);
 
@@ -61,5 +76,6 @@ export const usePagination = <T>({
     entireList,
     isLoading,
     totalPages: totalPagesRef.current,
+    countData,
   };
 };

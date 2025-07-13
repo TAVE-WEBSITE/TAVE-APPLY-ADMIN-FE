@@ -22,10 +22,18 @@ const tabCategories = ["파트별 질문", "공통 질문"];
 const Detail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { data: applicant, isLoading } = useQuery<Resume>({
-    queryKey: ["evaluation", "detail"],
+  const { data: applicant, isLoading, error } = useQuery<Resume>({
+    queryKey: ["evaluation", "detail", id],
     queryFn: () => fetchDocumentDetail(id || "1"),
+    enabled: !!id, // id가 있을 때만 쿼리 실행
   });
+
+  // 디버깅 로그
+  // console.log("=== Detail 컴포넌트 상태 ===");
+  // console.log("id:", id);
+  // console.log("isLoading:", isLoading);
+  // console.log("error:", error);
+  // console.log("applicant:", applicant);
   const { state } = useLocation();
   const application = state?.application;
   const [activeTab, setActiveTab] = useState("공통 질문");
@@ -37,13 +45,20 @@ const Detail = () => {
 
   const { mutate, isPending, isError } = useMutation({
     mutationKey: ["evaluation", "detail"],
-    mutationFn: () => postApplication(id!, { score, opinion }),
+    mutationFn: () => {
+      // score를 0.0 형식으로 변환
+      const numericScore = parseFloat(score) || 0.0;
+      return postApplication(id!, { 
+        score: numericScore, 
+        opinion 
+      });
+    },
     onSuccess: (response) => {
-      setPostMessage(response.message);
+      setPostMessage(response.message || "평가가 성공적으로 제출되었습니다.");
       setIsToastOpen(true);
     },
-    onError: (response) => {
-      setPostMessage(response.message);
+    onError: (error: any) => {
+      setPostMessage(error.response?.data?.message || "평가 제출에 실패했습니다.");
       setIsToastOpen(true);
     },
   });
@@ -117,7 +132,7 @@ const Detail = () => {
             {applicant &&
               !isLoading &&
               activeTab === "공통 질문" &&
-              applicant.commonQuestions.map((q) => (
+              applicant.commonQuestions?.map((q) => (
                 <Accordion
                   key={q.question}
                   title={q.question}
@@ -133,11 +148,11 @@ const Detail = () => {
             {applicant &&
               !isLoading &&
               activeTab === "파트별 질문" &&
-              applicant.partQuestions.map((q, index) => (
+              applicant.partQuestions?.map((q, index) => (
                 <Accordion
                   key={q.question}
                   title={
-                    index === 0 ? application.name + q.question : q.question
+                    index === 0 ? (application?.name || '') + q.question : q.question
                   }
                   className="w-full"
                 >
@@ -215,7 +230,7 @@ const Detail = () => {
               <Button
                 isPending={isPending}
                 onClick={() => mutate()}
-                className="w-[100px]"
+                className="w-24"
               >
                 평가 제출
               </Button>

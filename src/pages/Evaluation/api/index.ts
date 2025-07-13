@@ -2,12 +2,24 @@ import { axiosInstance } from "@/api/axiosInstance";
 
 export const fetchDocumentDetail = async (resumeId: string) => {
   try {
-    const res = await axiosInstance.get(
-      `/v1/manager/resume/evaluate/final/${resumeId}`
+    console.log("=== fetchDocumentDetail API 호출 ===");
+    console.log("resumeId:", resumeId);
+    console.log("요청 URL:", `/v1/manager/resume/evaluate/${resumeId}`);
+    
+    const res = await axiosInstance.post(
+      `/v1/manager/resume/evaluate/${resumeId}`
     );
+
+    
     return res.data;
-  } catch (error) {
-    return error;
+  } catch (error: any) {
+    console.error("=== fetchDocumentDetail API 에러 ===");
+    console.error("에러:", error);
+    if (error.response) {
+      console.error("에러 상태:", error.response.status);
+      console.error("에러 데이터:", error.response.data);
+    }
+    throw error; 
   }
 };
 
@@ -31,13 +43,24 @@ export const postApplication = async (
   body: postApplicationBody
 ) => {
   try {
+
     const res = await axiosInstance.post(
       `/v1/manager/resume/evaluate/${resumeId}`,
       body
     );
+    
+    console.log("=== postApplication API 응답 ===");
+    console.log("응답 상태:", res.status);
+    console.log("응답 데이터:", res.data);
+    
     return res.data;
-  } catch (error) {
-    return error;
+  } catch (error: any) {
+    console.error("=== postApplication API 에러 ===");
+    console.error("에러:", error);
+    if (error.response) {
+      console.error("에러 데이터:", error.response.data);
+    }
+    throw error;
   }
 };
 

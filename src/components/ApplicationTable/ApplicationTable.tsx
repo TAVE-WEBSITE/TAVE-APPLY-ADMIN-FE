@@ -138,11 +138,11 @@ const ApplicationTable = ({
                   <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
                     <span>{application.school || ''}</span>
                   </td>
-                  {application.count !== undefined && application.count !== null && application.count !== 0 && (
+                  {/* {application.count !== undefined && application.count !== null && application.count !== 0 && (
                     <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
                       <span>{String(application.count)}</span>
                     </td>
-                  )}
+                  )} */}
                   {application.interviewTime && (
                     <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
                       <span>{formatDateTime(application.interviewTime)}</span>
@@ -199,12 +199,8 @@ const ApplicationTable = ({
               );
               })
             ) : isLoading ? (
-              <tr className="h-[500px]">
-                <td colSpan={rows.length}>
-                  <InterviewersLoading />
-                </td>
-              </tr>
-            ) : (
+              <InterviewersLoading /> 
+            )  : (
 <tr className="h-[500px]">
   <td colSpan={rows.length}>
     <div className="flex flex-col justify-center items-center gap-4 p-4 text-gray-700 w-full h-full text-center">
