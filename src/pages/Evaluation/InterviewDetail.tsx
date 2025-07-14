@@ -9,7 +9,7 @@ import { fetchInterviewer } from "@/pages/Setting/api/Interview";
 import { useQuery } from "@tanstack/react-query";
 import TextArea from "@/components/Input/TextArea";
 import Accordion from "@/components/Accordion/Accordion";
-import type { Resume, RoleTypeForTimeTable } from "@/types/interview";
+import type { Resume } from "@/types/interview";
 import { useState } from "react";
 import SkeletonAccordion from "@/components/Accordion/Skeleton";
 
