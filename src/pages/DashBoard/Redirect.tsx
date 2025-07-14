@@ -16,6 +16,10 @@ const Redirect = () => {
           }),
         }
       );
+      if (!res.ok) {
+        throw new Error(`HTTP 에러! 상태: ${res.status}`);
+      }
+
       const data = await res.json();
       const result = data.result;
       sessionStorage.setItem("email", result.email);
