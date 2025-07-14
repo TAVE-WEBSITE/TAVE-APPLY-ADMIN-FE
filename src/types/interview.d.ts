@@ -2,6 +2,9 @@
 
 import type { RoleType } from "./role";
 
+type newRoleType = "APP 프론트엔드" | "Web 프론트엔드";
+export type RoleTypeForTimeTable = RoleType & newRoleType;
+
 // 질문/답변 구조
 export interface Question {
   question: string;
@@ -46,7 +49,7 @@ type TotalDateTimeDto = {
 
 type MemberDto = {
   interviewFinalId: number;
-  field: RoleType;
+  field: RoleTypeForTimeTable;
   username: string;
   interviewDate: string;
   interviewTime: string;
