@@ -2,8 +2,8 @@
 
 import type { RoleType } from "./role";
 
-type newRoleType = "APP 프론트엔드" | "Web 프론트엔드";
-export type RoleTypeForTimeTable = RoleType & newRoleType;
+type newRoleType = "App 프론트엔드" | "Web 프론트엔드";
+export type RoleTypeForTimeTable = RoleType | newRoleType;
 
 // 질문/답변 구조
 export interface Question {
