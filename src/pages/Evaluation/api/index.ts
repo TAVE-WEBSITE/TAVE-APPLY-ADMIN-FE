@@ -166,12 +166,43 @@ export const getTimeTableForm = async () => {
   }
 };
 
-// 왜 다운로드가 하나만 있을까?
+// 면접 평가 시트 다운로드
 export const getSheet = async () => {
   try {
-    const res = await axiosInstance.get("/v1/manager/interview-final/sheet");
-    return res.data;
-  } catch (error) {
-    return error;
+    const res = await axiosInstance.get("/v1/manager/excel/interview/evaluation", {
+      responseType: "blob", // 파일 다운로드를 위해 blob으로 설정
+    });
+
+    // 다운로드 처리
+    const blob = new Blob([res.data]);
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+
+    // 서버에서 파일명을 내려주는 경우 Content-Disposition 파싱
+    const disposition = res.headers["content-disposition"];
+    const match = disposition?.match(/filename="?(.+)"?/);
+    const filename = match?.[1] || "interview-evaluation-sheet.xlsx";
+
+    link.download = decodeURIComponent(filename);
+    link.click();
+    window.URL.revokeObjectURL(url);
+    
+    console.log("면접 평가 시트 다운로드 완료:", filename);
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      const response = error.response as { data: Blob };
+      if (response.data instanceof Blob) {
+        const text = await response.data.text();
+        try {
+          const json = JSON.parse(text);
+          console.error("서버 오류 메시지:", json);
+        } catch {
+        console.error("서버에서 반환된 오류 텍스트:", text);
+      }
+    }
+    console.error("면접 평가 시트 다운로드 실패:", error);
+    throw error;
   }
 };
+}

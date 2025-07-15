@@ -10,7 +10,11 @@ import { postInterviewFile,
   downloadInterviewTimeTableForm, 
   downloadInterviewerTimeTableForm, 
   generateInterviewTimeTable, 
-  downloadInterviewerTimeTable } from "@/pages/Setting/api/Interview";
+  downloadInterviewerTimeTable,
+  downloadInterviewEvaluationForm,
+  uploadIntervieweeScheduleFile,
+  uploadInterviewerScheduleFile,
+  uploadInterviewEvaluationTemplate } from "@/pages/Setting/api/Interview";
 import { getTimeTableForm } from "@/pages/Evaluation/api";
 import { useMutation } from "@tanstack/react-query";
 import ToastMessage from "@/components/Modal/ToastMessage";
@@ -34,6 +38,7 @@ const InterviewSetting = () => {
   const [isDownloadingInterviewer, setIsDownloadingInterviewer] = useState(false);
   const [isGeneratingTimeTable, setIsGeneratingTimeTable] = useState(false);
   const [isDownloadingInterviewerTime, setIsDownloadingInterviewerTime] = useState(false);
+  const [isDownloadingEvaluationForm, setIsDownloadingEvaluationForm] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
   /** 파일 */
@@ -49,17 +54,56 @@ const InterviewSetting = () => {
   const interviewerFileRef = useRef<HTMLInputElement>(null);
   const evaluationFileRef = useRef<HTMLInputElement>(null);
 
+  // 면접자 시간표 파일 업로드 mutation
   const {
-    mutate,
-    data: postFileResult,
-    isPending,
+    mutate: mutateIntervieweeFile,
+    data: intervieweeFileResult,
+    isPending: isPendingInterviewee,
   } = useMutation({
-    mutationKey: ["setting", "files"],
-    mutationFn: (data: { file: File }) => postInterviewFile(data),
+    mutationKey: ["setting", "interviewee-file"],
+    mutationFn: (data: { file: File }) => uploadIntervieweeScheduleFile(data),
     onSuccess: () => {
+      setToastMessage("면접자 시간표 파일이 성공적으로 업로드되었습니다.");
       setIsToastOpen(true);
     },
     onError: () => {
+      setToastMessage("면접자 시간표 파일 업로드에 실패했습니다.");
+      setIsToastOpen(true);
+    },
+  });
+
+  // 면접관 시간표 파일 업로드 mutation
+  const {
+    mutate: mutateInterviewerFile,
+    data: interviewerFileResult,
+    isPending: isPendingInterviewer,
+  } = useMutation({
+    mutationKey: ["setting", "interviewer-file"],
+    mutationFn: (data: { file: File }) => uploadInterviewerScheduleFile(data),
+    onSuccess: () => {
+      setToastMessage("면접관 시간표 파일이 성공적으로 업로드되었습니다.");
+      setIsToastOpen(true);
+    },
+    onError: () => {
+      setToastMessage("면접관 시간표 파일 업로드에 실패했습니다.");
+      setIsToastOpen(true);
+    },
+  });
+
+  // 면접 평가 시트 템플릿 파일 업로드 mutation
+  const {
+    mutate: mutateEvaluationFile,
+    data: evaluationFileResult,
+    isPending: isPendingEvaluation,
+  } = useMutation({
+    mutationKey: ["setting", "evaluation-file"],
+    mutationFn: (data: { file: File }) => uploadInterviewEvaluationTemplate(data),
+    onSuccess: () => {
+      setToastMessage("면접 평가 시트 템플릿 파일이 성공적으로 업로드되었습니다.");
+      setIsToastOpen(true);
+    },
+    onError: () => {
+      setToastMessage("면접 평가 시트 템플릿 파일 업로드에 실패했습니다.");
       setIsToastOpen(true);
     },
   });
@@ -122,6 +166,21 @@ const InterviewSetting = () => {
     }
   };
 
+  const handleDownloadEvaluationForm = async () => {
+    try {
+      setIsDownloadingEvaluationForm(true);
+      await downloadInterviewEvaluationForm();
+      setToastMessage("면접 평가 초기 양식이 성공적으로 다운로드되었습니다.");
+      setIsToastOpen(true);
+    } catch (error) {
+      console.error("면접 평가 초기 양식 다운로드 실패:", error);
+      setToastMessage("면접 평가 초기 양식 다운로드에 실패했습니다.");
+      setIsToastOpen(true);
+    } finally {
+      setIsDownloadingEvaluationForm(false);
+    }
+  };
+
   const postFiles = async () => {
     // 업로드된 파일들을 개별적으로 처리
     const uploadPromises = [];
@@ -129,7 +188,7 @@ const InterviewSetting = () => {
     if (intervieweeScheduleFile) {
       console.log("면접자 시간표 파일 업로드 중...");
       uploadPromises.push(
-        mutate({
+        mutateIntervieweeFile({
           file: intervieweeScheduleFile,
         })
       );
@@ -138,7 +197,7 @@ const InterviewSetting = () => {
     if (interviewerScheduleFile) {
       console.log("면접관 시간표 파일 업로드 중...");
       uploadPromises.push(
-        mutate({
+        mutateInterviewerFile({
           file: interviewerScheduleFile,
         })
       );
@@ -147,7 +206,7 @@ const InterviewSetting = () => {
     if (evaluationSheetTemplateFile) {
       console.log("평가 시트 템플릿 파일 업로드 중...");
       uploadPromises.push(
-        mutate({
+        mutateEvaluationFile({
           file: evaluationSheetTemplateFile,
         })
       );
@@ -184,13 +243,13 @@ const InterviewSetting = () => {
         dialogRef={dialogRef}
         buttonCount={2}
         onConfirm={postFiles}
-        isPending={isPending}
+        isPending={isPendingInterviewee || isPendingInterviewer || isPendingEvaluation}
         confirmText="등록"
         title="면접 시간표 등록"
       >
-        {(postFileResult || toastMessage) && (
+        {(intervieweeFileResult || interviewerFileResult || evaluationFileResult || toastMessage) && (
           <ToastMessage
-            message={postFileResult?.message || toastMessage}
+            message={intervieweeFileResult?.message || interviewerFileResult?.message || evaluationFileResult?.message || toastMessage}
             isOpen={isToastOpen}
             setIsOpen={setIsToastOpen}
           />
@@ -253,7 +312,7 @@ const InterviewSetting = () => {
                   onClick={handleDownloadTimeTableForm}
                   disabled={isDownloadingTimeTable}
                 >
-                  {isDownloadingTimeTable ? "다운로드 중..." : "면접자 시간표 양식"}
+                  {isDownloadingTimeTable ? "다운로드 중..." : "면접관 시간표 양식"}
                   <Icon type="Upload" size={16} />
                 </button>
                 <button 
@@ -264,8 +323,12 @@ const InterviewSetting = () => {
                   {isDownloadingInterviewer ? "다운로드 중..." : "면접관 시간표 포함"}
                   <Icon type="Upload" size={16} />
                 </button>
-                <button className="whitespace-nowrap px-1 h-14 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center">
-                  면접 평가 시트 양식
+                <button 
+                  className="whitespace-nowrap px-1 h-14 cursor-pointer bg-white border border-gray-300 text-gray-600 rounded-xl flex justify-between items-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleDownloadEvaluationForm}
+                  disabled={isDownloadingEvaluationForm}
+                >
+                  {isDownloadingEvaluationForm ? "다운로드 중..." : "면접 평가 초기 양식"}
                   <Icon type="Upload" size={16} />
                 </button>
               </div>
@@ -379,7 +442,7 @@ const InterviewSetting = () => {
 
             <div className="pl-13">
               <p className="text-gray-500 text-sm mb-2">
-                운영진이 평가할 시트 템플릿을 업로드해주세요.
+              면접평가 초기 양식에 면접 질문을 삽입 후 업로드해주세요
               </p>
               <div className="flex gap-2 items-center justify-between">
                 <div className="flex-1">

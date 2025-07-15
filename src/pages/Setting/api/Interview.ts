@@ -149,6 +149,98 @@ const downloadInterviewerTimeTable = async () => {
   }
 };
 
+// 면접 평가 초기 양식 다운로드
+const downloadInterviewEvaluationForm = async () => {
+  try {
+    const res = await axiosInstance.get("/v1/manager/excel/interview/evaluation-form", {
+      responseType: "blob", // 파일 다운로드를 위해 blob으로 설정
+    });
+
+    // 다운로드 처리
+    const blob = new Blob([res.data]);
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+
+    // 서버에서 파일명을 내려주는 경우 Content-Disposition 파싱
+    const disposition = res.headers["content-disposition"];
+    const match = disposition?.match(/filename="?(.+)"?/);
+    const filename = match?.[1] || "interview-evaluation-form.xlsx";
+
+    link.download = decodeURIComponent(filename);
+    link.click();
+    window.URL.revokeObjectURL(url);
+    
+    console.log("면접 평가 초기 양식 다운로드 완료:", filename);
+  } catch (error) {
+    console.error("면접 평가 초기 양식 다운로드 실패:", error);
+    throw error;
+  }
+};
+
+// 면접자 시간표 파일 업로드
+const uploadIntervieweeScheduleFile = async ({ file }: { file: File }) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await axiosInstance.post(
+      "/v1/manager/excel/interviewer/time-table",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    console.error("면접자 시간표 파일 업로드 실패:", error);
+    throw error;
+  }
+};
+
+// 면접관 시간표 파일 업로드
+const uploadInterviewerScheduleFile = async ({ file }: { file: File }) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await axiosInstance.post(
+      "/v1/manager/excel/interviewer/time-table",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    console.error("면접관 시간표 파일 업로드 실패:", error);
+    throw error;
+  }
+};
+
+// 면접 평가 시트 템플릿 업로드
+const uploadInterviewEvaluationTemplate = async ({ file }: { file: File }) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await axiosInstance.post(
+      "/v1/manager/excel/interview/evaluation",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    console.error("면접 평가 시트 템플릿 업로드 실패:", error);
+    throw error;
+  }
+};
+
 
 
 // 면접 장소 조회 API 없음 -> 필요하면 백엔드 요청 필요
@@ -193,4 +285,8 @@ export {
   downloadInterviewerTimeTableForm,
   generateInterviewTimeTable,
   downloadInterviewerTimeTable,
+  downloadInterviewEvaluationForm,
+  uploadIntervieweeScheduleFile,
+  uploadInterviewerScheduleFile,
+  uploadInterviewEvaluationTemplate,
 };
