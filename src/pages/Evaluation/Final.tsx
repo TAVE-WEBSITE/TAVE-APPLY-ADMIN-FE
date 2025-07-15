@@ -20,14 +20,30 @@ const Final = () => {
   const dialogRefFirst = useRef<HTMLDialogElement>(null);
   const dialogRefSecond = useRef<HTMLDialogElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentTab, setCurrentTab] = useState("전체");
   const navigate = useNavigate();
+
+  const getStatusFromTab = (tab: string) => {
+    switch (tab) {
+      case "전체":
+        return "ALL";
+      case "평가 진행 전":
+        return "NOTCHECKED";
+      case "불합격":
+        return "FAIL";
+      case "합격":
+        return "PASS";
+      default:
+        return "ALL";
+    }
+  };
 
   const { entireList, isLoading, totalPages } =
     usePagination<FinalEvaluationItem>({
       type: "최종 서류 평가",
-      page: currentPage,
+      page: currentPage - 1,
       size: 7,
-      status: "PASS",
+      status: getStatusFromTab(currentTab),
     });
 
   const {
@@ -58,6 +74,8 @@ const Final = () => {
 
   // 최종 서류 평가 API 조회 결과 콘솔 로그
   console.log("=== 최종 서류 평가 API 조회 결과 ===");
+  console.log("현재 탭:", currentTab);
+  console.log("현재 상태:", getStatusFromTab(currentTab));
   console.log("전체 리스트 길이:", entireList.length);
   console.log("전체 리스트:", entireList);
   console.log("현재 페이지:", currentPage);
@@ -165,7 +183,11 @@ const Final = () => {
           <Tab
             categories={["전체", "평가 진행 전", "불합격", "합격"]}
             active={activeTab}
-            onChange={setActiveTab}
+            onChange={(tab) => {
+              setActiveTab(tab);
+              setCurrentTab(tab);
+              setCurrentPage(1);
+            }}
           />
 
           <FlexBox className="gap-4">

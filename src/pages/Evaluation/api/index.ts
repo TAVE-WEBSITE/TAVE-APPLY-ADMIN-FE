@@ -35,6 +35,19 @@ export const fetchMemberInfo = async (memberId: string) => {
   }
 };
 
+// 운영진 평가 조회 API
+export const fetchFinalEvaluation = async (resumeId: string) => {
+  try {
+    const res = await axiosInstance.get(
+      `/v1/manager/resume/evaluate/final/${resumeId}`
+    );
+    return res.data;
+  } catch (error: any) {
+    console.error("운영진 평가 조회 에러:", error);
+    throw error;
+  }
+};
+
 // 지원서 질문 & 답변 정보 API
 export const fetchResumeQuestions = async (resumeId: string) => {
   try {

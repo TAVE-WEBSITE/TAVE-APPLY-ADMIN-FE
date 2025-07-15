@@ -30,8 +30,7 @@ export const fetchList = async (
         params.status = status;
         break;
       case "최종 서류 평가":
-        // 아직 구현안함
-        url = "/v1/manager/resume/evaluate/final";
+        url = `/v1/manager/resume/evaluate`;
         params.status = status;
         break;
     }
