@@ -112,6 +112,7 @@ const Document = () => {
             setCurrentPage={setCurrentPage}
             baseUrl="/evaluation/document"
             navigate={navigate}
+            pageType="document"
           />
         </div>
       </Body>

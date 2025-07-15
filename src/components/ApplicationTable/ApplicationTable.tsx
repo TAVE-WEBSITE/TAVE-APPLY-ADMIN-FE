@@ -14,6 +14,7 @@ interface ApplicationTableProps {
   totalPages: number | undefined;
   baseUrl?: string;
   navigate?: NavigateFunction;
+  pageType?: "document" | "final"; // 페이지 타입 구분
 }
 
 const ApplicationTable = ({
@@ -25,6 +26,7 @@ const ApplicationTable = ({
   totalPages,
   baseUrl,
   navigate,
+  pageType,
 }: ApplicationTableProps) => {
   const itemsPerPage = 7;
 
@@ -142,28 +144,21 @@ const ApplicationTable = ({
                   <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
                     <span>{application.school || ''}</span>
                   </td>
-                  {/* {application.count !== undefined && application.count !== null && application.count !== 0 && (
-                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
-                      <span>{String(application.count)}</span>
-                    </td>
-                  )} */}
-                  {application.interviewTime && (
-                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
-                      <span>{formatDateTime(application.interviewTime)}</span>
-                    </td>
-                  )}
-                  {application.recruitTime && (
+                  {/* Document 페이지: 지원 날짜 */}
+                  {pageType === "document" && application.recruitTime && (
                     <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
                       <span>{formatDateTime(application.recruitTime)}</span>
                     </td>
                   )}
-                  {application.isEvaluated !== undefined && (
-                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-base font-medium">
-                      {application.isEvaluated === true ? (
-                        <span className="text-blue-700 font-bold">완료</span>
-                      ) : (
-                        <span className="text-gray-700 font-medium">대기</span>
-                      )}
+                  {/* Final 페이지: 평가 완료 인원 */}
+                  {pageType === "final" && application.count !== undefined && (
+                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
+                      <span>{String(application.count)}명</span>
+                    </td>
+                  )}
+                  {application.interviewTime && (
+                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
+                      <span>{formatDateTime(application.interviewTime)}</span>
                     </td>
                   )}
                   {application.status !== undefined && application.status !== null && (
@@ -185,7 +180,7 @@ const ApplicationTable = ({
                           }
                           `}
                       >
-                        {/* {application.status === "COMPLETE"
+                        {application.status === "COMPLETE"
                           ? "완료"
                           : application.status === "FAIL"
                           ? "불합격"
@@ -195,7 +190,7 @@ const ApplicationTable = ({
                           ? "보류"
                           : application.status === "NOTCHECKED"
                           ? "평가 진행 전"
-                          : ""} */}
+                          : ""}
                       </span>
                     </td>
                   )}

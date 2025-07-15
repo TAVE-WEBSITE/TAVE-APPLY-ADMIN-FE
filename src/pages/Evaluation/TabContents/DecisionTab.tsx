@@ -1,31 +1,60 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import Button from "@/components/Button/Button";
 import FlexBox from "@/components/Layout/FlexBox";
 import ToastMessage from "@/components/Modal/ToastMessage";
+import { submitFinalEvaluation } from "../api";
 
 interface DecisionTabProps {
   message: string;
   finalEvaluation?: any; // 운영진 평가 데이터
   activeTab: string; // 현재 활성 탭
+  resumeId?: string; // resumeId
 }
 
-const DecisionTab = ({ message, finalEvaluation, activeTab }: DecisionTabProps) => {
+const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId }: DecisionTabProps) => {
+  const navigate = useNavigate();
   const [isPassed, setIsPassed] = useState<boolean | null>(null);
   const isDisabled = typeof isPassed !== "boolean";
-  const [isPending, setIsPending] = useState(false);
   const [isToastOpen, setIsToastOpen] = useState(false);
+  const [postMessage, setPostMessage] = useState("");
+
+  const { mutate, isPending, isError } = useMutation({
+    mutationKey: ["final-evaluation", "submit"],
+    mutationFn: (status: "PASS" | "FAIL") => {
+      if (!resumeId) {
+        throw new Error("resumeId가 없습니다.");
+      }
+
+      return submitFinalEvaluation(resumeId, status);
+    },
+    onSuccess: (response) => {
+      setPostMessage(response.message || "최종 평가가 성공적으로 제출되었습니다.");
+      setIsToastOpen(true);
+      
+      setTimeout(() => {
+        navigate("/evaluation/document/final");
+      }, 1000);
+    },
+    onError: (error: any) => {
+      console.log("에러 객체:", error);
+      console.log("에러 메시지:", error.response?.data?.message);
+      setPostMessage(error.response?.data?.message || "최종 평가 제출에 실패했습니다.");
+      setIsToastOpen(true);
+    },
+  });
 
   const postDecision = async () => {
-    setIsPending(true);
-    setTimeout(() => {
-      setIsPending(false);
-      setIsToastOpen(true);
-    }, 800);
+    if (isPassed === null) return;
+    
+    const status = isPassed ? "PASS" : "FAIL";
+    mutate(status);
   };
 
   return (
     <FlexBox direction="col" className="gap-4 text-gray-900 w-full">
-      {activeTab === "서류평가분석" && (
+      {activeTab === "서류 평가 분석" && (
         <div className="w-full flex flex-col gap-4">
           <div className="flex gap-4 items-center">
             <div className="px-3 py-1 bg-gray-200 rounded-md flex items-center justify-center font-bold text-xl text-gray-500">1</div>
@@ -89,7 +118,7 @@ const DecisionTab = ({ message, finalEvaluation, activeTab }: DecisionTabProps) 
         
       )}
 
-      {activeTab === "합격여부결정" && (
+      {activeTab === "합격 여부 결정" && (
         <FlexBox
           direction="col"
           className="border border-gray-300 rounded-lg p-4 bg-white w-full gap-16"
@@ -132,9 +161,10 @@ const DecisionTab = ({ message, finalEvaluation, activeTab }: DecisionTabProps) 
       )}
 
       <ToastMessage
-        message="합격 여부 결정이 완료되었습니다"
+        message={postMessage}
         isOpen={isToastOpen}
         setIsOpen={setIsToastOpen}
+        isError={isError}
       />
     </FlexBox>
   );

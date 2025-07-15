@@ -49,7 +49,7 @@ const FinalDetail = () => {
   });
 
   const [activeLeftTab, setActiveLeftTab] = useState("공통 질문");
-  const [activeRightTab, setActiveRightTab] = useState("서류평가분석");
+  const [activeRightTab, setActiveRightTab] = useState("서류 평가 분석");
 
   const isLoading = memberInfoLoading || questionsLoading || evaluationLoading;
 
@@ -194,7 +194,7 @@ const FinalDetail = () => {
           </div>
           <div className="flex flex-col gap-6 flex-1 rounded-xl min-h-[650px] px-6">
             <Tab
-              categories={["서류평가분석", "합격여부결정"]}
+              categories={["서류 평가 분석", "합격 여부 결정"]}
               active={activeRightTab}
               onChange={setActiveRightTab}
             />
@@ -207,6 +207,7 @@ const FinalDetail = () => {
                 evaluations
               }}
               activeTab={activeRightTab}
+              resumeId={application?.resumeId}
             />
           </div>
         </div>

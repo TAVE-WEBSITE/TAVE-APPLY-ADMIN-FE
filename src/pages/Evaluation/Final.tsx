@@ -1,5 +1,6 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import Body from "@/components/Layout/Body";
 import FlexBox from "@/components/Layout/FlexBox";
 import Icon from "@/components/Icon/Icon";
@@ -22,11 +23,22 @@ const Final = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentTab, setCurrentTab] = useState("전체");
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // 페이지 포커스 시 캐시 무효화
+  useEffect(() => {
+    const handleFocus = () => {
+      queryClient.invalidateQueries({ queryKey: ["pagination", "최종 서류 평가"] });
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [queryClient]);
 
   const getStatusFromTab = (tab: string) => {
     switch (tab) {
       case "전체":
-        return "ALL";
+        return "ALL"; 
       case "평가 진행 전":
         return "NOTCHECKED";
       case "불합격":
@@ -38,7 +50,7 @@ const Final = () => {
     }
   };
 
-  const { entireList, isLoading, totalPages } =
+  const { entireList, isLoading, totalPages, countData } =
     usePagination<FinalEvaluationItem>({
       type: "최종 서류 평가",
       page: currentPage - 1,
@@ -72,46 +84,6 @@ const Final = () => {
     return entireList.filter((e) => e.status === "NOTCHECKED").length;
   }, [entireList]);
 
-  // 최종 서류 평가 API 조회 결과 콘솔 로그
-  console.log("=== 최종 서류 평가 API 조회 결과 ===");
-  console.log("현재 탭:", currentTab);
-  console.log("현재 상태:", getStatusFromTab(currentTab));
-  console.log("전체 리스트 길이:", entireList.length);
-  console.log("전체 리스트:", entireList);
-  console.log("현재 페이지:", currentPage);
-  console.log("전체 페이지 수:", totalPages);
-  console.log("활성 탭:", activeTab);
-  console.log("검색어:", searchInput);
-
-  // 개별 항목 상세 정보
-  if (entireList.length > 0) {
-    console.log("=== 첫 번째 항목 상세 정보 ===");
-    console.log(entireList[0]);
-    
-    console.log("=== 모든 항목 요약 ===");
-    entireList.forEach((item, index) => {
-      console.log(`항목 ${index + 1}:`, {
-        id: item.id,
-        name: item.name,
-        fieldType: item.fieldType,
-        sex: item.sex,
-        school: item.school,
-        recruitTime: item.recruitTime,
-        count: item.count,
-        status: item.status
-      });
-    });
-  } else {
-    console.log("조회된 최종 서류 평가 데이터가 없습니다.");
-  }
-
-  // 상태별 통계
-  console.log("=== 상태별 통계 ===");
-  console.log("보류 중인 서류:", holdCount);
-  console.log("진행하지 않은 서류:", notCheckedCount);
-  console.log("합격자 수:", entireList.filter(e => e.status === "PASS").length);
-  console.log("불합격자 수:", entireList.filter(e => e.status === "FAIL").length);
-
   const handleUpdate = async () => {
     await updateStatusByDocumentEvaluation();
     dialogRefSecond.current?.close();
@@ -134,7 +106,10 @@ const Final = () => {
           <p className="text-gray-500">
             {formatDateTime(new Date().toISOString()) + " 기준"}
           </p>
-          <Button onClick={openModal}>서류 평가 완료</Button>
+          <FlexBox className="gap-4">
+           
+            <Button onClick={openModal}>서류 평가 완료</Button>
+          </FlexBox>
         </FlexBox>
       </FlexBox>
       <Modal
@@ -175,18 +150,20 @@ const Final = () => {
       </Modal>
       <Body className="pt-4 gap-8">
         <FlexBox className="gap-4 mx-auto">
-          <CountCard text="현재 지원자 수" boxColor={"blue"} count={200} />
-          <CountCard text="남은 평가 서류 수" boxColor={"green"} count={37} />
-          <CountCard text="합격자 수" boxColor={"orange"} count={80} />
+          <CountCard text="현재 지원자 수" boxColor={"blue"} count={countData.totalRecruiter || 0} />
+          <CountCard text="남은 평가 서류 수" boxColor={"green"} count={countData.notCompletedRecruiter || 0} />
+          <CountCard text="합격자 수" boxColor={"orange"} count={countData.completedRecruiter || 0} />
         </FlexBox>
         <FlexBox className="justify-between w-[1320px] mx-auto">
           <Tab
             categories={["전체", "평가 진행 전", "불합격", "합격"]}
-            active={activeTab}
+            active={currentTab}
             onChange={(tab) => {
               setActiveTab(tab);
               setCurrentTab(tab);
               setCurrentPage(1);
+              // 탭 변경 시 캐시 무효화
+              queryClient.invalidateQueries({ queryKey: ["pagination", "최종 서류 평가"] });
             }}
           />
 
@@ -203,7 +180,7 @@ const Final = () => {
           <ApplicationTable
             rows={[
               "지원 분야",
-              "이름",
+              "이름", 
               "성별",
               "학교",
               "평가 완료 인원",
@@ -216,6 +193,7 @@ const Final = () => {
             setCurrentPage={setCurrentPage}
             navigate={navigate}
             baseUrl="/evaluation/document/final"
+            pageType="final"
           />
         </div>
       </Body>

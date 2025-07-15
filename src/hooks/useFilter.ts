@@ -25,13 +25,16 @@ export const useFilter = <T>(list: T[]) => {
   };
 
   const filteredList = useMemo<T[]>(() => {
-    return list.filter((item: any) => {
+
+    const filtered = list.filter((item: any) => {
       const matchRole =
         checkedRoles.size === 0 || checkedRoles.has(item.fieldType as RoleType);
       const matchName = item.name.includes(searchInput);
       
       return matchRole && matchName;
     }) as T[];
+
+    return filtered;
   }, [list, searchInput, checkedRoles, activeTab]);
 
   return {

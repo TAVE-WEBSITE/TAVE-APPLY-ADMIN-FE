@@ -48,6 +48,20 @@ export const fetchFinalEvaluation = async (resumeId: string) => {
   }
 };
 
+// 최종 평가 제출 API
+export const submitFinalEvaluation = async (resumeId: string, status: "PASS" | "FAIL") => {
+  try {
+    const res = await axiosInstance.post(
+      `/v1/manager/resume/evaluate/final/${resumeId}`,
+      { status }
+    );
+    return res.data;
+  } catch (error: any) {
+    console.error("최종 평가 제출 에러:", error);
+    throw error;
+  }
+};
+
 // 지원서 질문 & 답변 정보 API
 export const fetchResumeQuestions = async (resumeId: string) => {
   try {
