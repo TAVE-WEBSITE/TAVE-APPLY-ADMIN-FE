@@ -9,7 +9,6 @@ import {
   postInterviewPlace,
   fetchInterviewTime,
 } from "@/pages/Setting/api/Interview";
-
 import type { InterviewAddress } from "@/pages/Setting/api/Interview";
 import ToastMessage from "@/components/Modal/ToastMessage";
 
@@ -20,6 +19,7 @@ const Default = () => {
   const { data: addressData, isLoading, error } = useQuery({
     queryKey: ["setting", "address", "get"],
     queryFn: fetchAddress,
+
     retry: 1, // 재시도 횟수 제한
     retryDelay: 1000, // 재시도 간격
   });
@@ -29,6 +29,7 @@ const Default = () => {
     queryFn: fetchInterviewTime,
     retry: 1,
     retryDelay: 1000,
+
 
   });
 
@@ -50,6 +51,7 @@ const Default = () => {
   const [detailAddress, setDetailAddress] = useState(["", "", "", ""]);
   const [openChatLinks, setOpenChatLinks] = useState(["", "", "", ""]);
   const [documentLinks, setDocumentLinks] = useState(["", "", "", ""]);
+
 
 
   // 면접 시간 데이터 로드
@@ -92,10 +94,47 @@ const Default = () => {
 
     console.log("면접 설정 등록 데이터:", payload);
 
+    if (data) {
+      const result: InterviewAddress[] = data.result;
+      setInterviewAddress(result);
+    }
+  }, [data]);
+
+  const handleGeneralAddressChange = (value: string) => {
+    const updated = [...interviewAddress].map((e) => {
+      return { ...e, generalAddress: value };
+    });
+    setInterviewAddress(updated);
+  };
+
+  const handleDetailAddressChange = (value: string) => {
+    const updated = [...interviewAddress].map((e) => {
+      return { ...e, detailAddress: value };
+    });
+    setInterviewAddress(updated);
+  };
+
+  const handleOpenChatLinkChange = (index: number, value: string) => {
+    const updated = [...interviewAddress];
+    updated[index] = { ...updated[index], openChatLink: value };
+    setInterviewAddress(updated);
+  };
+
+  const handleCodeChange = (index: number, value: string) => {
+    const updated = [...interviewAddress];
+    updated[index] = { ...updated[index], code: value };
+    setInterviewAddress(updated);
+  };
+
+  const handleSubmit = () => {
+    const payload: Omit<InterviewAddress, "id">[] = interviewAddress.map(
+      ({ id, ...rest }) => rest
+    );
     mutate(payload);
   };
 
   return (
+
     <Body className="py-8 gap-8 px-12">
       {isLoading && (
         <div className="text-center py-4">
@@ -195,6 +234,7 @@ const Default = () => {
         </Button>
       </div>
     </Body>
+
 
   );
 };

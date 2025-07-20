@@ -58,10 +58,10 @@ const Interview = () => {
         </FlexBox>
         <FlexBox className="mx-auto gap-4 justify-center pb-12">
           <Button
-
-            isPending={isPending2}
+           isPending={isPending2}
             onClick={() => downloadSheet()}
             className="bg-gray-300 w-64"
+
 
           >
             <Icon type={"DownLoad"} size={18} />
