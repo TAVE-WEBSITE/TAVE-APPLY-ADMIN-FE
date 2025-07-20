@@ -14,7 +14,7 @@ import { type FinalEvaluationItem } from "@/types/application";
 import { usePagination } from "@/hooks/usePagination";
 import { useFilter } from "@/hooks/useFilter";
 import Button from "@/components/Button/Button";
-import { getRecruitmentEmailCancel, getRecruitmentEmailConfig, updateStatusByDocumentEvaluation,getRecruitmentDocumentEmailFind } from "./api";
+import { getRecruitmentEmailCancel, getRecruitmentEmailConfig, getRecruitmentDocumentEmailFind } from "./api";
 
 const Final = () => {
   const dialogRefFirst = useRef<HTMLDialogElement>(null);
