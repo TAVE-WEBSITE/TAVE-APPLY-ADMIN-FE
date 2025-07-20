@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Body from "@/components/Layout/Body";
 import FlexBox from "@/components/Layout/FlexBox";
@@ -14,7 +14,7 @@ import { type FinalEvaluationItem } from "@/types/application";
 import { usePagination } from "@/hooks/usePagination";
 import { useFilter } from "@/hooks/useFilter";
 import Button from "@/components/Button/Button";
-import { getRecruitmentEmailCancel, getRecruitmentEmailConfig, updateStatusByDocumentEvaluation } from "./api";
+import { getRecruitmentEmailCancel, getRecruitmentEmailConfig, updateStatusByDocumentEvaluation,getRecruitmentDocumentEmailFind } from "./api";
 
 const Final = () => {
   const dialogRefFirst = useRef<HTMLDialogElement>(null);
@@ -26,6 +26,7 @@ const Final = () => {
   //백에서 예약되어있는지를 받아야할지 고민입니다. ( 최종 면접 결과 부분도 동일 )
   const [emailConfig , setEmailConfig] = useState(false); 
   const navigate = useNavigate();
+
 
   const { entireList, isLoading, totalPages } =
     usePagination<FinalEvaluationItem>({
@@ -69,7 +70,8 @@ const Final = () => {
   const handleEmailCancel = async () => {
     try {
       await getRecruitmentEmailCancel();
-      setEmailConfig(false);
+      const { isBooked } = await getRecruitmentDocumentEmailFind(); // 최신 상태 재조회
+      setEmailConfig(isBooked);
     } catch (error) {
       console.error("이메일 취소 실패:", error);
     }
@@ -80,13 +82,29 @@ const Final = () => {
     //await updateStatusByDocumentEvaluation();
     try {
       await getRecruitmentEmailConfig();
-      setEmailConfig(true);
+      const { isBooked } = await getRecruitmentDocumentEmailFind(); // 최신 상태 조회
+      setEmailConfig(isBooked); // 상태 갱신
+
     } catch (error) {
       console.error("이메일 예약 실패:", error);
     } finally {
       dialogRefSecond.current?.close();
     }
   };
+
+useEffect(() => {
+  const viewEmail = async () => {
+    try {
+      const { isBooked } = await getRecruitmentDocumentEmailFind();
+      setEmailConfig(isBooked);
+    } catch (error) {
+      console.error("이메일 상태 조회 실패:", error);
+    }
+  };
+
+  viewEmail();
+}, []);
+
 
   return (
     <div className="text-white">

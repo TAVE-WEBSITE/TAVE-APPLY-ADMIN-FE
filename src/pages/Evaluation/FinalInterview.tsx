@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Body from "@/components/Layout/Body";
 import FlexBox from "@/components/Layout/FlexBox";
@@ -12,7 +12,7 @@ import { type EvaluationItem } from "@/types/application";
 import { usePagination } from "@/hooks/usePagination";
 import { useFilter } from "@/hooks/useFilter";
 import Button from "@/components/Button/Button";
-import { getFinalInterviewEmailCancel, getFinalInterviewEmailConfig } from "./api";
+import { getFinalInterviewEmailCancel, getFinalInterviewEmailConfig, getFinalInterviewEmailFind } from "./api";
 import Modal from "@/components/Modal/Modal";
 
 const FinalInterview = () => {
@@ -20,7 +20,7 @@ const FinalInterview = () => {
   const dialogRefFirst = useRef<HTMLDialogElement>(null);
   const dialogRefSecond = useRef<HTMLDialogElement>(null);
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [emailConfig , setEmailConfig] = useState(false);
 
   const { entireList, isLoading, totalPages } = usePagination<EvaluationItem>({
@@ -42,7 +42,7 @@ const FinalInterview = () => {
   //서류 평가 부분과 유사하여 필요한 코드 가져옴
   //아직 마무리 되지 않은듯하여 주석 처리
   //이후 필요 시 사용 예정
-  /*
+  
   const openModal = () => {
   //서류 평가 상태 : FAIL, PASS, HOLD, NOTCHECKED, COMPLETE
     const isEmpty = entireList.length === 0;
@@ -57,10 +57,19 @@ const FinalInterview = () => {
     else handleEmailUpdate();
   };
 
+  const holdCount = useMemo(() => {
+      return entireList.filter((e) => e.status === "HOLD").length;
+    }, [entireList]);
+  
+    const notCheckedCount = useMemo(() => {
+      return entireList.filter((e) => e.status === "NOTCHECKED").length;
+    }, [entireList]);
+
   const handleEmailCancel = async () => {
       try {
         await getFinalInterviewEmailCancel();
-        setEmailConfig(false);
+        const { isBooked } = await getFinalInterviewEmailFind(); // 최신 상태 조회
+        setEmailConfig(isBooked); // 상태 갱신
       } catch (error) {
         console.error("이메일 취소 실패:", error);
       }
@@ -71,7 +80,8 @@ const FinalInterview = () => {
       //await updateStatusByDocumentEvaluation();
       try {
         await getFinalInterviewEmailConfig();
-        setEmailConfig(true);
+        const { isBooked } = await getFinalInterviewEmailFind(); // 최신 상태 조회
+        setEmailConfig(isBooked); // 상태 갱신
       } catch (error) {
         console.error("이메일 예약 실패:", error);
       } finally {
@@ -79,7 +89,18 @@ const FinalInterview = () => {
       }
     };
 
-    */
+    useEffect(() => {
+      const viewEmail = async () => {
+        try {
+          const { isBooked } = await getFinalInterviewEmailFind();
+          setEmailConfig(isBooked);
+        } catch (error) {
+          console.error("이메일 상태 조회 실패:", error);
+        }
+      };
+    
+      viewEmail();
+    }, []);
   return (
     <div className="text-white">
       <FlexBox className="gap-8 px-16 pb-8 items-start" direction="col">
@@ -88,10 +109,15 @@ const FinalInterview = () => {
           <p className="text-gray-500">
             {formatDateTime(new Date().toISOString()) + " 기준"}
           </p>
-          <Button onClick={() => {}}>면접 평가 완료</Button>
+          {emailConfig ? (
+            <Button className="bg-gray-200" onClick={handleEmailCancel}>
+              메일 발송 예정
+            </Button>
+          ) : (
+            <Button onClick={openModal}>면접 평가 완료</Button>
+          )}
         </FlexBox>
       </FlexBox>
-    {/*
       <Modal
         dialogRef={dialogRefFirst}
         buttonCount={2}
@@ -126,7 +152,6 @@ const FinalInterview = () => {
           동의하시겠습니까?
         </p>
       </Modal>
-    */}
       <Body className="pt-4 gap-8">
         <FlexBox className="gap-4 mx-auto">
           <CountCard text="현재 지원자 수" boxColor={"blue"} count={200} />

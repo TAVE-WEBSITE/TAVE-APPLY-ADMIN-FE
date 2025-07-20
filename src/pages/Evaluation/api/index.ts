@@ -126,3 +126,35 @@ export const getFinalInterviewEmailCancel = async () => {
     return error;
   }
 };
+
+// 서류 평가 이메일 예약 여부 조회
+// api.ts (혹은 해당 파일)
+export const getRecruitmentDocumentEmailFind = async (): Promise<{ isBooked: boolean }> => {
+  try {
+    const res = await axiosInstance.get("/v1/admin/config/recruitment/document/email/find");
+    const isBooked = res.data?.result?.bookStatus;
+    return {
+      isBooked
+    };
+  } catch (error) {
+    return {
+      isBooked: false,
+    };
+  }
+};
+
+
+// 최종 면접 이메일 예약 여부 조회
+export const getFinalInterviewEmailFind = async (): Promise<{ isBooked: boolean }> => {
+  try {
+    const res = await axiosInstance.get("/v1/admin/config/recruitment/last/email/find");
+    const isBooked = res.data?.result?.bookStatus;
+    return {
+      isBooked,
+    };
+  } catch (error) {
+    return {
+      isBooked: false,
+    };
+  }
+};
