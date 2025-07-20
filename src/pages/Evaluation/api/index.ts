@@ -85,3 +85,75 @@ export const getSheet = async () => {
     return error;
   }
 };
+
+//서류 평가 후 이메일 발송 예약
+export const getRecruitmentEmailConfig = async () => {
+  try {
+    const res = await axiosInstance.get("/v1/admin/config/recruitment/document/email");
+    return res.data;
+  } catch (error) {
+    return error;
+  }
+};
+
+//서류 평가 후 이메일 발송 예약 취소
+export const getRecruitmentEmailCancel = async () => {
+  try {
+    const res = await axiosInstance.get("/v1/admin/config/recruitment/document/email/cancel");
+    return res.data;
+  } catch (error) {
+    return error;
+  }
+};
+
+//면접 평가 후 이메일 발송 예약
+export const getFinalInterviewEmailConfig = async () => {
+  try {
+    const res = await axiosInstance.get("/v1/admin/config/recruitment/last/email");
+    return res.data;
+  } catch (error) {
+    return error;
+  }
+};
+
+//면접 평가 후 이메일 발송 예약 취소
+export const getFinalInterviewEmailCancel = async () => {
+  try {
+    const res = await axiosInstance.get("/v1/admin/config/recruitment/last/email/cancel");
+    return res.data;
+  } catch (error) {
+    return error;
+  }
+};
+
+// 서류 평가 이메일 예약 여부 조회
+// api.ts (혹은 해당 파일)
+export const getRecruitmentDocumentEmailFind = async (): Promise<{ isBooked: boolean }> => {
+  try {
+    const res = await axiosInstance.get("/v1/admin/config/recruitment/document/email/find");
+    const isBooked = res.data?.result?.bookStatus;
+    return {
+      isBooked
+    };
+  } catch (error) {
+    return {
+      isBooked: false,
+    };
+  }
+};
+
+
+// 최종 면접 이메일 예약 여부 조회
+export const getFinalInterviewEmailFind = async (): Promise<{ isBooked: boolean }> => {
+  try {
+    const res = await axiosInstance.get("/v1/admin/config/recruitment/last/email/find");
+    const isBooked = res.data?.result?.bookStatus;
+    return {
+      isBooked,
+    };
+  } catch (error) {
+    return {
+      isBooked: false,
+    };
+  }
+};

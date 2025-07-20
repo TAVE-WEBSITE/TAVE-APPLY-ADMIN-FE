@@ -13,17 +13,19 @@ export const usePagination = <T>({
 }: UseFilterProps) => {
   const totalPagesRef = useRef<number>(undefined);
   const maxPageRef = useRef<number>(0);
-  // 현재 페이지가 이전 최대 페이지보다 클 때만 새로운 쿼리 생성
-  const currentMaxPage = Math.max(page, maxPageRef.current);
+
+  // currentMaxPage는 최소 1 이상이 되도록 보정
+  const safePage = Math.max(0, page); // 실제 page는 0도 허용
+  const currentMaxPage = Math.max(safePage + 1, maxPageRef.current); // +1로 최소 쿼리 1개 보장
   maxPageRef.current = currentMaxPage;
 
   const pageQueries = useQueries({
     queries: Array.from({ length: currentMaxPage }, (_, index) => {
-      const pageNum = index + 1;
+      const pageNum = index; // 이제 0-based 페이지로 호출
       const queryParams =
         status === "ALL"
           ? { page: pageNum, size }
-          : { page: pageNum, size, status: status };
+          : { page: pageNum, size, status };
 
       return {
         queryKey: [type, "list", queryParams],
@@ -33,6 +35,7 @@ export const usePagination = <T>({
     }),
   });
 
+  //
   const entireList = useMemo(() => {
     const allData: T[] = [];
 
@@ -45,10 +48,9 @@ export const usePagination = <T>({
     return allData;
   }, [
     pageQueries.map((q) => q.isSuccess && q.data?.content?.length).join(","),
-  ]); // 실제 변화만 감지
+  ]);
 
   const isLoading = pageQueries.some((query) => query.isLoading);
-
   return {
     entireList,
     isLoading,
