@@ -31,6 +31,7 @@ export type NotificationItem = {
 export type EvaluationItem = Application & {
   recruitTime: string;
   isEvaluated: boolean;
+  status: Status;
 };
 
 export type FinalEvaluationItem = Application & {
