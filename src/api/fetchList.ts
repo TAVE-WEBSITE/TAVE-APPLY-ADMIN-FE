@@ -14,8 +14,8 @@ export const fetchList = async (
     let url = "";
     const params: Record<string, any> = { page, size };
 
-    // status가 undefined가 아닐 때만 params에 추가
-    if (status !== undefined) {
+    // status가 undefined, null이 아닐 때 params에 추가 (ALL 포함)
+    if (status !== undefined && status !== null) {
       params.status = status;
     }
 
@@ -25,7 +25,10 @@ export const fetchList = async (
         break;
       case "지원서":
         url = `/v1/manager/resume/evaluate`;
-        params.status = status;
+        // status가 유효한 값일 때만 추가 (ALL 포함)
+        if (status !== undefined && status !== null) {
+          params.status = status;
+        }
         break;
       case "면접 설정":
         url = `/v1/manager/interview-final?pageNum=${page}&pageSize=${size}`;
@@ -42,13 +45,18 @@ export const fetchList = async (
         return finalInterviewRes.data;
     }
 
-    const res = await axiosInstance.get(url, { params });
-    console.log("=== fetchList API 응답 ===");
+    console.log("=== fetchList API 요청 ===");
     console.log("URL:", url);
+    console.log("Params:", params);
+    console.log("Status:", status);
+
+    const res = await axiosInstance.get(url, { params });
+
     console.log("응답 데이터:", res.data);
     return res.data;
   } catch (error: any) {
-    console.error("에러:", error);
+
+    console.error("전체 에러:", error);
     throw error;
   }
 };

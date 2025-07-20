@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Body from "@/components/Layout/Body";
 import FlexBox from "@/components/Layout/FlexBox";
 import { formatDateTime } from "@/utils/formatDate";
-import { getInterviewTimeTable, getTimeTableForm } from "./api";
+import { getInterviewTimeTable, getTimeTableForm, getSheet } from "./api";
 import type { TimeTableList } from "@/types/interview";
 import TimeTable from "@/components/TimeTable";
 import Button from "@/components/Button/Button";
@@ -13,7 +13,7 @@ const Interview = () => {
   const navigate = useNavigate();
   const [timeTable, setTimeTable] = useState<TimeTableList[]>([]);
   const [isPending, setIsPending] = useState(false);
-  //const [isPending2, setIsPending2] = useState(false);
+  const [isPending2, setIsPending2] = useState(false);
 
   useEffect(() => {
     const fetcher = async () => {
@@ -30,11 +30,11 @@ const Interview = () => {
   };
 
   // 면접 평가 시트 다운로드는 어디에..?
-  // const downloadSheet = async () => {
-  //   setIsPending2(true);
-  //   await getSheet();
-  //   setIsPending2(false);
-  // };
+  const downloadSheet = async () => {
+    setIsPending2(true);
+    await getSheet();
+    setIsPending2(false);
+  };
 
   return (
     <div className="text-white">
