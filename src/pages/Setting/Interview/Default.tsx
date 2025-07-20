@@ -10,6 +10,10 @@ import {
   fetchInterviewTime,
 } from "@/pages/Setting/api/Interview";
 
+import type { InterviewAddress } from "@/pages/Setting/api/Interview";
+import ToastMessage from "@/components/Modal/ToastMessage";
+
+
 const Default = () => {
   const [interviewDays, setInterviewDays] = useState<string[]>([]);
   const [formattedDates, setFormattedDates] = useState<string[]>([]);
@@ -25,11 +29,13 @@ const Default = () => {
     queryFn: fetchInterviewTime,
     retry: 1,
     retryDelay: 1000,
+
   });
 
   const { mutate, isPending } = useMutation({
     mutationKey: ["setting", "interview", "post"],
     mutationFn: postInterviewPlace,
+
     onSuccess: (data) => {
       console.log("면접 설정 등록 성공:", data);
       alert("면접 설정이 성공적으로 등록되었습니다.");
@@ -44,6 +50,7 @@ const Default = () => {
   const [detailAddress, setDetailAddress] = useState(["", "", "", ""]);
   const [openChatLinks, setOpenChatLinks] = useState(["", "", "", ""]);
   const [documentLinks, setDocumentLinks] = useState(["", "", "", ""]);
+
 
   // 면접 시간 데이터 로드
   useEffect(() => {
@@ -84,6 +91,7 @@ const Default = () => {
     }));
 
     console.log("면접 설정 등록 데이터:", payload);
+
     mutate(payload);
   };
 
@@ -187,6 +195,7 @@ const Default = () => {
         </Button>
       </div>
     </Body>
+
   );
 };
 

@@ -15,15 +15,24 @@ import { type FinalEvaluationItem } from "@/types/application";
 import { usePagination } from "@/hooks/usePagination";
 import { useFilter } from "@/hooks/useFilter";
 import Button from "@/components/Button/Button";
-import { updateStatusByDocumentEvaluation } from "./api";
+import { getRecruitmentEmailCancel, getRecruitmentEmailConfig, getRecruitmentDocumentEmailFind } from "./api";
 
 const Final = () => {
   const dialogRefFirst = useRef<HTMLDialogElement>(null);
   const dialogRefSecond = useRef<HTMLDialogElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
+
   const [currentTab, setCurrentTab] = useState("전체");
+
+
+  //일단 서류평가 이메일 전송 예약 되어있는지 유무를 useState()로 해놨습니다
+  //하지만 이러면 당연히 제대로 로직되로 구조가 안 흘러갈 것 같아서 
+  //백에서 예약되어있는지를 받아야할지 고민입니다. ( 최종 면접 결과 부분도 동일 )
+  const [emailConfig , setEmailConfig] = useState(false); 
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
 
   // 페이지 포커스 시 캐시 무효화
   useEffect(() => {
@@ -51,6 +60,7 @@ const Final = () => {
   };
 
   const { entireList, isLoading, totalPages, countData } =
+
     usePagination<FinalEvaluationItem>({
       type: "최종 서류 평가",
       page: currentPage - 1,
@@ -69,11 +79,17 @@ const Final = () => {
   } = useFilter<FinalEvaluationItem>(entireList);
 
   const openModal = () => {
+  //서류 평가 상태 : FAIL, PASS, HOLD, NOTCHECKED, COMPLETE
+    const isEmpty = entireList.length === 0;
     const notDone = entireList.some(
       (e) => e.status === "NOTCHECKED" || e.status === "HOLD"
     );
+    const allFail = !isEmpty && entireList.every(e => e.status === "FAIL");
+    const allPass = !isEmpty && entireList.every(e => e.status === "PASS");
+
     if (notDone) dialogRefFirst.current?.showModal();
-    else dialogRefSecond.current?.showModal();
+    else if(allFail || allPass) dialogRefSecond.current?.showModal(); //모든 평가 FAIL 또는 PASS일때
+    else handleEmailUpdate();
   };
 
   const holdCount = useMemo(() => {
@@ -83,11 +99,45 @@ const Final = () => {
   const notCheckedCount = useMemo(() => {
     return entireList.filter((e) => e.status === "NOTCHECKED").length;
   }, [entireList]);
-
-  const handleUpdate = async () => {
-    await updateStatusByDocumentEvaluation();
-    dialogRefSecond.current?.close();
+  
+  const handleEmailCancel = async () => {
+    try {
+      await getRecruitmentEmailCancel();
+      const { isBooked } = await getRecruitmentDocumentEmailFind(); // 최신 상태 재조회
+      setEmailConfig(isBooked);
+    } catch (error) {
+      console.error("이메일 취소 실패:", error);
+    }
   };
+
+  const handleEmailUpdate = async () => {
+    // 기존 코드
+    //await updateStatusByDocumentEvaluation();
+    try {
+      await getRecruitmentEmailConfig();
+      const { isBooked } = await getRecruitmentDocumentEmailFind(); // 최신 상태 조회
+      setEmailConfig(isBooked); // 상태 갱신
+
+    } catch (error) {
+      console.error("이메일 예약 실패:", error);
+    } finally {
+      dialogRefSecond.current?.close();
+    }
+  };
+
+useEffect(() => {
+  const viewEmail = async () => {
+    try {
+      const { isBooked } = await getRecruitmentDocumentEmailFind();
+      setEmailConfig(isBooked);
+    } catch (error) {
+      console.error("이메일 상태 조회 실패:", error);
+    }
+  };
+
+  viewEmail();
+}, []);
+
 
   return (
     <div className="text-white">
@@ -106,10 +156,15 @@ const Final = () => {
           <p className="text-gray-500">
             {formatDateTime(new Date().toISOString()) + " 기준"}
           </p>
-          <FlexBox className="gap-4">
-           
-            <Button onClick={openModal}>서류 평가 완료</Button>
-          </FlexBox>
+
+          {emailConfig ? (
+          <Button className="bg-gray-200" onClick={handleEmailCancel}>
+            메일 발송 예정
+          </Button>
+        ) : (
+          <Button onClick={openModal}>서류 평가 완료</Button>
+        )}
+
         </FlexBox>
       </FlexBox>
       <Modal
@@ -139,7 +194,7 @@ const Final = () => {
       <Modal
         dialogRef={dialogRefSecond}
         buttonCount={2}
-        onConfirm={() => handleUpdate()}
+        onConfirm={() => handleEmailUpdate()}
         title="최종 서류 평가"
       >
         <p className="text-gray-500 text-balance">

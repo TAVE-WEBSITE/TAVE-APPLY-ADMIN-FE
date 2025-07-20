@@ -1,5 +1,14 @@
 import { axiosInstance } from "@/api/axiosInstance";
 
+export interface InterviewAddress {
+  id: number;
+  interviewDay: string;
+  generalAddress: string;
+  detailAddress: string;
+  openChatLink: string;
+  code: string;
+}
+
 const fetchAllInterviewers = async () => {
   try {
     const res = await axiosInstance.get("/v1/manager/interview-final");
@@ -253,6 +262,7 @@ const fetchAddress = async () => {
   }
 };
 
+
 const fetchInterviewTime = async () => {
   try {
     const res = await axiosInstance.get("/v1/manager/config/interview-time");
@@ -266,6 +276,7 @@ const postInterviewPlace = async (payload: any) => {
     console.log("면접 설정 등록 API 호출:", payload);
     const res = await axiosInstance.post("/v1/manager/interview-place", payload);
     console.log("면접 설정 등록 성공:", res.data);
+
     return res.data;
   } catch (error) {
     console.error("면접 설정 등록 실패:", error);
