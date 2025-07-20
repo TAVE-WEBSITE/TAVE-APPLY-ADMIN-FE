@@ -20,12 +20,15 @@ export const usePagination = <T>({
   maxPageRef.current = currentMaxPage;
 
   const pageQueries = useQueries({
+    
     queries: Array.from({ length: currentMaxPage }, (_, index) => {
-      const pageNum = index; // 이제 0-based 페이지로 호출
+
+      const pageNum = index ;
       const queryParams =
         status === "ALL"
-          ? { page: pageNum, size }
-          : { page: pageNum, size, status };
+          ? { page: pageNum, size}
+          : { page: pageNum, size, status: status };
+
 
       return {
         queryKey: [type, "list", queryParams],
@@ -40,20 +43,46 @@ export const usePagination = <T>({
     const allData: T[] = [];
 
     pageQueries.forEach((query) => {
-      if (query.isSuccess && query.data?.content) {
-        allData.push(...query.data.content);
-        totalPagesRef.current = query?.data?.page?.totalPages;
+      if (query.isSuccess && query.data?.result?.resumeResDtos?.content) {
+        const transformedData = query.data.result.resumeResDtos.content.map((item: any) => ({
+          ...item,
+          id: String(item.id), 
+          recruitTime: item.recruitTime || new Date().toISOString(), 
+          isEvaluated: item.isEvaluated || false,
+          memberId: item.memberId, 
+          resumeId: item.resumeId,
+        }));
+        
+        allData.push(...transformedData);
+        totalPagesRef.current = query?.data?.result?.resumeResDtos?.page?.totalPages;
       }
     });
     return allData;
-  }, [
-    pageQueries.map((q) => q.isSuccess && q.data?.content?.length).join(","),
-  ]);
 
+  }, [pageQueries.map(q => q.dataUpdatedAt).join(',')]); // dataUpdatedAt을 사용하여 더 안정적인 의존성
+
+  // API 응답에서 count 데이터 추출
+  const countData = useMemo(() => {
+    const firstQuery = pageQueries[0];
+    if (firstQuery?.isSuccess && firstQuery.data?.result) {
+      return {
+        totalRecruiter: firstQuery.data.result.totalRecruiter || 0,
+        notCompletedRecruiter: firstQuery.data.result.notCompletedRecruiter || 0,
+        completedRecruiter: firstQuery.data.result.completedRecruiter || 0,
+      };
+    }
+    return {
+      totalRecruiter: 0,
+      notCompletedRecruiter: 0,
+      completedRecruiter: 0,
+    };
+  }, [pageQueries[0]?.dataUpdatedAt]); // 첫 번째 쿼리의 dataUpdatedAt만 사용
+]
   const isLoading = pageQueries.some((query) => query.isLoading);
   return {
     entireList,
     isLoading,
     totalPages: totalPagesRef.current,
+    countData,
   };
 };
