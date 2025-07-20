@@ -1,5 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import Body from "@/components/Layout/Body";
 import FlexBox from "@/components/Layout/FlexBox";
 import Icon from "@/components/Icon/Icon";
@@ -14,25 +15,57 @@ import { type FinalEvaluationItem } from "@/types/application";
 import { usePagination } from "@/hooks/usePagination";
 import { useFilter } from "@/hooks/useFilter";
 import Button from "@/components/Button/Button";
-import { getRecruitmentEmailCancel, getRecruitmentEmailConfig, updateStatusByDocumentEvaluation,getRecruitmentDocumentEmailFind } from "./api";
+import { getRecruitmentEmailCancel, getRecruitmentEmailConfig, getRecruitmentDocumentEmailFind } from "./api";
 
 const Final = () => {
   const dialogRefFirst = useRef<HTMLDialogElement>(null);
   const dialogRefSecond = useRef<HTMLDialogElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [currentTab, setCurrentTab] = useState("전체");
+
+
   //일단 서류평가 이메일 전송 예약 되어있는지 유무를 useState()로 해놨습니다
   //하지만 이러면 당연히 제대로 로직되로 구조가 안 흘러갈 것 같아서 
   //백에서 예약되어있는지를 받아야할지 고민입니다. ( 최종 면접 결과 부분도 동일 )
   const [emailConfig , setEmailConfig] = useState(false); 
+
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
 
-  const { entireList, isLoading, totalPages } =
+  // 페이지 포커스 시 캐시 무효화
+  useEffect(() => {
+    const handleFocus = () => {
+      queryClient.invalidateQueries({ queryKey: ["pagination", "최종 서류 평가"] });
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [queryClient]);
+
+  const getStatusFromTab = (tab: string) => {
+    switch (tab) {
+      case "전체":
+        return "ALL"; 
+      case "평가 진행 전":
+        return "NOTCHECKED";
+      case "불합격":
+        return "FAIL";
+      case "합격":
+        return "PASS";
+      default:
+        return "ALL";
+    }
+  };
+
+  const { entireList, isLoading, totalPages, countData } =
+
     usePagination<FinalEvaluationItem>({
       type: "최종 서류 평가",
-      page: currentPage,
+      page: currentPage - 1,
       size: 7,
+      status: getStatusFromTab(currentTab),
     });
 
   const {
@@ -123,6 +156,7 @@ useEffect(() => {
           <p className="text-gray-500">
             {formatDateTime(new Date().toISOString()) + " 기준"}
           </p>
+
           {emailConfig ? (
           <Button className="bg-gray-200" onClick={handleEmailCancel}>
             메일 발송 예정
@@ -130,30 +164,33 @@ useEffect(() => {
         ) : (
           <Button onClick={openModal}>서류 평가 완료</Button>
         )}
+
         </FlexBox>
       </FlexBox>
       <Modal
-        dialogRef={dialogRefFirst}
-        buttonCount={2}
-        onConfirm={() => dialogRefFirst.current?.close()}
-        title="최종 서류 평가"
-      >
-        <p className="text-gray-500 text-balance">
-          모든 서류 평가가 완료되지 않았습니다. <br /> <br />
-          현재 서류 평가 진행 현황입니다. <br />
-          <ul>
-            <li>
-              - 보류 중인 서류{" "}
-              <span className="text-blue-500 font-bold">{holdCount}</span>건
-            </li>{" "}
-            <li>
-              - 진행하지 않은 서류{" "}
-              <span className="text-blue-500 font-bold">{notCheckedCount}</span>
-              건
-            </li>
-          </ul>
-        </p>
-      </Modal>
+  dialogRef={dialogRefFirst}
+  buttonCount={2}
+  onConfirm={() => dialogRefFirst.current?.close()}
+  title="최종 서류 평가"
+>
+  <div className="text-gray-500 text-balance">
+    <p>
+      모든 서류 평가가 완료되지 않았습니다. <br /> <br />
+      현재 서류 평가 진행 현황입니다.
+    </p>
+    <ul className="mt-4 space-y-1">
+      <li>
+        - 보류 중인 서류{" "}
+        <span className="text-blue-500 font-bold">{holdCount}</span>건
+      </li>
+      <li>
+        - 진행하지 않은 서류{" "}
+        <span className="text-blue-500 font-bold">{notCheckedCount}</span>건
+      </li>
+    </ul>
+  </div>
+</Modal>
+
       <Modal
         dialogRef={dialogRefSecond}
         buttonCount={2}
@@ -168,15 +205,21 @@ useEffect(() => {
       </Modal>
       <Body className="pt-4 gap-8">
         <FlexBox className="gap-4 mx-auto">
-          <CountCard text="현재 지원자 수" boxColor={"blue"} count={200} />
-          <CountCard text="남은 평가 서류 수" boxColor={"green"} count={37} />
-          <CountCard text="합격자 수" boxColor={"orange"} count={80} />
+          <CountCard text="현재 지원자 수" boxColor={"blue"} count={countData.totalRecruiter || 0} />
+          <CountCard text="남은 평가 서류 수" boxColor={"green"} count={countData.notCompletedRecruiter || 0} />
+          <CountCard text="합격자 수" boxColor={"orange"} count={countData.completedRecruiter || 0} />
         </FlexBox>
         <FlexBox className="justify-between w-[1320px] mx-auto">
           <Tab
             categories={["전체", "평가 진행 전", "불합격", "합격"]}
-            active={activeTab}
-            onChange={setActiveTab}
+            active={currentTab}
+            onChange={(tab) => {
+              setActiveTab(tab);
+              setCurrentTab(tab);
+              setCurrentPage(1);
+              // 탭 변경 시 캐시 무효화
+              queryClient.invalidateQueries({ queryKey: ["pagination", "최종 서류 평가"] });
+            }}
           />
 
           <FlexBox className="gap-4">
@@ -192,7 +235,7 @@ useEffect(() => {
           <ApplicationTable
             rows={[
               "지원 분야",
-              "이름",
+              "이름", 
               "성별",
               "학교",
               "평가 완료 인원",
@@ -205,6 +248,7 @@ useEffect(() => {
             setCurrentPage={setCurrentPage}
             navigate={navigate}
             baseUrl="/evaluation/document/final"
+            pageType="final"
           />
         </div>
       </Body>

@@ -3,7 +3,7 @@ import Body from "@/components/Layout/Body";
 import FlexBox from "@/components/Layout/FlexBox";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
-import { formatDateTime, formatDateTimeInput } from "@/utils/formatDate";
+import { formatDateTime } from "@/utils/formatDate";
 import Icon from "@/components/Icon/Icon";
 
 import ToastMessage from "@/components/Modal/ToastMessage";
@@ -45,8 +45,6 @@ function parseToISO(dateTimeStr: string): string | null {
 const FinalPassSetting = () => {
   const {
     isLoading,
-    mutationData,
-    error,
     isError,
     totalFee,
     setTotalFee,
@@ -98,7 +96,7 @@ const FinalPassSetting = () => {
 
   const [isPending, setIsPending] = useState(false);
   const [isToastOpen, setIsToastOpen] = useState(false);
-  const [toastText, setToastText] = useState("");
+  //const [toastText, setToastText] = useState("");
 
   useEffect(() => {
     if (isLoading || isError) {

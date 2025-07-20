@@ -4,12 +4,12 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import FlexBox from "@/components/Layout/FlexBox";
 import Body from "@/components/Layout/Body";
 import Tab from "@/components/Tab/Tab";
-import { fetchInterviewer } from "@/pages/Setting/api/Interview";
-import type { Resume } from "@/types/interview";
+import Accordion from "@/components/Accordion/Accordion";
+import { fetchDocumentDetail, fetchResumeQuestions, fetchMemberInfo, fetchFinalEvaluation } from "./api";
+import type { Resume, Question } from "@/types/interview";
+import TextArea from "@/components/Input/TextArea";
 import SkeletonAccordion from "@/components/Accordion/Skeleton";
 import Icon from "@/components/Icon/Icon";
-import CommonQuestions from "./TabContents/CommonQuestions";
-import PartQuestions from "./TabContents/PartQuestions";
 import DecisionTab from "./TabContents/DecisionTab";
 
 const tabCategories = ["파트별 질문", "공통 질문"];
@@ -17,26 +17,70 @@ const tabCategories = ["파트별 질문", "공통 질문"];
 const FinalDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { data: applicant, isLoading } = useQuery<Resume>({
-    queryKey: ["evaluation", "detail"],
-    queryFn: () => fetchInterviewer(id!),
-  });
   const { state } = useLocation();
   const application = state?.application;
+  
+  // 지원자 정보 조회
+  const { data: memberInfo, isLoading: memberInfoLoading } = useQuery({
+    queryKey: ["evaluation", "member-info", id],
+    queryFn: () => fetchMemberInfo(id || "1"),
+    enabled: !!id, // id가 있을 때만 쿼리 실행
+  });
+  
+  // 지원서 질문 정보 조회
+  const { data: resumeQuestions, isLoading: questionsLoading } = useQuery({
+    queryKey: ["evaluation", "resume-questions", id],
+    queryFn: () => {
+      // application에서 resumeId를 가져와서 사용
+      const resumeId = application?.resumeId;
+      return fetchResumeQuestions(resumeId);
+    },
+    enabled: !!id && !!application?.resumeId, // id와 resumeId가 있을 때만 쿼리 실행
+  });
+
+  // 운영진 평가 조회
+  const { data: finalEvaluation, isLoading: evaluationLoading } = useQuery({
+    queryKey: ["evaluation", "final-evaluation", id],
+    queryFn: () => {
+      const resumeId = application?.resumeId;
+      return fetchFinalEvaluation(resumeId);
+    },
+    enabled: !!id && !!application?.resumeId, // id와 resumeId가 있을 때만 쿼리 실행
+  });
+
   const [activeLeftTab, setActiveLeftTab] = useState("공통 질문");
+  const [activeRightTab, setActiveRightTab] = useState("서류 평가 분석");
+
+  const isLoading = memberInfoLoading || questionsLoading || evaluationLoading;
+
+  const questions = resumeQuestions?.result;
+  const commonQuestions = questions?.commonQuestions || [];
+  const partQuestions = questions?.partQuestions || [];
+
+  // 지원자 기본 정보는 API에서 가져온 데이터 우선 사용, 없으면 state에서 가져오기
+  const applicant = memberInfo?.result || application;
+
+  // 운영진 평가 데이터 처리
+  const evaluations = finalEvaluation?.result || [];
+  const averageScore = evaluations.length > 0 
+    ? (evaluations.reduce((sum: number, evaluation: any) => sum + evaluation.score, 0) / evaluations.length).toFixed(1)
+    : "0.0";
+
 
   const renderLabels = (label: string) => {
     switch (label) {
       case "성별":
-        return applicant?.gender === "MALE" ? "남자" : "여자";
+        return applicant?.sex === "MALE" ? "남자" : "여자";
       case "학교":
         return applicant?.school;
       case "연락처":
-        return applicant?.contact;
+        return applicant?.phoneNumber;
       case "생년월일":
-        return applicant?.birthDate;
+        return applicant?.birthday;
       case "전공/부전공":
-        return `${applicant?.major} / ${applicant?.subMajor}`;
+        const major = applicant?.major;
+        const minor = applicant?.minor;
+        return minor ? `${major} / ${minor}` : major;
       case "이메일 주소":
         return applicant?.email;
       default:
@@ -53,10 +97,10 @@ const FinalDetail = () => {
             type="ChevronDown"
             size={40}
             className="rotate-90 cursor-pointer"
-            onClick={() => navigate("/evaluation/interview/final")}
+            onClick={() => navigate("/evaluation/document/final")}
           />
           <h1 className="font-bold text-4xl">
-            {applicant?.name} ({applicant?.field})
+            {applicant?.username} ({applicant?.field})
           </h1>
         </FlexBox>
       </FlexBox>
@@ -92,26 +136,78 @@ const FinalDetail = () => {
                   <SkeletonAccordion key={index} />
                 ))}
 
-              {applicant && !isLoading && activeLeftTab === "공통 질문" && (
-                <CommonQuestions applicant={applicant} />
-              )}
-              {applicant && !isLoading && activeLeftTab === "파트별 질문" && (
-                <PartQuestions
-                  applicant={applicant}
-                  application={application}
-                />
-              )}
+              {applicant &&
+                !isLoading &&
+                activeLeftTab === "공통 질문" &&
+                commonQuestions.length > 0 &&
+                commonQuestions.map((q: Question) => (
+                  <Accordion
+                    key={q.question}
+                    title={q.question}
+                    className="w-full"
+                  >
+                    <TextArea
+                      value={q.answer}
+                      readOnly={true}
+                      className="w-full h-full"
+                    />
+                  </Accordion>
+                ))}
+              {applicant &&
+                !isLoading &&
+                activeLeftTab === "공통 질문" &&
+                commonQuestions.length === 0 && (
+                  <div className="flex flex-col justify-center items-center gap-4 p-4 text-gray-700 w-full h-full text-center">
+                    <Icon type="Alert" size={28} />
+                    <p>공통 질문이 없습니다.</p>
+                  </div>
+                )}
+              {applicant &&
+                !isLoading &&
+                activeLeftTab === "파트별 질문" &&
+                partQuestions.length > 0 &&
+                partQuestions.map((q: Question, index: number) => (
+                  <Accordion
+                    key={q.question}
+                    title={
+                      index === 0 ? (application?.name || '') + q.question : q.question
+                    }
+                    className="w-full"
+                  >
+                    <TextArea
+                      value={q.answer}
+                      readOnly={true}
+                      className="w-full h-full"
+                    />
+                  </Accordion>
+                ))}
+              {applicant &&
+                !isLoading &&
+                activeLeftTab === "파트별 질문" &&
+                partQuestions.length === 0 && (
+                  <div className="flex flex-col justify-center items-center gap-4 p-4 text-gray-700 w-full h-full text-center">
+                    <Icon type="Alert" size={28} />
+                    <p>파트별 질문이 없습니다.</p>
+                  </div>
+                )}
             </FlexBox>
           </div>
           <div className="flex flex-col gap-6 flex-1 rounded-xl min-h-[650px] px-6">
             <Tab
-              categories={["합격 여부 결정"]}
-              active={"합격 여부 결정"}
-              onChange={() => {}}
+              categories={["서류 평가 분석", "합격 여부 결정"]}
+              active={activeRightTab}
+              onChange={setActiveRightTab}
             />
             <DecisionTab
               message="면접 전형
           결과를 선택해주세요"
+              finalEvaluation={{
+                averageScore,
+                evaluatorCount: evaluations.length,
+                evaluations
+              }}
+              activeTab={activeRightTab}
+              resumeId={application?.resumeId}
             />
           </div>
         </div>
