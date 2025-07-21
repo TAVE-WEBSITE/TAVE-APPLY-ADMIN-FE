@@ -8,6 +8,7 @@ import type { TimeTableList } from "@/types/interview";
 import TimeTable from "@/components/TimeTable";
 import Button from "@/components/Button/Button";
 import Icon from "@/components/Icon/Icon";
+import { fetchList } from "@/api/fetchList";
 
 const Interview = () => {
   const navigate = useNavigate();
@@ -29,11 +30,19 @@ const Interview = () => {
     setIsPending(false);
   };
 
-  // 면접 평가 시트 다운로드는 어디에..?
   const downloadSheet = async () => {
     setIsPending2(true);
     await getSheet();
     setIsPending2(false);
+  };
+
+  const handleCellClick = async (date: string, time: string) => {
+    const data = await fetchList("면접 현황", { date, time });
+    const count = data?.result?.resumeList?.length ?? 0;
+    navigate(`/evaluation/interview/${date}`, {
+      state: { date, time, count }
+    });
+    console.log(date, time, count);
   };
 
   return (
@@ -54,7 +63,7 @@ const Interview = () => {
       </FlexBox>
       <Body className="pt-8 gap-8">
         <FlexBox className="justify-between w-[1320px] rounded-xl border border-gray-300 mx-auto">
-          <TimeTable timeTable={timeTable} />
+          <TimeTable timeTable={timeTable} onCellClick={handleCellClick} />
         </FlexBox>
         <FlexBox className="mx-auto gap-4 justify-center pb-12">
           <Button

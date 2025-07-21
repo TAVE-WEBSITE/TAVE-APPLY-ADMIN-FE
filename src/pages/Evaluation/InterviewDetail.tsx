@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import FlexBox from "@/components/Layout/FlexBox";
 import Icon from "@/components/Icon/Icon";
 import Body from "@/components/Layout/Body";
@@ -10,11 +10,15 @@ import { useQuery } from "@tanstack/react-query";
 import TextArea from "@/components/Input/TextArea";
 import Accordion from "@/components/Accordion/Accordion";
 import type { Resume } from "@/types/interview";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SkeletonAccordion from "@/components/Accordion/Skeleton";
+import { formatKorDate, formatTimeRange } from "@/utils/formatDate";
+import { fetchList } from "@/api/fetchList";
 
 const InterviewDetail = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { date, time, count } = location.state || {};
   //const { id: date } = useParams();
   const { data: applicant, isLoading } = useQuery<Resume>({
     queryKey: ["setting", "interviewer"],
@@ -23,6 +27,24 @@ const InterviewDetail = () => {
   const [activeLabels, setActiveLabels] = useState(new Set());
   const [activeTab, setActiveTab] = useState("파트별 질문");
 
+  // 면접 현황 지원서 목록 데이터 패칭
+  const { data: interviewData, isLoading: loadingResumeList } = useQuery({
+    queryKey: ["interview-detail", date, time],
+    queryFn: () => fetchList("면접 현황", { date, time }),
+    enabled: Boolean(date) && Boolean(time)
+  });
+
+  // 콘솔에 데이터 출력
+  if (interviewData) {
+    console.log("면접 현황 상세 데이터:", interviewData);
+  }
+  useEffect(() => {
+    console.log("질문 유형", activeTab);
+  }, [activeTab]);
+
+  // 공통 질문 데이터 추출
+  const commonQuestions = interviewData?.result?.resumeList?.[0]?.common?.[0]?.commonQuestions ?? [];
+  console.log("공통 질문 데이터:", commonQuestions);
   const handleActiveNames = (name: string) => {
     setActiveLabels((prev) => {
       const newSet = new Set(prev);
@@ -43,7 +65,7 @@ const InterviewDetail = () => {
             type="ChevronDown"
             size={40}
             className="rotate-90 cursor-pointer"
-            onClick={() => navigate("/evaluation/document/final")}
+            onClick={() => navigate("/evaluation/interview")}
           />
           <h1 className="font-bold text-2xl">면접 현황</h1>
         </FlexBox>
@@ -53,8 +75,8 @@ const InterviewDetail = () => {
           <Icon type={"ChevronDown"} size={18} className="rotate-90" />
         </div>
         <FlexBox direction="col">
-          <h2 className="font-bold text-xl">8월 10일 목요일</h2>
-          <p>12:00 ~ 13:00</p>
+          <h2 className="font-bold text-xl">{date ? formatKorDate(date) : "날짜"}</h2>
+          <p>{time ? formatTimeRange(time) : "시간"}</p>
         </FlexBox>
         <div className="bg-gray-800 p-2 rounded-full">
           <Icon type={"ChevronDown"} size={18} className="rotate-270" />
@@ -62,7 +84,7 @@ const InterviewDetail = () => {
       </FlexBox>
       <Body>
         <div className="w-[1344px] mx-auto flex flex-col gap-4">
-          <p className="text-gray-500 pt-8">총 면접자 4명</p>
+          <p className="text-gray-500 pt-8">총 면접자 {count ?? 0}명</p>
           <FlexBox className="gap-2">
             <label
               onClick={() => handleActiveNames("장진영")}
@@ -151,17 +173,15 @@ const InterviewDetail = () => {
                   Array.from({ length: 4 }).map((_, index) => (
                     <SkeletonAccordion key={index} />
                   ))}
+                  // 지원자 정보 API 수정 후 연결
+                  //
                 {applicant &&
                   !isLoading &&
                   activeTab === "공통 질문" &&
-                  applicant.commonQuestions.map((q) => (
-                    <Accordion
-                      key={q.question}
-                      title={q.question}
-                      className="w-full"
-                    >
+                  commonQuestions.map((q: any, idx: number) => (
+                    <Accordion key={q.id ?? idx} title={q.question} className="w-full">
                       <TextArea
-                        value={q.answer}
+                        value={q.answer ?? "미답변"}
                         readOnly={true}
                         className="w-full h-full"
                       />

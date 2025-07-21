@@ -12,11 +12,14 @@ const formatHHMin = (isoString: string) => {
   return `${hh}:${min}`;
 };
 
-const formatKorDate = (isoString: string) => {
-  const date = new Date(isoString);
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  return `${mm}월 ${dd}일`;
+const formatKorDate = (dateString: string) => {
+  // '2025-00-00' 형식도 지원
+  const date = dateString.includes('T') ? new Date(dateString) : new Date(dateString + 'T00:00:00');
+  const mm = date.getMonth() + 1;
+  const dd = date.getDate();
+  const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+  const day = dayNames[date.getDay()];
+  return `${mm}월 ${dd}일 ${day}요일`;
 };
 
 /**
@@ -84,6 +87,13 @@ const formatDateTimeInput = (
   setValue(formatted);
 };
 
+// '12:00' -> '12:00~13:00' 변환
+const formatTimeRange = (time: string) => {
+  const [hour, min] = time.split(":").map(Number);
+  const nextHour = (hour + 1).toString().padStart(2, "0");
+  return `${hour.toString().padStart(2, "0")}:${min.toString().padStart(2, "0")}` + `~${nextHour}:${min.toString().padStart(2, "0")}`;
+};
+
 export {
   formatMMDD,
   formatHHMin,
@@ -91,4 +101,5 @@ export {
   formatDateTime,
   formatDateTimeInput,
   formatKorDate,
+  formatTimeRange,
 };

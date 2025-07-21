@@ -5,9 +5,10 @@ import { useNavigate } from "react-router-dom";
 
 interface TimeTableProps {
   timeTable: TimeTableList[];
+  onCellClick?: (date: string, time: string) => void;
 }
 
-const TimeTable = ({ timeTable }: TimeTableProps) => {
+const TimeTable = ({ timeTable, onCellClick }: TimeTableProps) => {
   const navigate = useNavigate();
 
   // 모든 시간대를 추출하여 정렬
@@ -65,9 +66,10 @@ const TimeTable = ({ timeTable }: TimeTableProps) => {
               return (
                 <td
                   key={`${day.groupByDay}-${timeSlot}`}
-                  onClick={() =>
-                    navigate(`/evaluation/interview/${day.groupByDay}`)
-                  }
+                  onClick={() => {
+                    if (onCellClick) onCellClick(day.groupByDay, timeSlot);
+                    navigate(`/evaluation/interview/${day.groupByDay}`);
+                  }}
                   className={`border-r border-gray-300 w-1/${timeTable.length} bg-gray-50 hover:bg-gray-100 cursor-pointer`}
                 >
                   <div className="p-2 h-full min-h-[120px]">
