@@ -31,7 +31,9 @@ export const fetchList = async (
         }
         break;
       case "면접 설정":
-        url = `/v1/manager/interview-final?pageNum=${page}&pageSize=${size}`;
+        url = `/v1/manager/interview-final`;
+        params.pageNum = page;
+        params.pageSize = size;
         break;
       case "서류 평가":
         url = `/v1/manager/resume/evaluate`;
@@ -40,22 +42,31 @@ export const fetchList = async (
         url = `/v1/manager/resume/evaluate/final`;
         break;
       case "최종 면접 평가":
-        url = `/v1/manager/interview-final?pageNum=${page}&pageSize=${size}`;
-        const finalInterviewRes = await axiosInstance.get(url);
+        url = `/v1/manager/interview-final`;
+        params.pageNum = page;
+        params.pageSize = size;
+        const finalInterviewRes = await axiosInstance.get(url, { params });
         return finalInterviewRes.data;
     }
 
     console.log("=== fetchList API 요청 ===");
-    console.log("URL:", url);
+    console.log("Base URL:", axiosInstance.defaults.baseURL);
+    console.log("Full URL:", `${axiosInstance.defaults.baseURL}${url}`);
     console.log("Params:", params);
     console.log("Status:", status);
 
     const res = await axiosInstance.get(url, { params });
 
+    console.log("응답 상태:", res.status);
+    console.log("응답 헤더:", res.headers);
     console.log("응답 데이터:", res.data);
     return res.data;
   } catch (error: any) {
-
+    console.error("=== fetchList API 에러 ===");
+    console.error("에러 메시지:", error.message);
+    console.error("에러 응답:", error.response?.data);
+    console.error("에러 상태:", error.response?.status);
+    console.error("에러 헤더:", error.response?.headers);
     console.error("전체 에러:", error);
     throw error;
   }

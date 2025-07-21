@@ -94,42 +94,6 @@ const Default = () => {
 
     console.log("면접 설정 등록 데이터:", payload);
 
-    if (data) {
-      const result: InterviewAddress[] = data.result;
-      setInterviewAddress(result);
-    }
-  }, [data]);
-
-  const handleGeneralAddressChange = (value: string) => {
-    const updated = [...interviewAddress].map((e) => {
-      return { ...e, generalAddress: value };
-    });
-    setInterviewAddress(updated);
-  };
-
-  const handleDetailAddressChange = (value: string) => {
-    const updated = [...interviewAddress].map((e) => {
-      return { ...e, detailAddress: value };
-    });
-    setInterviewAddress(updated);
-  };
-
-  const handleOpenChatLinkChange = (index: number, value: string) => {
-    const updated = [...interviewAddress];
-    updated[index] = { ...updated[index], openChatLink: value };
-    setInterviewAddress(updated);
-  };
-
-  const handleCodeChange = (index: number, value: string) => {
-    const updated = [...interviewAddress];
-    updated[index] = { ...updated[index], code: value };
-    setInterviewAddress(updated);
-  };
-
-  const handleSubmit = () => {
-    const payload: Omit<InterviewAddress, "id">[] = interviewAddress.map(
-      ({ id, ...rest }) => rest
-    );
     mutate(payload);
   };
 
