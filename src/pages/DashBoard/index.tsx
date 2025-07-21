@@ -1,31 +1,35 @@
 import { useRef } from "react";
 import FlexBox from "@/components/Layout/FlexBox";
-// import CountCard from "@/components/Card/CountCard";
-// import DonutChart from "@/components/Chart/DonutChart";
+import CountCard from "@/components/Card/CountCard";
+import DonutChart from "@/components/Chart/DonutChart";
 import Modal from "@/components/Modal/Modal";
 import { formatDateTime } from "@/utils/formatDate";
-// import SkeletonDonutChart from "@/components/Chart/SkeletonUI/SkeletonDonutChart";
-// import { useDashBoard } from "@/hooks/DashBoard/useDashBoard";
+import SkeletonDonutChart from "@/components/Chart/SkeletonUI/SkeletonDonutChart";
+import { useDashBoard } from "@/hooks/DashBoard/useDashBoard";
 
 export const Page = () => {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  // const {
-  //   genderQuery: {
-  //     data: genderData,
-  //     isLoading: isGenderLoading,
-  //     isError: isGenderError,
-  //   },
-  //   skillQuery: {
-  //     data: skillData,
-  //     isLoading: isSkillLoading,
-  //     isError: isSkillError,
-  //   },
-  // } = useDashBoard();
+  const {
+    genderQuery: {
+      data: genderData,
+      isLoading: isGenderLoading,
+      isError: isGenderError,
+    },
+    skillQuery: {
+      data: skillData,
+      isLoading: isSkillLoading,
+      isError: isSkillError,
+    },
+    dashboardQuery: {
+      data: dashboardData,
+      isLoading: isDashboardLoading,
+    }
+  } = useDashBoard();
 
-  // const calculateSum = () => {
-  //   if (genderData) return genderData.reduce((a, b) => a + b.count, 0);
-  //   return 0;
-  // };
+  const calculateSum = () => {
+    if (genderData) return genderData.reduce((a, b) => a + b.count, 0);
+    return 0;
+  };
 
   return (
     <div className="text-white">
@@ -40,25 +44,25 @@ export const Page = () => {
       </FlexBox>
 
       <section className="min-h-[calc(100vh-244px)] bg-gray-100 flex flex-col gap-8">
-        {/* <FlexBox className="w-full pt-8 justify-center gap-4">
-          {isGenderLoading ? (
+        <FlexBox className="w-full pt-8 justify-center gap-4">
+          {isDashboardLoading ? (
             <CountCard text="현재 지원자수" boxColor="blue" count={"-"} />
           ) : (
             <CountCard
               text="현재 지원자수"
               boxColor="blue"
-              count={calculateSum()}
+              count={dashboardData?.totalCount ?? 0}
             />
           )}
-          {isGenderLoading ? (
-            <CountCard text="전 기수 대비" boxColor="green" count="-" />
+          {isDashboardLoading ? (
+            <CountCard text="전 기수 대비" boxColor="green" count={"-"} />
           ) : (
-            <CountCard text="전 기수 대비" boxColor="green" count="+10%" />
+            <CountCard text="전 기수 대비" boxColor="green" count={`${dashboardData?.comparisonRatio ?? 0}%`} />
           )}
-          {isGenderLoading ? (
-            <CountCard text="임시 저장 수" boxColor="orange" count="-" />
+          {isDashboardLoading ? (
+            <CountCard text="임시 저장 수" boxColor="orange" count={"-"} />
           ) : (
-            <CountCard text="임시 저장 수" boxColor="orange" count={100} />
+            <CountCard text="임시 저장 수" boxColor="orange" count={dashboardData?.temperCount ?? 0} />
           )}
         </FlexBox>
 
@@ -95,7 +99,7 @@ export const Page = () => {
               )
             )}
           </div>
-        </FlexBox> */}
+        </FlexBox>
         <Modal
           dialogRef={dialogRef}
           defaultOpen={true}
