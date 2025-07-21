@@ -21,7 +21,7 @@ export const useDashBoard = () => {
   const fetchChartData = async (): Promise<DashboardResponse> => {
     try {
       const res = await axiosInstance.get(`/v1/admin/dashboard`);
-      console.log("res", res);
+      // console.log("res", res);
       return res.data;
     } catch (error) {
       console.error(`Failed to fetch chart data`, error);
