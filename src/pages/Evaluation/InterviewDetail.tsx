@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import TextArea from "@/components/Input/TextArea";
 import Accordion from "@/components/Accordion/Accordion";
 import type { Resume } from "@/types/interview";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import SkeletonAccordion from "@/components/Accordion/Skeleton";
 import { formatKorDate, formatTimeRange } from "@/utils/formatDate";
 import { fetchList } from "@/api/fetchList";
@@ -19,6 +19,21 @@ const InterviewDetail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { date, time, count } = location.state || {};
+  // 시간 슬롯 배열 (예시: 09:00, 10:00, ...)
+  const timeSlots = useMemo(() => [
+    "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
+  ], []);
+
+  const goToTimeSlot = (direction: "prev" | "next") => {
+    if (!time) return;
+    const idx = timeSlots.indexOf(time);
+    if (idx === -1) return;
+    const newIdx = direction === "prev" ? idx - 1 : idx + 1;
+    if (newIdx < 0 || newIdx >= timeSlots.length) return;
+    navigate(`/evaluation/interview/${date}`, {
+      state: { date, time: timeSlots[newIdx], count }
+    });
+  };
   //const { id: date } = useParams();
   const { data: applicant, isLoading } = useQuery<Resume>({
     queryKey: ["setting", "interviewer"],
@@ -81,14 +96,14 @@ const InterviewDetail = () => {
       </FlexBox>
       <FlexBox className="justify-center gap-4 pb-8">
         <div className="bg-gray-800 p-2 rounded-full">
-          <Icon type={"ChevronDown"} size={18} className="rotate-90" />
+          <Icon type={"ChevronDown"} size={18} className="rotate-90 cursor-pointer" onClick={() => goToTimeSlot("prev")} />
         </div>
         <FlexBox direction="col">
           <h2 className="font-bold text-xl">{date ? formatKorDate(date) : "날짜"}</h2>
           <p>{time ? formatTimeRange(time) : "시간"}</p>
         </FlexBox>
         <div className="bg-gray-800 p-2 rounded-full">
-          <Icon type={"ChevronDown"} size={18} className="rotate-270" />
+          <Icon type={"ChevronDown"} size={18} className="rotate-270 cursor-pointer" onClick={() => goToTimeSlot("next")} />
         </div>
       </FlexBox>
       <Body>
