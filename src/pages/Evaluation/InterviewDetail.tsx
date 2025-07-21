@@ -56,6 +56,15 @@ const InterviewDetail = () => {
       return newSet;
     });
   };
+  // 파트별 질문 데이터 추출
+  const partQuestions = interviewData?.result?.resumeList?.[0]?.specific?.[0]?.specificQuestions ?? [];
+
+
+  // 지원자 정보 추출
+  const memberInfo = interviewData?.result?.resumeList?.[0]?.resumeMemberInfoDto;
+
+  // 지원서 목록 추출
+  const resumeList = interviewData?.result?.resumeList ?? [];
 
   return (
     <div className="text-white">
@@ -129,102 +138,74 @@ const InterviewDetail = () => {
           </FlexBox>
           <div className="w-full h-px border-t border-t-gray-300 mb-8" />
         </div>
-        <article className="w-[1344px] mx-auto flex gap-4 text-gray-900 pb-12">
-          {Array.from({ length: 2 }, () => (
-            <div className="flex flex-col gap-4 rounded-lg border border-gray-300 bg-white w-1/2 px-6 py-4">
-              <FlexBox className="gap-2">
-                <h2 className="font-bold text-xl">장진영</h2>
-                <Chip title="웹 프론트" />
-              </FlexBox>
-              <div className="grid grid-cols-2 gap-4">
-                <FlexBox className="gap-4">
-                  <label htmlFor="gender" className="text-gray-500">
-                    성별
-                  </label>
-                  <p id="gender">여자</p>
-                </FlexBox>
-                <FlexBox className="gap-4">
-                  <label htmlFor="school" className="text-gray-500">
-                    학교
-                  </label>
-                  <p id="school">홍익대학교</p>
-                </FlexBox>
-                <FlexBox className="gap-4">
-                  <label htmlFor="birth" className="text-gray-500">
-                    생년월일
-                  </label>
-                  <p id="gender">2000.05.19</p>
-                </FlexBox>
-                <FlexBox className="gap-4">
-                  <label htmlFor="major" className="text-gray-500">
-                    전공
-                  </label>
-                  <p id="major">컴퓨터공학과, 통계학과</p>
-                </FlexBox>
-              </div>
-              <Tab
-                categories={["파트별 질문", "공통 질문"]}
-                active={activeTab}
-                onChange={setActiveTab}
-                className="pt-8"
-              />
-              <FlexBox direction="col" className="gap-8 overflow-y-scroll py-6">
-                {isLoading &&
-                  Array.from({ length: 4 }).map((_, index) => (
-                    <SkeletonAccordion key={index} />
-                  ))}
-                  // 지원자 정보 API 수정 후 연결
-                  //
-                {applicant &&
-                  !isLoading &&
-                  activeTab === "공통 질문" &&
-                  commonQuestions.map((q: any, idx: number) => (
-                    <Accordion key={q.id ?? idx} title={q.question} className="w-full">
-                      <TextArea
-                        value={q.answer ?? "미답변"}
-                        readOnly={true}
-                        className="w-full h-full"
-                      />
-                    </Accordion>
-                  ))}
-                {applicant &&
-                  !isLoading &&
-                  activeTab === "파트별 질문" &&
-                  applicant.partQuestions.map((q, index) => (
-                    <Accordion
-                      key={q.question}
-                      title={
-                        index === 0 ? applicant.name + q.question : q.question
-                      }
-                      className="w-full"
-                    >
-                      {index === 0 ? (
-                        <StepCounter
-                          title="Javascript"
-                          currentStep={2}
-                          setCurrentStep={() => {}}
-                          maxStep={5}
-                          stepLabels={[
-                            "입문",
-                            "초급",
-                            "중급",
-                            "고급",
-                            "전문가",
-                          ]}
-                        />
-                      ) : (
-                        <TextArea
-                          value={q.answer}
-                          readOnly={true}
-                          className="w-full h-full"
-                        />
-                      )}
-                    </Accordion>
-                  ))}
-              </FlexBox>
-            </div>
-          ))}
-        </article>
+        {/* 지원서 목록을 2개씩 article로 나눠서 렌더링 */}
+        {Array.from({ length: Math.ceil(resumeList.length / 2) }).map((_, articleIdx) => (
+          <article key={articleIdx} className="w-[1344px] mx-auto flex gap-4 text-gray-900 pb-12">
+            {resumeList.slice(articleIdx * 2, articleIdx * 2 + 2).map((resume: any, idx: number) => {
+              const memberInfo = resume.resumeMemberInfoDto;
+              const partQuestions = resume.specific?.[0]?.specificQuestions ?? [];
+              const commonQuestions = resume.common?.[0]?.commonQuestions ?? [];
+              return (
+                <div key={resume.resumeId} className="flex flex-col gap-4 rounded-lg border border-gray-300 bg-white w-1/2 px-6 py-4">
+                  <FlexBox className="gap-2">
+                    <h2 className="font-bold text-xl">{memberInfo?.username ?? '-'}</h2>
+                    <Chip title={memberInfo?.field ?? '-'} />
+                  </FlexBox>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FlexBox className="gap-4">
+                      <label htmlFor="gender" className="text-gray-500">성별</label>
+                      <p id="gender">{memberInfo?.sex ?? '-'}</p>
+                    </FlexBox>
+                    <FlexBox className="gap-4">
+                      <label htmlFor="school" className="text-gray-500">학교</label>
+                      <p id="school">{memberInfo?.univ ?? '-'}</p>
+                    </FlexBox>
+                    <FlexBox className="gap-4">
+                      <label htmlFor="birth" className="text-gray-500">생년월일</label>
+                      <p id="birth">{memberInfo?.birthday ?? '-'}</p>
+                    </FlexBox>
+                    <FlexBox className="gap-4">
+                      <label htmlFor="major" className="text-gray-500">전공</label>
+                      <p id="major">{memberInfo?.major ?? '-'}</p>
+                    </FlexBox>
+                  </div>
+                  <Tab
+                    categories={["파트별 질문", "공통 질문"]}
+                    active={activeTab}
+                    onChange={setActiveTab}
+                    className="pt-8"
+                  />
+                  <FlexBox direction="col" className="gap-8 overflow-y-scroll py-6">
+                    {activeTab === "공통 질문" &&
+                      commonQuestions.map((q: any) => (
+                        <Accordion key={q.id} title={q.question} className="w-full">
+                          <TextArea
+                            value={q.answer ?? "미답변"}
+                            readOnly={true}
+                            className="w-full h-full"
+                          />
+                        </Accordion>
+                      ))}
+                    {activeTab === "파트별 질문" &&
+                      partQuestions.map((q: any, index: number) => (
+                        <Accordion
+                          key={q.id}
+                          title={q.question}
+                          className="w-full"
+                        >
+                          <TextArea
+                            value={q.answer ?? "미답변"}
+                            readOnly={true}
+                            className="w-full h-full"
+                          />
+                        </Accordion>
+                      ))}
+                  </FlexBox>
+                </div>
+              );
+            })}
+          </article>
+        ))}
       </Body>
     </div>
   );
