@@ -2,6 +2,7 @@ import Icon from "@/components/Icon/Icon";
 import FlexBox from "@/components/Layout/FlexBox";
 import type { SkillSet } from "@/hooks/Setting/Document/useDocumentStore";
 import useDocumentStore from "@/hooks/Setting/Document/useDocumentStore";
+import { postSkillSetByField, deleteSkillSetById } from "@/pages/Setting/api/Document";
 
 interface ChipControllerProps {
   chips: SkillSet[];
@@ -21,9 +22,21 @@ const ChipController = ({ chips, focused = false }: ChipControllerProps) => {
     setSkillSets([...skillSets, newSkill]);
   };
 
-  const handleRemoveChip = (id: any) => {
-    const temp = skillSets.filter((skill) => skill.id !== id);
-    setSkillSets(temp);
+  const handleRemoveChip = async (id: any) => {
+    try {
+      // API 호출하여 서버에서 삭제
+      await deleteSkillSetById(id);
+      console.log("스킬셋이 성공적으로 삭제되었습니다:", id);
+      
+      // 로컬 상태에서도 제거
+      const temp = skillSets.filter((skill) => skill.id !== id);
+      setSkillSets(temp);
+    } catch (error) {
+      console.error("스킬셋 삭제 실패:", error);
+      // 에러가 발생해도 로컬에서는 제거 (사용자 경험을 위해)
+      const temp = skillSets.filter((skill) => skill.id !== id);
+      setSkillSets(temp);
+    }
   };
 
   const handleEditChip = (id: any, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,6 +44,33 @@ const ChipController = ({ chips, focused = false }: ChipControllerProps) => {
       skill.id === id ? { ...skill, language: e.target.value } : skill
     );
     setSkillSets(newSkills);
+  };
+
+  const handleSaveSkill = async (id: any, skillName: string) => {
+    if (skillName.trim() && currentType) {
+      try {
+        await postSkillSetByField(currentType, skillName.trim());
+        console.log("스킬셋이 성공적으로 생성되었습니다:", skillName);
+      } catch (error) {
+        console.error("스킬셋 생성 실패:", error);
+      }
+    }
+  };
+
+  const handleKeyDown = (id: any, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      const skill = skillSets.find(s => s.id === id);
+      if (skill) {
+        handleSaveSkill(id, skill.language);
+      }
+    }
+  };
+
+  const handleBlur = (id: any) => {
+    const skill = skillSets.find(s => s.id === id);
+    if (skill && skill.language.trim()) {
+      handleSaveSkill(id, skill.language);
+    }
   };
 
   return (
@@ -44,6 +84,8 @@ const ChipController = ({ chips, focused = false }: ChipControllerProps) => {
             value={chip.language}
             className="bg-transparent outline-none flex-1 min-w-0"
             onChange={(e) => handleEditChip(chip.id, e)}
+            onKeyDown={(e) => handleKeyDown(chip.id, e)}
+            onBlur={() => handleBlur(chip.id)}
           />
           <Icon
             type="Plus"

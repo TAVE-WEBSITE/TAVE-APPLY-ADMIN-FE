@@ -5,8 +5,8 @@ import FlexBox from "@/components/Layout/FlexBox";
 import Body from "@/components/Layout/Body";
 import Tab from "@/components/Tab/Tab";
 import Accordion from "@/components/Accordion/Accordion";
-import { fetchDocumentDetail } from "./api";
-import type { Resume } from "@/types/interview";
+import { fetchDocumentDetail, fetchResumeQuestions, fetchMemberInfo } from "./api";
+import type { Resume, Question } from "@/types/interview";
 import TextArea from "@/components/Input/TextArea";
 import StepCounter from "@/components/StepCounter/StepCounter";
 import SkeletonAccordion from "@/components/Accordion/Skeleton";
@@ -22,12 +22,27 @@ const tabCategories = ["파트별 질문", "공통 질문"];
 const Detail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { data: applicant, isLoading } = useQuery<Resume>({
-    queryKey: ["evaluation", "detail"],
-    queryFn: () => fetchDocumentDetail(id || "1"),
-  });
   const { state } = useLocation();
   const application = state?.application;
+  
+  // 지원자 정보 조회
+  const { data: memberInfo, isLoading: memberInfoLoading } = useQuery({
+    queryKey: ["evaluation", "member-info", id],
+    queryFn: () => fetchMemberInfo(id || "1"),
+    enabled: !!id, // id가 있을 때만 쿼리 실행
+  });
+  
+  // 지원서 질문 정보 조회만 유지
+  const { data: resumeQuestions, isLoading: questionsLoading } = useQuery({
+    queryKey: ["evaluation", "resume-questions", id],
+    queryFn: () => {
+      // application에서 resumeId를 가져와서 사용
+      const resumeId = application?.resumeId ;
+      return fetchResumeQuestions(resumeId);
+    },
+    enabled: !!id && !!application?.resumeId, // id와 resumeId가 있을 때만 쿼리 실행
+  });
+
   const [activeTab, setActiveTab] = useState("공통 질문");
   const [postMessage, setPostMessage] = useState("");
   const [isToastOpen, setIsToastOpen] = useState(false);
@@ -35,15 +50,32 @@ const Detail = () => {
   const [score, setScore] = useState("");
   const [opinion, setOpinion] = useState("");
 
+  const isLoading = memberInfoLoading || questionsLoading;
+
+  const questions = resumeQuestions?.result;
+  const commonQuestions = questions?.commonQuestions || [];
+  const partQuestions = questions?.partQuestions || [];
+
+  // 지원자 기본 정보는 API에서 가져온 데이터 우선 사용, 없으면 state에서 가져오기
+  const applicant = memberInfo?.result || application;
+
   const { mutate, isPending, isError } = useMutation({
     mutationKey: ["evaluation", "detail"],
-    mutationFn: () => postApplication(id!, { score, opinion }),
+    mutationFn: () => {
+      // score를 0.0 형식으로 변환
+      const numericScore = parseFloat(score) || 0.0;
+      const requestBody = {
+        score: numericScore,
+        opinion: opinion
+      };
+      return fetchDocumentDetail(application?.resumeId || id!, requestBody);
+    },
     onSuccess: (response) => {
-      setPostMessage(response.message);
+      setPostMessage(response.message || "평가가 성공적으로 제출되었습니다.");
       setIsToastOpen(true);
     },
-    onError: (response) => {
-      setPostMessage(response.message);
+    onError: (error: any) => {
+      setPostMessage(error.response?.data?.message || "평가 제출에 실패했습니다.");
       setIsToastOpen(true);
     },
   });
@@ -51,15 +83,17 @@ const Detail = () => {
   const renderLabels = (label: string) => {
     switch (label) {
       case "성별":
-        return applicant?.gender === "MALE" ? "남자" : "여자";
+        return applicant?.sex === "MALE" ? "남자" : "여자";
       case "학교":
         return applicant?.school;
       case "연락처":
-        return applicant?.contact;
+        return applicant?.phoneNumber;
       case "생년월일":
-        return applicant?.birthDate;
+        return applicant?.birthday;
       case "전공/부전공":
-        return `${applicant?.major} / ${applicant?.subMajor}`;
+        const major = applicant?.major;
+        const minor = applicant?.minor;
+        return minor ? `${major} / ${minor}` : major;
       case "이메일 주소":
         return applicant?.email;
         break;
@@ -80,7 +114,7 @@ const Detail = () => {
             onClick={() => navigate("/evaluation/document")}
           />
           <h1 className="font-bold text-4xl">
-            {applicant?.name} ({applicant?.field})
+            {applicant?.username} ({applicant?.field})
           </h1>
         </FlexBox>
       </FlexBox>
@@ -117,7 +151,8 @@ const Detail = () => {
             {applicant &&
               !isLoading &&
               activeTab === "공통 질문" &&
-              applicant.commonQuestions.map((q) => (
+              commonQuestions.length > 0 &&
+              commonQuestions.map((q: Question) => (
                 <Accordion
                   key={q.question}
                   title={q.question}
@@ -132,12 +167,22 @@ const Detail = () => {
               ))}
             {applicant &&
               !isLoading &&
+              activeTab === "공통 질문" &&
+              commonQuestions.length === 0 && (
+                <div className="flex flex-col justify-center items-center gap-4 p-4 text-gray-700 w-full h-full text-center">
+                  <Icon type="Alert" size={28} />
+                  <p>공통 질문이 없습니다.</p>
+                </div>
+              )}
+            {applicant &&
+              !isLoading &&
               activeTab === "파트별 질문" &&
-              applicant.partQuestions.map((q, index) => (
+              partQuestions.length > 0 &&
+              partQuestions.map((q: Question, index: number) => (
                 <Accordion
                   key={q.question}
                   title={
-                    index === 0 ? application.name + q.question : q.question
+                    index === 0 ? (application?.name || '') + q.question : q.question
                   }
                   className="w-full"
                 >
@@ -158,6 +203,15 @@ const Detail = () => {
                   )}
                 </Accordion>
               ))}
+            {applicant &&
+              !isLoading &&
+              activeTab === "파트별 질문" &&
+              partQuestions.length === 0 && (
+                <div className="flex flex-col justify-center items-center gap-4 p-4 text-gray-700 w-full h-full text-center">
+                  <Icon type="Alert" size={28} />
+                  <p>파트별 질문이 없습니다.</p>
+                </div>
+              )}
           </FlexBox>
           <div className="border border-gray-300 bg-white flex-1 rounded-xl min-h-[650px] px-6 py-5">
             <p className="text-gray-900 font-semibold text-lg">서류 평가</p>
@@ -172,7 +226,7 @@ const Detail = () => {
                 <FlexBox direction="col" className="w-full items-start">
                   <div className="flex flex-col items-start gap-4 w-full">
                     <label>
-                      <span className="text-blue-500">장진영</span>님의 점수를{" "}
+                      <span className="text-blue-500">{sessionStorage.getItem("username") || "사용자"}</span>님의 점수를{" "}
                       <span className="text-blue-500">10점 만점</span>으로
                       입력해주세요
                     </label>
@@ -215,7 +269,7 @@ const Detail = () => {
               <Button
                 isPending={isPending}
                 onClick={() => mutate()}
-                className="w-[100px]"
+                className="w-24"
               >
                 평가 제출
               </Button>

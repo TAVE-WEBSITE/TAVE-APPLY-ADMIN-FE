@@ -19,3 +19,30 @@ export interface SettingDefaultErrorResponse {
   message: string;
   data: null;
 }
+
+
+
+export interface FinalPassResult {
+  totalFee: number;
+  clubFee: number;
+  mtFee: number;
+  feeDeadline: string;
+  bankName: string;
+  accountNumber: string;
+  accountHolder: string;
+  surveyLink: string;
+  surveyDeadline: string;
+  otLink: string;
+  otPassword: string;
+  otDeadline: string;
+}
+
+export interface SettingFinalPassResponse {
+  time: string;
+  status: number;
+  code: string;
+  message: string;
+  result: FinalPassResult;
+}
+
+

@@ -38,13 +38,13 @@ const TimeTable = ({ timeTable }: TimeTableProps) => {
     <table className="w-full h-full rounded-xl bg-[#F3F4F6]">
       <thead>
         <tr className="border-b border-gray-300">
-          <th className="w-20 p-4 text-left font-medium border-r border-r-gray-300 text-gray-700">
+          <th className="p-4 text-left font-medium border-r border-r-gray-300 text-gray-700">
             시간
           </th>
           {timeTable.map((day) => (
             <th
               key={day.groupByDay}
-              className="p-4 text-center font-semibold text-gray-700 border-r border-gray-300 last:border-r-0"
+              className="w-8 text-center font-semibold text-gray-700 border-r border-gray-300 last:border-r-0"
             >
               {formatKorDate(day.groupByDay)} ({day.dayName[0]})
             </th>
@@ -57,7 +57,7 @@ const TimeTable = ({ timeTable }: TimeTableProps) => {
             key={timeSlot}
             className="border-b border-gray-300 last:border-b-0 text-gray-900 font-semibold"
           >
-            <td className="w-20 p-4 text-center border-r border-gray-300 align-top">
+            <td className="p-4 text-center border-r border-gray-300 align-top">
               {timeSlot}
             </td>
             {timeTable.map((day) => {
@@ -68,7 +68,7 @@ const TimeTable = ({ timeTable }: TimeTableProps) => {
                   onClick={() =>
                     navigate(`/evaluation/interview/${day.groupByDay}`)
                   }
-                  className="border-r border-gray-300 w-1/4 bg-gray-50 hover:bg-gray-100 cursor-pointer"
+                  className={`border-r border-gray-300 w-1/${timeTable.length} bg-gray-50 hover:bg-gray-100 cursor-pointer`}
                 >
                   <div className="p-2 h-full min-h-[120px]">
                     <div className="grid grid-cols-2 gap-2 p-2">

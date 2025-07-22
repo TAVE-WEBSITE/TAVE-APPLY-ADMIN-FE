@@ -1,29 +1,88 @@
-import { useState } from "react";
+import { useState, forwardRef, useImperativeHandle, useEffect } from "react";
 import Modal from "@/components/Modal/Modal";
 import Input from "@/components/Input/Input";
 import ToastMessage from "@/components/Modal/ToastMessage";
+import { updateQuestion, type FieldType } from "@/pages/Setting/api/Document";
+import { useQueryClient } from "@tanstack/react-query";
 
-const WordLimitModal = ({
-  ref,
-}: {
-  ref: React.RefObject<HTMLDialogElement | null>;
-}) => {
+interface WordLimitModalProps {
+  questionId?: number;
+  currentContent?: string;
+  currentFieldType?: FieldType;
+  currentOrdered?: number;
+  currentTextLength?: number;
+  onUpdateSuccess?: () => void;
+}
+
+const WordLimitModal = forwardRef<HTMLDialogElement | null, WordLimitModalProps>(({
+  questionId,
+  currentContent,
+  currentFieldType,
+  currentOrdered,
+  currentTextLength,
+  onUpdateSuccess
+}, ref) => {
   const [wordLimit, setWordLimit] = useState("");
+  const queryClient = useQueryClient();
+
+  // currentTextLength가 변경될 때마다 wordLimit 상태 업데이트
+  useEffect(() => {
+    if (currentTextLength) {
+      setWordLimit(currentTextLength.toString());
+    }
+  }, [currentTextLength]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const updateWordLimit = () => {
+  const updateWordLimit = async () => {
+    if (!questionId || !currentContent || !currentFieldType) {
+      console.error("필수 데이터가 누락되었습니다:", { questionId, currentContent, currentFieldType });
+      return;
+    }
+
     setIsLoading(true);
-    setTimeout(() => {
-      setIsOpen(true);
+    try {
+      console.log("글자수 제한 업데이트 API 호출:", {
+        id: questionId,
+        content: currentContent,
+        fieldType: currentFieldType,
+        ordered: currentOrdered,
+        textLength: parseInt(wordLimit)
+      });
+
+      const response = await updateQuestion(
+        questionId,
+        currentContent,
+        currentFieldType,
+        currentOrdered || 0,
+        parseInt(wordLimit),
+        undefined // required는 기존 값 유지
+      );
+
+      console.log("글자수 제한 업데이트 성공");
+      console.log("API 응답:", response);
+      
+      // 데이터 무효화하여 다시 조회
+      await queryClient.invalidateQueries({ queryKey: ["setting", "document", "questions", currentFieldType] });
+      await queryClient.invalidateQueries({ queryKey: ["setting", "document", "all-questions"] });
+      
+      // 모달 닫기
+      if (ref && 'current' in ref && ref.current) {
+        ref.current.close();
+      }
+      
+      onUpdateSuccess?.();
+    } catch (error) {
+      console.error("글자수 제한 업데이트 실패:", error);
+    } finally {
       setIsLoading(false);
       setWordLimit("");
-    }, 1000);
+    }
   };
 
   return (
     <Modal
-      dialogRef={ref}
+      dialogRef={ref as React.RefObject<HTMLDialogElement | null>}
       title="글자 수 제한"
       buttonCount={2}
       onConfirm={updateWordLimit}
@@ -47,6 +106,6 @@ const WordLimitModal = ({
       />
     </Modal>
   );
-};
+});
 
 export default WordLimitModal;

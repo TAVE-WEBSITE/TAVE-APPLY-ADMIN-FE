@@ -3,7 +3,8 @@ export type ApplicationType =
   | "지원서"
   | "서류 평가"
   | "면접 설정"
-  | "최종 서류 평가";
+  | "최종 서류 평가"
+  | "최종 면접 평가";
 
 export type Status =
   | "ALL"
@@ -30,6 +31,7 @@ export type NotificationItem = {
 export type EvaluationItem = Application & {
   recruitTime: string;
   isEvaluated: boolean;
+  status: Status;
 };
 
 export type FinalEvaluationItem = Application & {

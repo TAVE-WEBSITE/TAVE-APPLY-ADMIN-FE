@@ -36,8 +36,14 @@ const Modal = ({
     };
   }, []);
 
-  const openModal = () => {
-    dialogRef.current?.showModal();
+  const openModal = (): void => {
+    if (dialogRef.current && !dialogRef.current.open) {
+      try {
+        dialogRef.current.showModal();
+      } catch (error) {
+        console.error('Modal open error:', error);
+      }
+    }
   };
 
   const closeModal = () => {

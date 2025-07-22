@@ -1,30 +1,33 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import FlexBox from "../Layout/FlexBox";
 import Icon from "@/components/Icon/Icon";
 import Switch from "../Input/Switch";
 import ChipController from "@/pages/Setting/Document/ChipController";
 import WordLimitModal from "@/pages/Setting/Document/WordLimitModal";
+import TypeChangeModal from "@/pages/Setting/Document/TypeChangeModal";
 import InterviewScheduleModal from "@/pages/Setting/Document/InterviewScheduleModal";
-import type { FieldType } from "@/pages/Setting/api/Document";
+
+import useDocumentStore from "@/hooks/Setting/Document/useDocumentStore";
 import type { SkillSet } from "@/hooks/Setting/Document/useDocumentStore";
 
-type Item = {
-  id: any;
-  content: string;
-  fieldType: FieldType;
-  ordered: number;
-  textLength: number;
-  answerType: string;
-  mode: string;
+type QuestionItem = {
+  id: string;
+  question: string;
+  required: boolean;
+  maxLength?: number;
+  mode?: string;
 };
+
 interface DraggableItemProps {
-  item: Item;
+  item: QuestionItem;
   skills?: SkillSet[];
+  questionData?: any;
   onStartEdit: (itemId: string) => void;
   onEndEdit: () => void;
-  onEdit: (itemId: string, value: string) => void;
+  onEdit: (itemId: string, value: string, required?: boolean) => void;
   onDelete: (itemId: string) => void;
   onToggleRequired: (itemId: string) => void;
 }
@@ -32,16 +35,25 @@ interface DraggableItemProps {
 const DraggableItem = ({
   item,
   skills = [],
+  questionData,
   onStartEdit,
   onEndEdit,
   onEdit,
   onDelete,
   onToggleRequired,
 }: DraggableItemProps) => {
+  // 전달받은 데이터 로깅
+  // console.log("DraggableItem - item:", item);
+  // console.log("DraggableItem - questionData:", questionData);
+  const queryClient = useQueryClient();
   const wordLimitModalRef = useRef<HTMLDialogElement>(null);
+  const typeChangeModalRef = useRef<HTMLDialogElement>(null);
   const interviewScheduleModal = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [inputValue, setInputValue] = useState(item.content);
+  const [inputValue, setInputValue] = useState(
+    questionData?.content || item.question || ""
+  );
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const {
     attributes,
@@ -57,28 +69,95 @@ const DraggableItem = ({
     transition,
   };
 
+  // questionData가 변경될 때 inputValue 업데이트
+  useEffect(() => {
+    if (questionData?.content) {
+      setInputValue(questionData.content);
+    }
+  }, [questionData]);
+
+  // 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      // 드롭다운 내부 클릭인지 확인
+      if (target.closest('.dropdown-container')) {
+        return;
+      }
+      
+      if (showDropdown) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
+
   const handleFocus = useCallback(() => {
-    if (item.mode === "default") {
+    console.log("handleFocus 함수 실행됨", { itemId: item.id, mode: item.mode });
+    if (item.mode === "default" || !item.mode) {
+      console.log("편집 모드로 전환 중...");
       onStartEdit(item.id);
       requestAnimationFrame(() => {
         inputRef.current?.focus();
       });
     } else {
+      console.log("편집 모드 종료 중...");
       onEndEdit();
     }
   }, [item.id, item.mode, onStartEdit, onEndEdit]);
 
-  const handleEdit = useCallback(() => {
-    onEdit(item.id, inputValue);
-  }, [item.id, inputValue, onEdit]);
+  const handleEdit = useCallback(async () => {
+    console.log("질문 편집 완료:", inputValue);
+    console.log("현재 질문 데이터:", questionData);
+    
+    await onEdit(item.id, inputValue);
+  }, [item.id, inputValue, onEdit, questionData]);
 
-  const handleDelete = useCallback(() => {
-    onDelete(item.id);
+  const handleDelete = useCallback(async () => {
+    console.log("질문 삭제 시작:", item.id);
+    await onDelete(item.id);
   }, [item.id, onDelete]);
 
-  const handleToggleRequired = useCallback(() => {
-    onToggleRequired(item.id);
-  }, [item.id, onToggleRequired]);
+  const handleToggleRequired = useCallback(async () => {
+    console.log("필수 질문 토글:", { itemId: item.id, currentRequired: item.required });
+    
+    const newRequiredValue = !item.required;
+    
+    // API 호출을 위한 데이터 준비
+    if (questionData?.id && questionData?.content && questionData?.fieldType) {
+      try {
+        console.log("필수 질문 API 호출:", {
+          id: questionData.id,
+          content: questionData.content,
+          fieldType: questionData.fieldType,
+          ordered: questionData.ordered,
+          textLength: questionData.textLength || 500,
+          required: newRequiredValue
+        });
+        
+        // updateQuestion API 호출 (required 필드 포함)
+        await onEdit(item.id, questionData.content, newRequiredValue);
+        console.log("필수 질문 상태 업데이트 성공");
+      } catch (error) {
+        console.error("필수 질문 상태 업데이트 실패:", error);
+      }
+    } else {
+      // API 호출 조건이 안 되면 로컬 상태만 업데이트
+      onToggleRequired(item.id);
+      console.log("API 호출 조건 불충족, 로컬 상태만 업데이트:", { questionData });
+    }
+  }, [item.id, item.required, onToggleRequired, questionData, onEdit]);
+
+  const handleDropdownToggle = useCallback(() => {
+    setShowDropdown(prev => !prev);
+  }, []);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,9 +168,10 @@ const DraggableItem = ({
   );
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    async (e: React.KeyboardEvent) => {
       if (e.key === "Enter") {
-        handleEdit();
+        e.preventDefault(); // Enter 키의 기본 동작 방지
+        await handleEdit();
       }
     },
     [handleEdit]
@@ -99,7 +179,6 @@ const DraggableItem = ({
 
   return (
     <li
-      onKeyDown={handleKeyDown}
       className={`flex flex-col justify-between w-full border border-gray-300 rounded-xl bg-white pr-4 hover:bg-gray-100 ${
         item.mode === "focused"
           ? "outline outline-blue-500 shadow-lg scale-103"
@@ -131,10 +210,11 @@ const DraggableItem = ({
               isDragging ? "cursor-grabbing" : ""
             }`}
             onChange={handleInputChange}
-            style={{ width: `${item.content.length + 5}ch` }}
+            onKeyDown={handleKeyDown}
+            style={{ width: `${inputValue.length + 5}ch` }}
           />
-          {item.textLength && (
-            <p className="text-gray-500 text-sm">{`(${item.textLength}자 이내)`}</p>
+          {item.maxLength && (
+            <p className="text-gray-500 text-sm">{`(${item.maxLength}자 이내)`}</p>
           )}
         </div>
 
@@ -142,21 +222,65 @@ const DraggableItem = ({
           <Switch
             title="필수 질문"
             setIsOn={handleToggleRequired}
-            isOn={false}
+            isOn={item.required}
           />
 
-          <button
-            className="p-2 border border-gray-300 rounded-lg hover:bg-blue-100 cursor-pointer"
-            onClick={() => {
-              item.content === "가능한 오프라인 면접 시간"
-                ? interviewScheduleModal.current?.showModal()
-                : handleFocus();
-            }}
-          >
-            <Icon type="Pen" size={20} />
-          </button>
+          <div className="relative">
+            <button
+              className="p-2 border border-gray-300 rounded-lg hover:bg-blue-100 cursor-pointer"
+              onClick={handleDropdownToggle}
+            >
+              <Icon type="Dots" size={20} />
+            </button>
+            
+            {showDropdown && (
+                              <div className="dropdown-container absolute right-0 top-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-[150px]">
+                  <button
+                    className="w-full px-4 py-2 text-left text-sm text-gray-900 hover:bg-gray-100 border-b border-gray-200 flex items-center gap-2 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      
+                      // answerType이 TIME인 경우 InterviewScheduleModal 띄우기
+                      if (questionData?.answerType === "TIME") {
+                        interviewScheduleModal.current?.showModal();
+                        setShowDropdown(false);
+                      } else {
+                        // 일반적인 질문 수정 모드
+                        handleFocus();
+                        setShowDropdown(false);
+                      }
+                    }}
+                  >
+                    <Icon type="Pen" size={20} />
+                    <span className="whitespace-nowrap">
+                      {questionData?.answerType === "TIME" ? "면접 일정 설정" : "질문 수정하기"}
+                    </span>
+                  </button>
+                  <button
+                    className="w-full px-4 py-2 text-left text-sm text-gray-900 hover:bg-gray-100 border-b border-gray-200 flex items-center gap-2 cursor-pointer"
+                    onClick={() => {
+                      wordLimitModalRef.current?.showModal();
+                      setShowDropdown(false);
+                    }}
+                  >
+                    <Icon type="TextLength" size={20} />
+                    <span className="whitespace-nowrap">글자수 제한하기</span>
+                  </button>
+                  <button
+                    className="w-full px-4 py-2 text-left text-sm text-gray-900 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
+                    onClick={() => {
+                      typeChangeModalRef.current?.showModal();
+                      setShowDropdown(false);
+                    }}
+                  >
+                    <Icon type="Type" size={20} />
+                    <span className="whitespace-nowrap">타입 변경하기</span>
+                  </button>
+              </div>
+            )}
+          </div>
 
-          {item.textLength && (
+          {item.maxLength && (
             <button
               className="p-2 border border-gray-300 rounded-lg hover:bg-blue-100 cursor-pointer"
               onClick={() => wordLimitModalRef.current?.showModal()}
@@ -172,10 +296,35 @@ const DraggableItem = ({
             <Icon type="Trash" size={20} />
           </button>
         </FlexBox>
-        <WordLimitModal ref={wordLimitModalRef} />
+        <WordLimitModal 
+          ref={wordLimitModalRef}
+          questionId={questionData?.id}
+          currentContent={questionData?.content || item.question}
+          currentFieldType={questionData?.fieldType}
+          currentOrdered={questionData?.ordered}
+          currentTextLength={questionData?.textLength || item.maxLength}
+          onUpdateSuccess={() => {
+            console.log("글자수 제한 업데이트 완료");
+          }}
+        />
+        <TypeChangeModal 
+          ref={typeChangeModalRef}
+          questionId={questionData?.id}
+          currentContent={questionData?.content || item.question}
+          currentFieldType={questionData?.fieldType}
+          currentOrdered={questionData?.ordered}
+          currentTextLength={questionData?.textLength || item.maxLength}
+          currentAnswerType={questionData?.answerType}
+          currentRequired={questionData?.required}
+          onUpdateSuccess={async () => {
+            await queryClient.invalidateQueries({ queryKey: ["setting", "document", "questions", questionData?.fieldType] });
+            await queryClient.invalidateQueries({ queryKey: ["setting", "document", "all-questions"] });
+            console.log("데이터 무효화 완료");
+          }}
+        />
         <InterviewScheduleModal ref={interviewScheduleModal} />
       </div>
-      {item.ordered === 1 && skills.length > 0 && (
+      {skills.length > 0 && (
         <div className="px-4 pb-4">
           <ChipController chips={skills} focused={item.mode === "focused"} />
         </div>
