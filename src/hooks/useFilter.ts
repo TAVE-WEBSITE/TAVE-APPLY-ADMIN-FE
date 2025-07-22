@@ -25,22 +25,16 @@ export const useFilter = <T>(list: T[]) => {
   };
 
   const filteredList = useMemo<T[]>(() => {
-    return list.filter((item: any) => {
+
+    const filtered = list.filter((item: any) => {
       const matchRole =
         checkedRoles.size === 0 || checkedRoles.has(item.fieldType as RoleType);
       const matchName = item.name.includes(searchInput);
-      const matchTab = (() => {
-        const status = statusMap[activeTab];
-
-        if (status === "ALL") return true;
-
-        if (activeTab === "완료") return item.isEvaluated === true;
-        if (activeTab === "대기중") return item.isEvaluated === false;
-
-        return item.status === status;
-      })();
-      return matchRole && matchName && matchTab;
+      
+      return matchRole && matchName;
     }) as T[];
+
+    return filtered;
   }, [list, searchInput, checkedRoles, activeTab]);
 
   return {
