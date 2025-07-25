@@ -277,6 +277,7 @@ const postInterviewPlace = async (payload: any) => {
     const res = await axiosInstance.post("/v1/manager/interview-place", payload);
     console.log("면접 설정 등록 성공:", res.data);
 
+
     return res.data;
   } catch (error) {
     console.error("면접 설정 등록 실패:", error);

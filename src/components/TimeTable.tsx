@@ -5,9 +5,10 @@ import { useNavigate } from "react-router-dom";
 
 interface TimeTableProps {
   timeTable: TimeTableList[];
+  onCellClick?: (date: string, time: string) => void;
 }
 
-const TimeTable = ({ timeTable }: TimeTableProps) => {
+const TimeTable = ({ timeTable, onCellClick }: TimeTableProps) => {
   const navigate = useNavigate();
 
   // 모든 시간대를 추출하여 정렬
@@ -52,44 +53,63 @@ const TimeTable = ({ timeTable }: TimeTableProps) => {
         </tr>
       </thead>
       <tbody>
-        {timeSlots.map((timeSlot) => (
-          <tr
-            key={timeSlot}
-            className="border-b border-gray-300 last:border-b-0 text-gray-900 font-semibold"
-          >
-            <td className="p-4 text-center border-r border-gray-300 align-top">
-              {timeSlot}
-            </td>
-            {timeTable.map((day) => {
-              const members = getMembersForDateTime(day.groupByDay, timeSlot);
-              return (
-                <td
-                  key={`${day.groupByDay}-${timeSlot}`}
-                  onClick={() =>
-                    navigate(`/evaluation/interview/${day.groupByDay}`)
-                  }
-                  className={`border-r border-gray-300 w-1/${timeTable.length} bg-gray-50 hover:bg-gray-100 cursor-pointer`}
-                >
-                  <div className="p-2 h-full min-h-[120px]">
-                    <div className="grid grid-cols-2 gap-2 p-2">
-                      {members.map((member) => (
-                        <div
-                          key={member.memberId}
-                          className="flex flex-col items-start gap-2 border border-gray-300 rounded-xl p-3"
-                        >
-                          <span className="font-semibold">
-                            {member.username}
-                          </span>
-                          <Chip title={member.field} />
-                        </div>
-                      ))}
+        {timeSlots.map((timeSlot) => {
+          // 현재 시간이 timeSlot과 같은지 체크
+          const now = new Date();
+          const nowHour = now.getHours();
+          const nowMinute = now.getMinutes();
+          const [slotHour, slotMinute] = timeSlot.split(":").map(Number);
+          const isCurrent = nowHour === slotHour && nowMinute >= 0 && nowMinute < 60;
+          // 이미 지난 시간인지 체크
+          // day.groupByDay는 yyyy-mm-dd 형식, now는 Date 객체
+          // 각 day에 대해 아래에서 처리
+          return (
+            <tr
+              key={timeSlot}
+              className="border-b border-gray-300 last:border-b-0 text-gray-900 font-semibold"
+            >
+              <td
+                className={`p-4 text-center border-r border-gray-300 align-top hover:bg-blue-100 hover:text-blue-600 cursor-pointer
+                  ${isCurrent ? 'bg-blue-100 border-l-4 border-l-blue-600 text-blue-600' : ''}`}
+              >
+                {timeSlot}
+              </td>
+              {timeTable.map((day) => {
+                const members = getMembersForDateTime(day.groupByDay, timeSlot);
+                // day.groupByDay: yyyy-mm-dd
+                const [year, month, dayNum] = day.groupByDay.split('-').map(Number);
+                const slotDate = new Date(year, month - 1, dayNum, slotHour, slotMinute);
+                const isPast = now > slotDate;
+                return (
+                  <td
+                    key={`${day.groupByDay}-${timeSlot}`}
+                    onClick={() => {
+                      if (onCellClick) onCellClick(day.groupByDay, timeSlot);
+                      navigate(`/evaluation/interview/${day.groupByDay}`);
+                    }}
+                    className={`border-r border-gray-300 w-1/${timeTable.length} bg-gray-50 hover:bg-gray-100 cursor-pointer ${isPast ? 'bg-gray-100' : ''}`}
+                  >
+                    <div className="p-2 h-full min-h-[120px]">
+                      <div className="grid grid-cols-2 gap-2 p-2">
+                        {members.map((member) => (
+                          <div
+                            key={member.memberId}
+                            className="flex flex-col items-start gap-2 border border-gray-300 rounded-xl p-3 hover:border-t-4 hover:border-blue-500 hover:border-t-blue-500 hover:bg-white hover:shadow-md"
+                          >
+                            <span className="font-semibold">
+                              {member.username}
+                            </span>
+                            <Chip title={member.field} />
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </td>
-              );
-            })}
-          </tr>
-        ))}
+                  </td>
+                );
+              })}
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );

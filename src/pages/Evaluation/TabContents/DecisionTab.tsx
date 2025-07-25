@@ -103,7 +103,7 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId }: Decision
                     <div key={index} className="grid grid-cols-2 gap-4 items-center mb-1 font-medium text-gray-700">
                       <div className="flex flex-col gap-4">
                         <span className="text-gray-500 font-medium">{evaluation.username}</span>
-                        <span className="text-gray-700">{evaluation.opinion}점</span>
+                        <span className="text-gray-700">{evaluation.opinion}</span>
                       </div>
                     </div>
                   
