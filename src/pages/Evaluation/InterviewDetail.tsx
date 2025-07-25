@@ -164,9 +164,7 @@ const InterviewDetail = () => {
                 <div key={resume.resumeId} className="flex flex-col gap-4 rounded-lg border border-gray-300 bg-white w-1/2 px-6 py-4">
                   <FlexBox className="gap-2">
                     <h2 className="font-bold text-xl">{memberInfo?.username ?? '-'}</h2>
-                    <span className="px-2 py-1 text-sm bg-gray-200 text-gray-700 rounded-2xl">
-                      {memberInfo?.field ?? '-'}
-                    </span>
+                    <Chip title={memberInfo?.field as any ?? '-'} />
                   </FlexBox>
                   <div className="grid grid-cols-2 gap-4">
                     <FlexBox className="gap-4">
