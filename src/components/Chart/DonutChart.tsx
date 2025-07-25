@@ -109,7 +109,7 @@ const DonutChart = ({ title, data = [], colors }: DonutChartProps<any>) => {
                 style={{ backgroundColor: colors[index] }}
               ></div>
               <span className="text-gray-700 text-sm font-medium whitespace-nowrap">
-                {item.topic}
+                {item.topic}  {item.topic}
               </span>
             </button>
           ))}

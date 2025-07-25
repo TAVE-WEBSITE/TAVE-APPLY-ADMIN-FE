@@ -85,6 +85,7 @@ export const Page = () => {
               <SkeletonDonutChart />
             ) : (
               skillData && (
+                // 파트 컬러 추가
                 <DonutChart
                   data={skillData}
                   title="파트별 비율"
@@ -94,7 +95,7 @@ export const Page = () => {
                     "#F97316",
                     "#EAB308",
                     "#10B981",
-                    "#A73CD8"
+                    "#B744ED"
                   ]}
                 />
               )
