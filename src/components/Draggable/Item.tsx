@@ -49,7 +49,7 @@ const DraggableItem = ({
   const wordLimitModalRef = useRef<HTMLDialogElement>(null);
   const typeChangeModalRef = useRef<HTMLDialogElement>(null);
   const interviewScheduleModal = useRef<HTMLDialogElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [inputValue, setInputValue] = useState(
     questionData?.content || item.question || ""
   );
@@ -76,6 +76,20 @@ const DraggableItem = ({
     }
   }, [questionData]);
 
+  // inputValue가 변경될 때 높이 조정
+  useEffect(() => {
+    if (inputRef.current) {
+      const charCount = inputValue.length;
+      
+      if (charCount > 51) {
+        inputRef.current.style.height = 'auto';
+        inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
+      } else {
+        inputRef.current.style.height = '1.5rem';
+      }
+    }
+  }, [inputValue]);
+
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -100,51 +114,33 @@ const DraggableItem = ({
   }, [showDropdown]);
 
   const handleFocus = useCallback(() => {
-    console.log("handleFocus 함수 실행됨", { itemId: item.id, mode: item.mode });
     if (item.mode === "default" || !item.mode) {
-      console.log("편집 모드로 전환 중...");
       onStartEdit(item.id);
       requestAnimationFrame(() => {
         inputRef.current?.focus();
       });
     } else {
-      console.log("편집 모드 종료 중...");
       onEndEdit();
     }
   }, [item.id, item.mode, onStartEdit, onEndEdit]);
 
   const handleEdit = useCallback(async () => {
-    console.log("질문 편집 완료:", inputValue);
-    console.log("현재 질문 데이터:", questionData);
-    
     await onEdit(item.id, inputValue);
   }, [item.id, inputValue, onEdit, questionData]);
 
   const handleDelete = useCallback(async () => {
-    console.log("질문 삭제 시작:", item.id);
     await onDelete(item.id);
   }, [item.id, onDelete]);
 
   const handleToggleRequired = useCallback(async () => {
-    console.log("필수 질문 토글:", { itemId: item.id, currentRequired: item.required });
-    
+
     const newRequiredValue = !item.required;
     
     // API 호출을 위한 데이터 준비
     if (questionData?.id && questionData?.content && questionData?.fieldType) {
       try {
-        console.log("필수 질문 API 호출:", {
-          id: questionData.id,
-          content: questionData.content,
-          fieldType: questionData.fieldType,
-          ordered: questionData.ordered,
-          textLength: questionData.textLength || 500,
-          required: newRequiredValue
-        });
-        
         // updateQuestion API 호출 (required 필드 포함)
         await onEdit(item.id, questionData.content, newRequiredValue);
-        console.log("필수 질문 상태 업데이트 성공");
       } catch (error) {
         console.error("필수 질문 상태 업데이트 실패:", error);
       }
@@ -160,7 +156,7 @@ const DraggableItem = ({
   }, []);
 
   const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setInputValue(e.target.value);
       e.target.style.width = `${e.target.value.length + 5}ch`;
     },
@@ -202,16 +198,22 @@ const DraggableItem = ({
           {...listeners}
         >
           <Icon type="Menu" size={20} className="mr-2" />
-          <input
+          <textarea
             ref={inputRef}
             readOnly={item.mode !== "focused"}
             value={inputValue}
-            className={`text-gray-900 font-medium ${
+            className={`text-gray-900 font-medium resize-none border-none outline-none bg-transparent ${
               isDragging ? "cursor-grabbing" : ""
             }`}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            style={{ width: `${inputValue.length + 5}ch` }}
+            style={{ 
+              width: `${Math.min(inputValue.length + 5, 80)}ch`,
+              minHeight: '1.5rem',
+              height: '1.5rem',
+              overflow: 'hidden'
+            }}
+
           />
           {item.maxLength && (
             <p className="text-gray-500 text-sm">{`(${item.maxLength}자 이내)`}</p>
