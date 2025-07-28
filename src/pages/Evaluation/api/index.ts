@@ -204,6 +204,7 @@ export const getSheet = async () => {
     throw error;
   }
 };
+}
 
 //서류 평가 후 이메일 발송 예약
 export const getRecruitmentEmailConfig = async () => {
@@ -276,4 +277,3 @@ export const getFinalInterviewEmailFind = async (): Promise<{ isBooked: boolean 
     };
   }
 };
-

@@ -23,13 +23,6 @@ const NotificationTable = ({
   setCurrentPage,
   onClick,
 }: NotificationTableProps) => {
-  const itemsPerPage = 7;
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems =
-    applications && applications.slice(indexOfFirstItem, indexOfLastItem);
-
   const handlePageChange = (pageNumber: number): void => {
     setCurrentPage(pageNumber);
   };
@@ -52,16 +45,16 @@ const NotificationTable = ({
           </thead>
           <tbody className="bg-white">
             {isLoading && <InterviewersLoading />}
-            {currentItems ? (
-              currentItems.map((applicant) => (
-                <tr key={applicant.id} className={`border-b border-gray-200`}>
+            {!isLoading && applications && applications.length > 0 ? (
+              applications.map((applicant) => (
+                <tr key={applicant.id} className="border-b border-gray-200">
                   <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
                     {applicant.email}
                   </td>
-                  <td className="px-6 p-4 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
                     {formatDateTime(applicant.date)}
                   </td>
-                  <td className="px-6 p-4 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
                     <button
                       className="py-2 px-3 bg-white border border-gray-300 text-gray-900 rounded-lg hover:bg-gray-100 flex items-center cursor-pointer"
                       onClick={() => onClick(applicant.id)}
@@ -72,14 +65,16 @@ const NotificationTable = ({
                 </tr>
               ))
             ) : (
-              <tr className="h-[500px]">
-                <td colSpan={6}>
-                  <div className="flex flex-col justify-center items-center gap-4 p-4 text-gray-700 w-full h-full">
-                    <Icon type="Alert" size={28} />
-                    데이터를 불러오는데 실패했습니다
-                  </div>
-                </td>
-              </tr>
+              !isLoading && (
+                <tr className="h-[500px]">
+                  <td colSpan={rows.length}>
+                    <div className="flex flex-col justify-center items-center gap-4 p-4 text-gray-700 w-full h-full">
+                      <Icon type="Alert" size={28} />
+                      데이터를 불러오는데 실패했습니다
+                    </div>
+                  </td>
+                </tr>
+              )
             )}
           </tbody>
         </table>
@@ -93,5 +88,6 @@ const NotificationTable = ({
     </div>
   );
 };
+
 
 export default NotificationTable;
