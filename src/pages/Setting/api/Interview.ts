@@ -252,7 +252,7 @@ const uploadInterviewEvaluationTemplate = async ({ file }: { file: File }) => {
 
 
 
-// 면접 장소 조회 API 없음 -> 필요하면 백엔드 요청 필요
+// 면접 장소 조회 
 const fetchAddress = async () => {
   try {
     const res = await axiosInstance.get("/v1/manager/interview-place");
