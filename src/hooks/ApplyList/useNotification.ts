@@ -10,7 +10,7 @@ export const useNotification = () => {
     setIsPending(true);
     try {
       const res = await axiosInstance.get("/v1/admin/notification/reservation");
-      setToastMessage("전체 메일 전송했습니다");
+      setToastMessage("전체 메일 전송 예약 완료되었습니다.");
       setIsToastOpen(true);
       return res.data;
     } catch (error) {
@@ -20,12 +20,32 @@ export const useNotification = () => {
     }
   };
 
-  const postIndividual = async (id: string | number) => {
+  const postIndividual = async (id: string |number) => {
     try {
-      const res = await axiosInstance.post(
-        `/v1/admin/notification/individual?id=${id}`
+      const res = await axiosInstance.get(
+        `/v1/admin/notification/individual/${id}`
       );
       setToastMessage(`${id}번 회원에 대해 메일 전송했습니다`);
+      setIsToastOpen(true);
+      return res.data;
+    } catch (error) {
+      return error;
+    }
+  };
+
+   const getReservationCheck = async () => {
+    try {
+      const res = await axiosInstance.get("/v1/admin/notification/reservation-check");
+      return res.data.result;
+    } catch (error) {
+      return error;
+    }
+  };
+
+  const deleteReservation = async () => {
+    try {
+      const res = await axiosInstance.delete("/v1/admin/notification/reservation");
+      setToastMessage("전체 메일 전송 예약을 취소했습니다.");
       setIsToastOpen(true);
       return res.data;
     } catch (error) {
@@ -40,5 +60,7 @@ export const useNotification = () => {
     setIsToastOpen,
     postNotification,
     postIndividual,
+    getReservationCheck,
+    deleteReservation,
   };
 };
