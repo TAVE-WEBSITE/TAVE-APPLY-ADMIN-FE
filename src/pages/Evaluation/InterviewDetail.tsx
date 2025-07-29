@@ -50,9 +50,17 @@ const InterviewDetail = () => {
   });
 
   // 콘솔에 데이터 출력
-  if (interviewData) {
-    console.log("면접 현황 상세 데이터:", interviewData);
-  }
+  useEffect(() => {
+    if (interviewData) {
+      console.log("=== 면접 현황 API 응답 데이터 ===");
+      console.log("API Path:", `/v1/manager/resume/interview-time?date=${date}&time=${time}`);
+      console.log("전체 응답:", interviewData);
+      console.log("result 필드:", interviewData.result);
+      console.log("resumeList:", interviewData.result?.resumeList);
+      console.log("첫 번째 지원서:", interviewData.result?.resumeList?.[0]);
+      console.log("=============================");
+    }
+  }, [interviewData, date, time]);
   useEffect(() => {
     console.log("질문 유형", activeTab);
   }, [activeTab]);

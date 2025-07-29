@@ -114,8 +114,6 @@ const useDocument = () => {
       question: item.id === itemId ? updatedQuestion : item.question,
       required: required !== undefined && item.id === itemId ? required : item.required,
     }));
-    console.log("Editing question ID:", itemId, "New text:", updatedQuestion, "Required:", required);
-    console.log("Current field type:", currentType);
     setQuestions(newQuestions);
 
     if (updatedQuestion.trim() && currentType) {

@@ -129,8 +129,12 @@ const InterviewSetting = () => {
     try {
       setIsDownloadingInterviewer(true);
       await downloadInterviewerTimeTableForm();
+      setToastMessage("면접관 시간표 포함이 성공적으로 다운로드되었습니다.");
+      setIsToastOpen(true);
     } catch (error) {
       console.error("면접관 시간표 포함 다운로드 실패:", error);
+      setToastMessage("면접관 시간표 포함 다운로드에 실패했습니다.");
+      setIsToastOpen(true);
     } finally {
       setIsDownloadingInterviewer(false);
     }
@@ -195,7 +199,10 @@ const InterviewSetting = () => {
     }
     
     if (interviewerScheduleFile) {
-      console.log("면접관 시간표 파일 업로드 중...");
+      console.log("=== 면접관 시간표 파일 업로드 시작 ===");
+      console.log("선택된 파일:", interviewerScheduleFile.name);
+      console.log("파일 크기:", interviewerScheduleFile.size, "bytes");
+      console.log("파일 타입:", interviewerScheduleFile.type);
       uploadPromises.push(
         mutateInterviewerFile({
           file: interviewerScheduleFile,
@@ -312,7 +319,7 @@ const InterviewSetting = () => {
                   onClick={handleDownloadTimeTableForm}
                   disabled={isDownloadingTimeTable}
                 >
-                  {isDownloadingTimeTable ? "다운로드 중..." : "면접관 시간표 양식"}
+                  {isDownloadingTimeTable ? "다운로드 중..." : "면접자 시간표 양식"}
                   <Icon type="Upload" size={16} />
                 </button>
                 <button 

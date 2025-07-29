@@ -82,8 +82,7 @@ const downloadInterviewTimeTableForm = async () => {
     link.download = decodeURIComponent(filename);
     link.click();
     window.URL.revokeObjectURL(url);
-    
-    console.log("면접자 시간표 양식 다운로드 완료:", filename);
+
   } catch (error) {
     console.error("면접자 시간표 양식 다운로드 실패:", error);
     throw error;
@@ -111,8 +110,7 @@ const downloadInterviewerTimeTableForm = async () => {
     link.download = decodeURIComponent(filename);
     link.click();
     window.URL.revokeObjectURL(url);
-    
-    console.log("면접관 시간표 포함 다운로드 완료:", filename);
+
   } catch (error) {
     console.error("면접관 시간표 포함 다운로드 실패:", error);
     throw error;
@@ -179,8 +177,6 @@ const downloadInterviewEvaluationForm = async () => {
     link.download = decodeURIComponent(filename);
     link.click();
     window.URL.revokeObjectURL(url);
-    
-    console.log("면접 평가 초기 양식 다운로드 완료:", filename);
   } catch (error) {
     console.error("면접 평가 초기 양식 다운로드 실패:", error);
     throw error;
@@ -214,7 +210,7 @@ const uploadInterviewerScheduleFile = async ({ file }: { file: File }) => {
     const formData = new FormData();
     formData.append("file", file);
     const res = await axiosInstance.post(
-      "/v1/manager/excel/interviewer/time-table",
+      "/v1/manager/excel/interview/time-table",
       formData,
       {
         headers: {
@@ -222,6 +218,7 @@ const uploadInterviewerScheduleFile = async ({ file }: { file: File }) => {
         },
       }
     );
+
     return res.data;
   } catch (error) {
     console.error("면접관 시간표 파일 업로드 실패:", error);
@@ -252,7 +249,7 @@ const uploadInterviewEvaluationTemplate = async ({ file }: { file: File }) => {
 
 
 
-// 면접 장소 조회 API 없음 -> 필요하면 백엔드 요청 필요
+// 면접 장소 조회 
 const fetchAddress = async () => {
   try {
     const res = await axiosInstance.get("/v1/manager/interview-place");
@@ -273,11 +270,7 @@ const fetchInterviewTime = async () => {
 };
 const postInterviewPlace = async (payload: any) => {
   try {
-    console.log("면접 설정 등록 API 호출:", payload);
     const res = await axiosInstance.post("/v1/manager/interview-place", payload);
-    console.log("면접 설정 등록 성공:", res.data);
-
-
     return res.data;
   } catch (error) {
     console.error("면접 설정 등록 실패:", error);

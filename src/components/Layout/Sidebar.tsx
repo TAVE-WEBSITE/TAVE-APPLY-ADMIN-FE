@@ -187,7 +187,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   return (
     <div
-      className={`w-64 bg-white min-h-screen border-r border-gray-200 ${className}`}
+      className={`w-64 bg-white min-h-screen border-r border-gray-200 flex-shrink-0 ${className}`}
     >
       {/* 사이드바 항목들 */}
       <div className="flex-1 overflow-y-auto">
