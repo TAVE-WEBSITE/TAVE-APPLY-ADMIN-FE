@@ -104,7 +104,8 @@ export const Page = () => {
           confirmText="설정하러 가기"
         >
           <p className="text-center text-gray-500">
-            안녕하세요, 홍길동 회장님! <br /> 기수 지원 관리 페이지에 오신 것을
+            안녕하세요, {sessionStorage.getItem("username") && sessionStorage.getItem("username")} 회장님!
+            <br /> 기수 지원 관리 페이지에 오신 것을
             환영합니다. <br /> <br /> 15기 모집이 종료된 지, 147일이 지났습니다.{" "}
             <br /> 다음 기수 모집을 시작하기 전, 초기 설정 부탁드립니다.
           </p>

@@ -80,8 +80,8 @@ const Redirect = () => {
             console.log("토큰 리프레시 성공");
             // 필요시 새로운 세션 정보 저장
             sessionStorage.setItem("access_token", data.result.accessToken);
-            sessionStorage.setItem("email", data.result.email);
-            sessionStorage.setItem("username", data.result.username);
+            //sessionStorage.setItem("email", data.result.email);
+            //sessionStorage.setItem("username", data.result.username);
           } else {
             console.error("토큰 리프레시 실패:", data.message);
           }
