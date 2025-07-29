@@ -8,11 +8,17 @@ export type IconType =
   | "X"
   | "ChevronDown"
   | "ChevronUp"
+  | "Check"
+  | "DownLoad"
   | "Left"
   | "Calendar"
   | "Arrow"
   | "Alert"
   | "Trash"
+  | "TextLength"
+  | "Pen"
+  | "DownLoad2"
+  | "Menu"
   | "File"
   | "Filter"
   | "HelperCircle"
@@ -21,8 +27,10 @@ export type IconType =
   | "Upload"
   | "Link"
   | "Key"
+  | "Email"
   | "CheckCircle"
-  | "ClockCircle";
+  | "ClockCircle"
+  | "Type";
 
 interface BaseIconProps extends SVGProps<SVGSVGElement> {
   type: IconType;

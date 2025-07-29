@@ -1,12 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import FlexBox from "@/components/Layout/FlexBox";
 import Icon from "@/components/Icon/Icon";
-import Button from "@/components/Button/Button";
 import SearchInput from "@/components/Input/SearchInput";
 import ApplicationTable from "@/components/ApplicationTable/ApplicationTable";
 import type { RoleType } from "@/types/role";
 import CheckBox from "@/components/Input/CheckBox";
-import { useFilter } from "@/hooks/Setting/Interview/useFilter";
+import { type InterviewItem } from "@/types/application";
+import { usePagination } from "@/hooks/usePagination";
+import { useFilter } from "@/hooks/useFilter";
+import { useState } from "react";
 
 const tableRows = ["지원 분야", "이름", "성별", "학교", "면접 일자"];
 
@@ -21,32 +23,35 @@ const filters: RoleType[] = [
 
 const TimeTable = () => {
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const { entireList, isLoading, totalPages } = usePagination<InterviewItem>({
+    type: "면접 설정",
+    page: currentPage,
+    size: 7,
+  });
+
   const {
     filteredList,
-    isLoading,
-    showFilter,
     checkedRoles,
     searchInput,
     setSearchInput,
-    setShowFilter,
     handleFilter,
-    searchByName,
-  } = useFilter();
+  } = useFilter<InterviewItem>(entireList);
+
+  console.log("전체 리스트:", entireList);
+
+
   return (
-    <div
-      className="flex flex-col gap-4"
-      onKeyDown={(e) => e.key === "Enter" && searchByName()}
-    >
+    <div className="flex flex-col gap-4">
       <FlexBox className="justify-between">
-        <Button
-          className="bg-white border-gray-300 text-gray-700! relative"
-          onClick={() => setShowFilter(!showFilter)}
-        >
-          <Icon type="Filter" size={18} />
-          지원분야
-        </Button>
-        {showFilter && (
-          <div className="w-[222px] h-[296px] bg-white rounded-xl p-4 absolute bottom-35 border border-gray-100">
+        <details className="relative">
+          <summary className="flex items-center gap-2 px-4 py-3 rounded-lg bg-white text-gray-700 focus:outline outline-gray-300 font-medium cursor-pointer">
+            <Icon type="Filter" size={18} />
+            지원분야
+          </summary>
+          <div
+            className={`absolute top-full left-0 mt-2 px-4 py-3 bg-white border border-gray-300 rounded-lg min-w-48 z-10`}
+          >
             {filters.map((role) => (
               <CheckBox
                 key={role}
@@ -56,19 +61,23 @@ const TimeTable = () => {
               />
             ))}
           </div>
-        )}
+        </details>
         <SearchInput
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           placeholder="이름을 입력해주세요"
-          onKeyDown={(e) => e.key === "Enter" && searchByName()}
         />
       </FlexBox>
       <ApplicationTable
         applications={filteredList}
+        totalPages={totalPages}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
         rows={tableRows}
         isLoading={isLoading}
+        baseUrl="/setting/interview"
         navigate={navigate}
+        pageType="interview"
       />
     </div>
   );

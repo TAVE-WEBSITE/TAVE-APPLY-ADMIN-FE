@@ -9,12 +9,12 @@ const Header = ({ redirectionList }: HeaderProps) => {
   const navigate = useNavigate();
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
 
-  // const [openMenu, setOpenMenu] = useState<"SETTING" | "EVALUTION" | null>(
-  //   null
-  // );
-  // const handleMouseEnter = (menu: "SETTING" | "EVALUTION") => setOpenMenu(menu);
-  // const handleMouseLeave = () => setOpenMenu(null);
-  // const handleClick = () => setOpenMenu(null); // 클릭 시 닫기
+  // 로그아웃 로직 (정확히는 iframe 창 닫기)
+  const handleLogout = () => {
+    // 부모 창에 로그아웃 신호 전송
+    window.parent.postMessage({ type: "EXIT_FROM_APPLY_ADMIN" }, "*");
+    window.close();
+  };
 
   const handleNavigate = (url: string) => {
     switch (url) {
@@ -49,7 +49,7 @@ const Header = ({ redirectionList }: HeaderProps) => {
                   {item}
                 </button>
                 {item === "SETTING" && (
-                  <ul className="absolute top-14 left-0 w-full bg-gray-800 text-gray-400 px-4 py-3 rounded-xl flex flex-col gap-3 text-center hidden group-hover:flex transition-all duration-200">
+                  <ul className="absolute z-99 top-14 left-0 w-full bg-gray-800 text-gray-400 px-4 py-3 rounded-xl flex flex-col gap-3 text-center hidden group-hover:flex transition-all duration-200">
                     <li
                       className="hover:text-white cursor-pointer"
                       onClick={() => navigate("/setting/default")}
@@ -58,19 +58,19 @@ const Header = ({ redirectionList }: HeaderProps) => {
                     </li>
                     <li
                       className="hover:text-white cursor-pointer"
-                      onClick={() => navigate("setting/document")}
+                      onClick={() => navigate("/setting/document")}
                     >
                       서류 설정
                     </li>
                     <li
                       className="hover:text-white cursor-pointer"
-                      onClick={() => navigate("setting/interview")}
+                      onClick={() => navigate("/setting/interview")}
                     >
                       면접 설정
                     </li>
                     <li
                       className="hover:text-white cursor-pointer"
-                      onClick={() => navigate("setting/final")}
+                      onClick={() => navigate("/setting/final")}
                     >
                       최종 합격
                     </li>
@@ -80,10 +80,16 @@ const Header = ({ redirectionList }: HeaderProps) => {
                 <div className="absolute top-full left-0 w-full h-2" />
                 {item === "EVALUTION" && (
                   <ul className="absolute top-14 left-0 w-full bg-gray-800 text-gray-400 px-4 py-3 rounded-xl flex flex-col gap-3 text-center hidden group-hover:flex transition-all duration-200">
-                    <li className="hover:text-white cursor-pointer">
+                    <li
+                      className="hover:text-white cursor-pointer"
+                      onClick={() => navigate("/evaluation/document")}
+                    >
                       서류 평가
                     </li>
-                    <li className="hover:text-white cursor-pointer">
+                    <li
+                      className="hover:text-white cursor-pointer"
+                      onClick={() => navigate("/evaluation/interview")}
+                    >
                       면접 평가
                     </li>
                   </ul>
@@ -96,7 +102,9 @@ const Header = ({ redirectionList }: HeaderProps) => {
           className="relative group bg-gray-800 py-2 px-4 rounded-[10px] cursor-pointer flex gap-2"
           onClick={() => setIsLogoutOpen(!isLogoutOpen)}
         >
-          홍길동님
+          {sessionStorage.getItem("username") &&
+            sessionStorage.getItem("username")}
+          님
           <Icon type="ChevronDown" size={24} />
           <div className="absolute top-full left-0 w-full h-2" />
           <ul
@@ -104,7 +112,12 @@ const Header = ({ redirectionList }: HeaderProps) => {
               isLogoutOpen ? "flex" : "hidden"
             } transition-all duration-200`}
           >
-            <li className="hover:text-white cursor-pointer">로그아웃</li>
+            <li
+              className="hover:text-white cursor-pointer"
+              onClick={handleLogout}
+            >
+              로그아웃
+            </li>
           </ul>
         </button>
       </div>

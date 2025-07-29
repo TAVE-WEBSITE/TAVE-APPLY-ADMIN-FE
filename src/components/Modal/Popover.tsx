@@ -1,10 +1,24 @@
 import CheckBox from "@/components/Input/CheckBox";
 
+interface PopoverProps {
+  children: React.ReactNode;
+}
+
 interface CheckBoxPopoverProps {
   contents: string[];
   checkedList: any[];
   setCheckedList: (value: any) => void;
 }
+
+const Popover = ({ children }: PopoverProps) => {
+  return (
+    <div
+      className={`absolute top-full left-0 mt-2 px-4 py-3 bg-white border border-gray-300 rounded-lg min-w-48 z-10`}
+    >
+      {children}
+    </div>
+  );
+};
 
 const CheckBoxPopover = ({
   contents,
@@ -19,7 +33,7 @@ const CheckBoxPopover = ({
     }
   };
   return (
-    <div className="w-[222px] h-[296px] bg-white rounded-xl p-4 absolute bottom-35 border border-gray-100">
+    <Popover>
       {contents.map((content) => (
         <CheckBox
           key={content}
@@ -28,7 +42,7 @@ const CheckBoxPopover = ({
           onChange={() => handleToggle(content)}
         />
       ))}
-    </div>
+    </Popover>
   );
 };
 

@@ -3,14 +3,27 @@ import FlexBox from "@/components/Layout/FlexBox";
 import CountCard from "@/components/Card/CountCard";
 import DonutChart from "@/components/Chart/DonutChart";
 import Modal from "@/components/Modal/Modal";
+import { formatDateTime } from "@/utils/formatDate";
 import SkeletonDonutChart from "@/components/Chart/SkeletonUI/SkeletonDonutChart";
 import { useDashBoard } from "@/hooks/DashBoard/useDashBoard";
 
 export const Page = () => {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const {
-    genderQuery: { data: genderData, isLoading: isGenderLoading },
-    skillQuery: { data: skillData, isLoading: isSkillLoading },
+    genderQuery: {
+      data: genderData,
+      isLoading: isGenderLoading,
+      isError: isGenderError,
+    },
+    skillQuery: {
+      data: skillData,
+      isLoading: isSkillLoading,
+      isError: isSkillError,
+    },
+    dashboardQuery: {
+      data: dashboardData,
+      isLoading: isDashboardLoading,
+    }
   } = useDashBoard();
 
   const calculateSum = () => {
@@ -24,36 +37,38 @@ export const Page = () => {
         <h1 className="font-bold text-4xl">DashBoard</h1>
         <FlexBox className="w-full justify-between">
           <h2 className="font-semibold text-xl">16기 지원 현황</h2>
-          <p className="text-gray-500">2025.08.11 14:00 기준</p>
+          <p className="text-gray-500">
+            {formatDateTime(new Date().toISOString()) + " 기준"}
+          </p>
         </FlexBox>
       </FlexBox>
 
       <section className="min-h-[calc(100vh-244px)] bg-gray-100 flex flex-col gap-8">
         <FlexBox className="w-full pt-8 justify-center gap-4">
-          {isGenderLoading ? (
+          {isDashboardLoading ? (
             <CountCard text="현재 지원자수" boxColor="blue" count={"-"} />
           ) : (
             <CountCard
               text="현재 지원자수"
               boxColor="blue"
-              count={calculateSum()}
+              count={dashboardData?.totalCount ?? 0}
             />
           )}
-          {isGenderLoading ? (
-            <CountCard text="전 기수 대비" boxColor="green" count="-" />
+          {isDashboardLoading ? (
+            <CountCard text="전 기수 대비" boxColor="green" count={"-"} />
           ) : (
-            <CountCard text="전 기수 대비" boxColor="green" count="+10%" />
+            <CountCard text="전 기수 대비" boxColor="green" count={`${dashboardData?.comparisonRatio ?? 0}%`} />
           )}
-          {isGenderLoading ? (
-            <CountCard text="임시 저장 수" boxColor="orange" count="-" />
+          {isDashboardLoading ? (
+            <CountCard text="임시 저장 수" boxColor="orange" count={"-"} />
           ) : (
-            <CountCard text="임시 저장 수" boxColor="orange" count={100} />
+            <CountCard text="임시 저장 수" boxColor="orange" count={dashboardData?.temperCount ?? 0} />
           )}
         </FlexBox>
 
         <FlexBox className="justify-center gap-4">
           <div className="bg-white rounded-xl px-4 py-5 justify-between w-[640px] border border-gray-200">
-            {isGenderLoading ? (
+            {isGenderLoading || isGenderError ? (
               <SkeletonDonutChart />
             ) : (
               genderData && (
@@ -66,10 +81,11 @@ export const Page = () => {
             )}
           </div>
           <div className="bg-white rounded-xl px-4 py-5 justify-between w-[640px] border border-gray-200">
-            {isSkillLoading ? (
+            {isSkillLoading || isSkillError ? (
               <SkeletonDonutChart />
             ) : (
               skillData && (
+                // 파트 컬러 추가
                 <DonutChart
                   data={skillData}
                   title="파트별 비율"
@@ -79,6 +95,7 @@ export const Page = () => {
                     "#F97316",
                     "#EAB308",
                     "#10B981",
+                    "#B744ED"
                   ]}
                 />
               )
@@ -87,12 +104,14 @@ export const Page = () => {
         </FlexBox>
         <Modal
           dialogRef={dialogRef}
+          defaultOpen={true}
           title="신규 지원 초기 설정"
           buttonCount={1}
           confirmText="설정하러 가기"
         >
           <p className="text-center text-gray-500">
-            안녕하세요, 홍길동 회장님! <br /> 기수 지원 관리 페이지에 오신 것을
+            안녕하세요, {sessionStorage.getItem("username") && sessionStorage.getItem("username")} 회장님!
+            <br /> 기수 지원 관리 페이지에 오신 것을
             환영합니다. <br /> <br /> 15기 모집이 종료된 지, 147일이 지났습니다.{" "}
             <br /> 다음 기수 모집을 시작하기 전, 초기 설정 부탁드립니다.
           </p>

@@ -15,7 +15,7 @@ export default function Switch({ title, isOn, setIsOn, onClick }: SwitchProps) {
 
   return (
     <>
-      <div className="flex gap-4">
+      <div className="flex gap-2">
         {title && (
           <div
             className={`flex items-center ${

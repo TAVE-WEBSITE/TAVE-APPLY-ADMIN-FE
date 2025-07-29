@@ -1,0 +1,229 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Body from "@/components/Layout/Body";
+import FlexBox from "@/components/Layout/FlexBox";
+import { formatDateTime } from "@/utils/formatDate";
+import CountCard from "@/components/Card/CountCard";
+import Tab from "@/components/Tab/Tab";
+import SearchInput from "@/components/Input/SearchInput";
+import FilterButton from "@/components/Button/FilterButton";
+import ApplicationTable from "@/components/ApplicationTable/ApplicationTable";
+import { type EvaluationItem } from "@/types/application";
+import { usePagination } from "@/hooks/usePagination";
+import { useFilter } from "@/hooks/useFilter";
+import Button from "@/components/Button/Button";
+import { getFinalInterviewEmailCancel, getFinalInterviewEmailConfig, getFinalInterviewEmailFind } from "./api";
+import Modal from "@/components/Modal/Modal";
+
+const FinalInterview = () => {
+  const navigate = useNavigate();
+  const dialogRefFirst = useRef<HTMLDialogElement>(null);
+  const dialogRefSecond = useRef<HTMLDialogElement>(null);
+
+  const [currentPage, setCurrentPage] = useState(0);
+  const [emailConfig , setEmailConfig] = useState(false);
+  const [activeTab, setActiveTab] = useState("전체");
+
+  const getStatusFromTab = (tab: string) => {
+    switch (tab) {
+      case "전체":
+        return "PASS";
+      case "평가 진행 전":
+        return "PASS";
+      case "불합격":
+        return "FAIL";
+      case "합격":
+        return "FINAL_PASS";
+      default:
+        return "PASS";
+    }
+  };
+
+  const { entireList, isLoading, totalPages } = usePagination<EvaluationItem>({
+    type: "최종 면접 평가",
+    page: currentPage,
+    size: 7,
+    status: getStatusFromTab(activeTab),
+  });
+
+  const {
+    filteredList,
+    checkedRoles,
+    searchInput,
+    setSearchInput,
+    handleFilter,
+  } = useFilter<EvaluationItem>(entireList);
+
+  // 응답 데이터 로깅
+  useEffect(() => {
+    if (entireList.length > 0) {
+      console.log("=== 최종 면접 평가 API 응답 데이터 ===");
+      console.log("현재 탭:", activeTab);
+      console.log("현재 status:", getStatusFromTab(activeTab));
+      console.log("전체 리스트:", entireList);
+      console.log("필터된 리스트:", filteredList);
+      console.log("=============================");
+    }
+  }, [entireList, activeTab, filteredList]);
+
+  
+  const openModal = () => {
+  //서류 평가 상태 : FAIL, PASS, HOLD, NOTCHECKED, COMPLETE
+    const isEmpty = entireList.length === 0;
+    const notDone = entireList.some(
+      (e) => e.status === "NOTCHECKED" || e.status === "HOLD"
+    );
+    const allFail = !isEmpty && entireList.every(e => e.status === "FAIL");
+    const allPass = !isEmpty && entireList.every(e => e.status === "PASS");
+
+    if (notDone) dialogRefFirst.current?.showModal();
+    else if(allFail || allPass) dialogRefSecond.current?.showModal(); //모든 평가 FAIL 또는 PASS일때
+    else handleEmailUpdate();
+  };
+
+  const holdCount = useMemo(() => {
+      return entireList.filter((e) => e.status === "HOLD").length;
+    }, [entireList]);
+  
+    const notCheckedCount = useMemo(() => {
+      return entireList.filter((e) => e.status === "NOTCHECKED").length;
+    }, [entireList]);
+
+  const handleEmailCancel = async () => {
+      try {
+        await getFinalInterviewEmailCancel();
+        const { isBooked } = await getFinalInterviewEmailFind(); // 최신 상태 조회
+        setEmailConfig(isBooked); // 상태 갱신
+      } catch (error) {
+        console.error("이메일 취소 실패:", error);
+      }
+    };
+  
+    const handleEmailUpdate = async () => {
+      // 기존 코드
+      //await updateStatusByDocumentEvaluation();
+      try {
+        await getFinalInterviewEmailConfig();
+        const { isBooked } = await getFinalInterviewEmailFind(); // 최신 상태 조회
+        setEmailConfig(isBooked); // 상태 갱신
+      } catch (error) {
+        console.error("이메일 예약 실패:", error);
+      } finally {
+        dialogRefSecond.current?.close();
+      }
+    };
+
+    useEffect(() => {
+      const viewEmail = async () => {
+        try {
+          const { isBooked } = await getFinalInterviewEmailFind();
+          setEmailConfig(isBooked);
+        } catch (error) {
+          console.error("이메일 상태 조회 실패:", error);
+        }
+      };
+    
+      viewEmail();
+    }, []);
+  return (
+    <div className="text-white">
+      <FlexBox className="gap-8 px-16 pb-8 items-start" direction="col">
+        <h1 className="font-bold text-4xl">16기 최종 면접 평가</h1>
+        <FlexBox className="w-full justify-between">
+          <p className="text-gray-500">
+            {formatDateTime(new Date().toISOString()) + " 기준"}
+          </p>
+          {emailConfig ? (
+            <Button className="bg-gray-200" onClick={handleEmailCancel}>
+              메일 발송 예정
+            </Button>
+          ) : (
+            <Button onClick={openModal}>면접 평가 완료</Button>
+          )}
+        </FlexBox>
+      </FlexBox>
+      <Modal
+        dialogRef={dialogRefFirst}
+        buttonCount={2}
+        onConfirm={() => dialogRefFirst.current?.close()}
+        title="최종 면접 평가"
+      >
+        <p className="text-gray-500 text-balance">
+          모든 면접 평가가 완료되지 않았습니다. <br /> <br />
+          현재 면접 평가 진행 현황입니다. <br />
+          <ul>
+            <li>
+              - 보류 중인 면접{" "}
+              <span className="text-blue-500 font-bold">{holdCount}</span>건
+            </li>{" "}
+            <li>
+              - 진행하지 않은 면접{" "}
+              <span className="text-blue-500 font-bold">{notCheckedCount}</span>
+              건
+            </li>
+          </ul>
+        </p>
+      </Modal>
+      <Modal
+        dialogRef={dialogRefSecond}
+        buttonCount={2}
+        onConfirm={() => handleEmailUpdate()}
+        title="최종 면접 평가"
+      >
+        <p className="text-gray-500 text-balance">
+          현재 시간 부로, <br /> 면접 합격 결과를 수정하실 수 없습니다. <br />
+          <br />
+          동의하시겠습니까?
+        </p>
+      </Modal>
+      <Body className="pt-4 gap-8">
+        <FlexBox className="gap-4 mx-auto">
+          <CountCard text="현재 지원자 수" boxColor={"blue"} count={200} />
+          <CountCard text="최종 평가 완료 수" boxColor={"green"} count={37} />
+          <CountCard text="합격자 수" boxColor={"orange"} count={80} />
+        </FlexBox>
+        <FlexBox className="justify-between w-[1320px] mx-auto">
+          <Tab
+            categories={["전체", "평가 진행 전", "불합격", "합격"]}
+            active={activeTab}
+            onChange={(tab) => {
+              setActiveTab(tab);
+              setCurrentPage(0); // 탭 변경 시 첫 페이지로 이동
+            }}
+          />
+
+          <FlexBox className="gap-4">
+            <FilterButton checkedList={checkedRoles} onChange={handleFilter} />
+            <SearchInput
+              placeholder="이름을 입력해주세요"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+          </FlexBox>
+        </FlexBox>
+        <div className="w-[1320px] mx-auto">
+          <ApplicationTable
+            rows={[
+              "지원 분야",
+              "이름",
+              "성별",
+              "학교",
+              "면접 일자",
+              "최종 평가",
+            ]}
+            applications={filteredList}
+            totalPages={totalPages}
+            isLoading={isLoading}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            baseUrl="/evaluation/interview/final"
+            navigate={navigate}
+            pageType="final"
+          />
+        </div>
+      </Body>
+    </div>
+  );
+};
+
+export default FinalInterview;

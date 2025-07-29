@@ -5,12 +5,14 @@ import FlexBox from "@/components/Layout/FlexBox";
 export interface AccordionProps {
   title: string;
   children: React.ReactNode;
+  hasBorder?: boolean;
   className?: string;
 }
 
 export default function Accordion({
   title,
   children,
+  hasBorder = true,
   className,
 }: AccordionProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -42,7 +44,7 @@ export default function Accordion({
         onClick={() => handleToggle()}
         onKeyDown={(e) => e.key === "Space" && handleToggle()}
       >
-        <p className="text-gray-700 font-semibold text-balance text-start">
+        <p className="text-gray-700 font-medium text-balance text-start">
           {title}
         </p>
         <Icon
@@ -62,7 +64,7 @@ export default function Accordion({
           isOpen ? "duration-300" : "duration-300"
         }`}
       >
-        <div className="w-full h-px bg-gray-300 mb-5" />
+        {hasBorder && <div className="w-full h-px bg-gray-300 mb-5" />}
         <section className="pt-1 pb-5">{children}</section>
       </div>
     </FlexBox>

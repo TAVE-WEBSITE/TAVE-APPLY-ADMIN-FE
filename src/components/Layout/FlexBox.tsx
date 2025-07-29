@@ -1,4 +1,6 @@
-interface FlexBoxProps {
+import type { HTMLAttributes } from "react";
+
+interface FlexBoxProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
   direction?: "row" | "col";
   children: React.ReactNode;

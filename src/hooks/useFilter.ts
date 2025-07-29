@@ -1,0 +1,62 @@
+import { useMemo, useState } from "react";
+import type { RoleType } from "@/types/role";
+import type { Status } from "@/types/application";
+
+const statusMap: Record<string, Status> = {
+  전체: "ALL",
+  대기중: "HOLD",
+  완료: "COMPLETE",
+  "평가 진행 전": "NOTCHECKED",
+  불합격: "FAIL",
+  합격: "PASS",
+};
+
+// 한글-영문 매핑
+const roleMap: Record<string, string> = {
+  "디자인": "DESIGN",
+  "웹 프론트": "WEBFRONTEND",
+  "앱 프론트": "APPFRONTEND",
+  "백엔드": "BACKEND",
+  "데이터 분석": "DATAANALYSIS",
+  "딥러닝": "DEEPLEARNING",
+};
+
+export const useFilter = <T>(list: T[]) => {
+  const [searchInput, setSearchInput] = useState("");
+  const [checkedRoles, setCheckedRoles] = useState<Set<RoleType>>(new Set());
+  const [activeTab, setActiveTab] = useState("전체");
+
+  const handleFilter = (role: RoleType) => {
+    setCheckedRoles((prev) => {
+      const newSet = new Set(prev);
+      newSet.has(role) ? newSet.delete(role) : newSet.add(role);
+      return newSet;
+    });
+  };
+
+  const filteredList = useMemo<T[]>(() => {
+
+    const filtered = list.filter((item: any) => {
+      const matchRole =
+        checkedRoles.size === 0 ||
+        Array.from(checkedRoles).some(
+          (role) => roleMap[role] === item.fieldType || roleMap[role] === item.field || role === item.fieldType || role === item.field
+        );
+      const matchName = (item.name || item.username || '').includes(searchInput);
+      
+      return matchRole && matchName;
+    }) as T[];
+
+    return filtered;
+  }, [list, searchInput, checkedRoles, activeTab]);
+
+  return {
+    filteredList,
+    checkedRoles,
+    searchInput,
+    activeTab,
+    setActiveTab,
+    setSearchInput,
+    handleFilter,
+  };
+};
