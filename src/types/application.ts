@@ -13,7 +13,8 @@ export type Status =
   | "PASS"
   | "HOLD"
   | "NOTCHECKED"
-  | "COMPLETE";
+  | "COMPLETE"
+  | "FINAL_PASS";
 
 type Application = {
   id: string;

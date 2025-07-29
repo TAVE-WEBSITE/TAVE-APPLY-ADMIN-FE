@@ -22,26 +22,50 @@ const FinalInterview = () => {
 
   const [currentPage, setCurrentPage] = useState(0);
   const [emailConfig , setEmailConfig] = useState(false);
+  const [activeTab, setActiveTab] = useState("전체");
+
+  const getStatusFromTab = (tab: string) => {
+    switch (tab) {
+      case "전체":
+        return "PASS";
+      case "평가 진행 전":
+        return "PASS";
+      case "불합격":
+        return "FAIL";
+      case "합격":
+        return "FINAL_PASS";
+      default:
+        return "PASS";
+    }
+  };
 
   const { entireList, isLoading, totalPages } = usePagination<EvaluationItem>({
     type: "최종 면접 평가",
     page: currentPage,
     size: 7,
+    status: getStatusFromTab(activeTab),
   });
 
   const {
     filteredList,
     checkedRoles,
     searchInput,
-    activeTab,
-    setActiveTab,
     setSearchInput,
     handleFilter,
   } = useFilter<EvaluationItem>(entireList);
 
-  //서류 평가 부분과 유사하여 필요한 코드 가져옴
-  //아직 마무리 되지 않은듯하여 주석 처리
-  //이후 필요 시 사용 예정
+  // 응답 데이터 로깅
+  useEffect(() => {
+    if (entireList.length > 0) {
+      console.log("=== 최종 면접 평가 API 응답 데이터 ===");
+      console.log("현재 탭:", activeTab);
+      console.log("현재 status:", getStatusFromTab(activeTab));
+      console.log("전체 리스트:", entireList);
+      console.log("필터된 리스트:", filteredList);
+      console.log("=============================");
+    }
+  }, [entireList, activeTab, filteredList]);
+
   
   const openModal = () => {
   //서류 평가 상태 : FAIL, PASS, HOLD, NOTCHECKED, COMPLETE
@@ -155,14 +179,17 @@ const FinalInterview = () => {
       <Body className="pt-4 gap-8">
         <FlexBox className="gap-4 mx-auto">
           <CountCard text="현재 지원자 수" boxColor={"blue"} count={200} />
-          <CountCard text="남은 평가 서류 수" boxColor={"green"} count={37} />
+          <CountCard text="최종 평가 완료 수" boxColor={"green"} count={37} />
           <CountCard text="합격자 수" boxColor={"orange"} count={80} />
         </FlexBox>
         <FlexBox className="justify-between w-[1320px] mx-auto">
           <Tab
             categories={["전체", "평가 진행 전", "불합격", "합격"]}
             active={activeTab}
-            onChange={setActiveTab}
+            onChange={(tab) => {
+              setActiveTab(tab);
+              setCurrentPage(0); // 탭 변경 시 첫 페이지로 이동
+            }}
           />
 
           <FlexBox className="gap-4">
@@ -181,8 +208,8 @@ const FinalInterview = () => {
               "이름",
               "성별",
               "학교",
-              "지원 날짜",
-              "평가 여부",
+              "면접 일자",
+              "최종 평가",
             ]}
             applications={filteredList}
             totalPages={totalPages}
@@ -191,6 +218,7 @@ const FinalInterview = () => {
             setCurrentPage={setCurrentPage}
             baseUrl="/evaluation/interview/final"
             navigate={navigate}
+            pageType="final"
           />
         </div>
       </Body>

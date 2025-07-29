@@ -52,11 +52,8 @@ export const fetchList = async (
           url = `/v1/manager/resume/evaluate/final`;
           break;
         case "최종 면접 평가":
-          url = `/v1/manager/interview-final`;
-          requestParams.pageNum = page;
-          requestParams.pageSize = size;
-          const finalInterviewRes = await axiosInstance.get(url, { params: requestParams });
-          return finalInterviewRes.data;
+          url = `/v1/manager/resume/evaluate/final`;
+          break;
       }
     }
 
