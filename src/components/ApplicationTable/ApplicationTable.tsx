@@ -14,7 +14,7 @@ interface ApplicationTableProps {
   totalPages: number | undefined;
   baseUrl?: string;
   navigate?: NavigateFunction;
-  pageType?: "document" | "final"; // 페이지 타입 구분
+  pageType?: "document" | "final" | "interview"; // 페이지 타입 구분
 }
 
 const ApplicationTable = ({
@@ -130,19 +130,19 @@ const ApplicationTable = ({
                   <td className="flex items-center gap-2 px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium min-w-[120px]">
                     <div
                       className={`w-2 h-2 rounded-full ${getFieldColor(
-                        application.fieldType
+                        application.fieldType || application.field
                       )}`}
                     />
-                    <span>{getFieldDisplayName(application.fieldType)}</span>
+                    <span>{getFieldDisplayName(application.fieldType || application.field)}</span>
                   </td>
                   <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium min-w-32">
-                    <span>{application.name || ''}</span>
+                    <span>{application.name || application.username || ''}</span>
                   </td>
                   <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium min-w-32">
                     <span>{getGenderText(application.sex) || ''}</span>
                   </td>
                   <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
-                    <span>{application.school || ''}</span>
+                    <span>{application.school || application.university || ''}</span>
                   </td>
                   {/* Document 페이지: 지원 날짜 */}
                   {pageType === "document" && application.recruitTime && (
@@ -154,6 +154,12 @@ const ApplicationTable = ({
                   {pageType === "final" && application.count !== undefined && (
                     <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
                       <span>{String(application.count)}명</span>
+                    </td>
+                  )}
+                  {/* Interview 페이지: 면접 일자 */}
+                  {pageType === "interview" && application.interviewDate && (
+                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
+                      <span>{application.interviewDate}</span>
                     </td>
                   )}
                   {application.interviewTime && (

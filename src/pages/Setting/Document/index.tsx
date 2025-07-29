@@ -19,12 +19,9 @@ const DocumentSetting = () => {
         <h1 className="font-bold text-4xl">서류 설정</h1>
       </FlexBox>
       <Body className="pt-4">
-        <Tab
-          categories={["지원서 질문", "지원 완료 안내"]}
-          active={selectedTab}
-          onChange={setSelectedTab}
-          centerType={true}
-        />
+        <div className=" flex pl-5 leading-[135%] tracking-[-0.56px] border-b border-[#E5E7EB]">
+        <div className="text-[#255FF4] px-1 pb-4 text-xl font-bold ">지원서 질문</div>
+        </div>
         <div className="flex items-start w-full">
           <Sidebar
             items={SidebarItems}

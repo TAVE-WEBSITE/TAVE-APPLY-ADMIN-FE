@@ -4,7 +4,8 @@ export type ApplicationType =
   | "서류 평가"
   | "면접 설정"
   | "최종 서류 평가"
-  | "최종 면접 평가";
+  | "최종 면접 평가"
+  | "면접 현황";
 
 export type Status =
   | "ALL"
@@ -12,7 +13,8 @@ export type Status =
   | "PASS"
   | "HOLD"
   | "NOTCHECKED"
-  | "COMPLETE";
+  | "COMPLETE"
+  | "FINAL_PASS";
 
 type Application = {
   id: string;

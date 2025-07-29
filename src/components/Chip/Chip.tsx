@@ -2,7 +2,8 @@
 import type { RoleTypeForTimeTable } from "@/types/interview";
 
 interface ChipProps {
-  title: RoleTypeForTimeTable;
+  // title: RoleTypeForTimeTable;
+  title : any;
 }
 
 const Chip = ({ title }: ChipProps) => {

@@ -199,7 +199,7 @@ const FinalDetail = () => {
               onChange={setActiveRightTab}
             />
             <DecisionTab
-              message="면접 전형
+              message="서류 전형
           결과를 선택해주세요"
               finalEvaluation={{
                 averageScore,

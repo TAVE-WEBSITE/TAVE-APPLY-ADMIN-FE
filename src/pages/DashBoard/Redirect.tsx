@@ -2,6 +2,7 @@
 
 // const Redirect = () => {
 //   useEffect(() => {
+    
 //     const login = async () => {
 //       const res = await fetch(
 //         `${import.meta.env.VITE_BASE_URL}/v1/auth/signin`,
@@ -16,8 +17,15 @@
 //           }),
 //         }
 //       );
+//       if (!res.ok) {
+//         throw new Error(`HTTP 에러! 상태: ${res.status}`);
+//       }
+
 //       const data = await res.json();
+//       console.log("로그인 응답:", data);
+      
 //       const result = data.result;
+      
 //       sessionStorage.setItem("email", result.email);
 //       sessionStorage.setItem("access_token", result.accessToken);
 //       sessionStorage.setItem("username", result.username);
@@ -61,7 +69,7 @@ const Redirect = () => {
       const refreshToken = async () => {
         try {
           const response = await fetch(
-            `${import.meta.env.VITE_BASE_URL}/v1/auth/refresh`,
+            "https://api.tave-wave.com/v1/auth/refresh",
             {
               method: "POST",
               headers: {
@@ -80,8 +88,8 @@ const Redirect = () => {
             console.log("토큰 리프레시 성공");
             // 필요시 새로운 세션 정보 저장
             sessionStorage.setItem("access_token", data.result.accessToken);
-            sessionStorage.setItem("email", data.result.email);
-            sessionStorage.setItem("username", data.result.username);
+            //sessionStorage.setItem("email", data.result.email);
+            //sessionStorage.setItem("username", data.result.username);
           } else {
             console.error("토큰 리프레시 실패:", data.message);
           }

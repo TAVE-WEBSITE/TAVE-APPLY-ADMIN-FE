@@ -25,7 +25,7 @@ const WithTitle = ({ title, children, className = "" }: WithTitleProps) => {
           </label>
         </FlexBox>
       </FlexBox>
-      <FlexBox direction="col" className="gap-4">
+      <FlexBox direction="col" className="gap-4 w-full">
         {children}
       </FlexBox>
     </>
