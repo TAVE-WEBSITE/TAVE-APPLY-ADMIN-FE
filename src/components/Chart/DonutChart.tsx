@@ -66,7 +66,7 @@ const DonutChart = ({ title, data = [], colors }: DonutChartProps<any>) => {
             fontWeight="600"
             style={{ pointerEvents: "none", transition: "all 0.3s ease" }}
           >
-            {item.label} ({item.ratio}%)
+            {item.topic} ({Math.round(item.ratio)}%)
           </text>
         </g>
       );
@@ -93,11 +93,11 @@ const DonutChart = ({ title, data = [], colors }: DonutChartProps<any>) => {
           </>
         </FlexBox>
 
-        <FlexBox className="gap-2">
+        <FlexBox className="gap-1">
           {data.map((item, index) => (
             <button
               key={index}
-              className={`flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-all ${
+              className={`flex items-center gap-1 p-3 rounded-lg cursor-pointer transition-all ${
                 selectedSegment === index
                   ? "bg-blue-50 scale-103"
                   : "hover:bg-gray-100"
@@ -108,8 +108,8 @@ const DonutChart = ({ title, data = [], colors }: DonutChartProps<any>) => {
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: colors[index] }}
               ></div>
-              <span className="text-gray-700 text-sm font-medium">
-                {item.label}
+              <span className="text-gray-700 text-sm font-medium whitespace-nowrap">
+                {item.topic}
               </span>
             </button>
           ))}

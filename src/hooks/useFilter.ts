@@ -11,6 +11,16 @@ const statusMap: Record<string, Status> = {
   합격: "PASS",
 };
 
+// 한글-영문 매핑
+const roleMap: Record<string, string> = {
+  "디자인": "DESIGN",
+  "웹 프론트": "WEBFRONTEND",
+  "앱 프론트": "APPFRONTEND",
+  "백엔드": "BACKEND",
+  "데이터 분석": "DATAANALYSIS",
+  "딥러닝": "DEEPLEARNING",
+};
+
 export const useFilter = <T>(list: T[]) => {
   const [searchInput, setSearchInput] = useState("");
   const [checkedRoles, setCheckedRoles] = useState<Set<RoleType>>(new Set());
@@ -28,7 +38,10 @@ export const useFilter = <T>(list: T[]) => {
 
     const filtered = list.filter((item: any) => {
       const matchRole =
-        checkedRoles.size === 0 || checkedRoles.has(item.fieldType as RoleType);
+        checkedRoles.size === 0 ||
+        Array.from(checkedRoles).some(
+          (role) => roleMap[role] === item.fieldType || role === item.fieldType
+        );
       const matchName = item.name.includes(searchInput);
       
       return matchRole && matchName;

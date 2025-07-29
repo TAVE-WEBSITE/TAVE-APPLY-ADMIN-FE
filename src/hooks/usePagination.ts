@@ -77,6 +77,7 @@ export const usePagination = <T>({
       completedRecruiter: 0,
     };
   }, [pageQueries[0]?.dataUpdatedAt]); // 첫 번째 쿼리의 dataUpdatedAt만 사용
+
   const isLoading = pageQueries.some((query) => query.isLoading);
   return {
     entireList,

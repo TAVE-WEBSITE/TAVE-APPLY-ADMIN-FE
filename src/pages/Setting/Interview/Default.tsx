@@ -9,7 +9,6 @@ import {
   postInterviewPlace,
   fetchInterviewTime,
 } from "@/pages/Setting/api/Interview";
-
 import type { InterviewAddress } from "@/pages/Setting/api/Interview";
 import ToastMessage from "@/components/Modal/ToastMessage";
 
@@ -20,6 +19,7 @@ const Default = () => {
   const { data: addressData, isLoading, error } = useQuery({
     queryKey: ["setting", "address", "get"],
     queryFn: fetchAddress,
+
     retry: 1, // 재시도 횟수 제한
     retryDelay: 1000, // 재시도 간격
   });
@@ -29,6 +29,7 @@ const Default = () => {
     queryFn: fetchInterviewTime,
     retry: 1,
     retryDelay: 1000,
+
 
   });
 
@@ -50,6 +51,7 @@ const Default = () => {
   const [detailAddress, setDetailAddress] = useState(["", "", "", ""]);
   const [openChatLinks, setOpenChatLinks] = useState(["", "", "", ""]);
   const [documentLinks, setDocumentLinks] = useState(["", "", "", ""]);
+
 
 
   // 면접 시간 데이터 로드
@@ -96,6 +98,7 @@ const Default = () => {
   };
 
   return (
+
     <Body className="py-8 gap-8 px-12">
       {isLoading && (
         <div className="text-center py-4">
@@ -195,6 +198,7 @@ const Default = () => {
         </Button>
       </div>
     </Body>
+
 
   );
 };
