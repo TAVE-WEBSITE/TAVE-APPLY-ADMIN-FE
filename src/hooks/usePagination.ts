@@ -43,18 +43,29 @@ export const usePagination = <T>({
     const allData: T[] = [];
 
     pageQueries.forEach((query) => {
-      if (query.isSuccess && query.data?.result?.resumeResDtos?.content) {
-        const transformedData = query.data.result.resumeResDtos.content.map((item: any) => ({
-          ...item,
-          id: String(item.id), 
-          recruitTime: item.recruitTime || new Date().toISOString(), 
-          isEvaluated: item.isEvaluated || false,
-          memberId: item.memberId, 
-          resumeId: item.resumeId,
-        }));
-        
-        allData.push(...transformedData);
-        totalPagesRef.current = query?.data?.result?.resumeResDtos?.page?.totalPages;
+      if (query.isSuccess && query.data?.result) {
+        if (query.data.result.dataList) {
+          const transformedData = query.data.result.dataList.map((item: any) => ({
+            ...item,
+            id: String(item.id),
+          }));
+          
+          allData.push(...transformedData);
+          totalPagesRef.current = query.data.result.totalPage;
+        }
+        else if (query.data.result.resumeResDtos?.content) {
+          const transformedData = query.data.result.resumeResDtos.content.map((item: any) => ({
+            ...item,
+            id: String(item.id), 
+            recruitTime: item.recruitTime || new Date().toISOString(), 
+            isEvaluated: item.isEvaluated || false,
+            memberId: item.memberId, 
+            resumeId: item.resumeId,
+          }));
+          
+          allData.push(...transformedData);
+          totalPagesRef.current = query?.data?.result?.resumeResDtos?.page?.totalPages;
+        }
       }
     });
     return allData;

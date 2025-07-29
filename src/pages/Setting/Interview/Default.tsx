@@ -112,12 +112,6 @@ const Default = () => {
       openChatLink: openChatLinks[idx] || "",
       code: documentLinks[idx] || "",
     }));
-
-    console.log("=== 면접 설정 등록 데이터 ===");
-    console.log("전체 payload:", payload);
-    console.log("JSON 형태:", JSON.stringify(payload, null, 2));
-    console.log("=============================");
-
     mutate(payload);
   };
 

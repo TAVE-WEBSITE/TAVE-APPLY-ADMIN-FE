@@ -38,6 +38,9 @@ const TimeTable = () => {
     handleFilter,
   } = useFilter<InterviewItem>(entireList);
 
+  console.log("전체 리스트:", entireList);
+
+
   return (
     <div className="flex flex-col gap-4">
       <FlexBox className="justify-between">
@@ -74,6 +77,7 @@ const TimeTable = () => {
         isLoading={isLoading}
         baseUrl="/setting/interview"
         navigate={navigate}
+        pageType="interview"
       />
     </div>
   );

@@ -40,9 +40,9 @@ export const useFilter = <T>(list: T[]) => {
       const matchRole =
         checkedRoles.size === 0 ||
         Array.from(checkedRoles).some(
-          (role) => roleMap[role] === item.fieldType || role === item.fieldType
+          (role) => roleMap[role] === item.fieldType || roleMap[role] === item.field || role === item.fieldType || role === item.field
         );
-      const matchName = item.name.includes(searchInput);
+      const matchName = (item.name || item.username || '').includes(searchInput);
       
       return matchRole && matchName;
     }) as T[];
