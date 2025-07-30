@@ -276,3 +276,20 @@ export const getFinalInterviewEmailFind = async (): Promise<{ isBooked: boolean 
     };
   }
 };
+
+
+// 최종 면접 평가 제출 API
+export const submitInterviewFinalEvaluation = async (
+  interviewFinalId: string,
+  status: "FINAL_PASS" | "FINAL_FAIL"
+) => {
+  try {
+    const res = await axiosInstance.post(
+      `/v1/admin/interview-final/${interviewFinalId}?status=${status}`
+    );
+    return res.data;
+  } catch (error: any) {
+    console.error("최종 면접 평가 제출 에러:", error.response?.data || error);
+    throw error;
+  }
+};

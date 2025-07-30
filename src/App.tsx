@@ -60,7 +60,7 @@ function App() {
               />
               <Route
                 path="/evaluation/document/final/:id"
-                element={<FinalEvaluationDetail />}
+                element={<FinalEvaluationDetail type="document"/>}
               />
               <Route
                 path="/evaluation/interview"
@@ -76,7 +76,7 @@ function App() {
               />
               <Route
                 path="/evaluation/interview/final/:id"
-                element={<FinalEvaluationDetail />}
+                element={<FinalEvaluationDetail type="interview"/>}
               />
             </Routes>
           </main>

@@ -52,7 +52,7 @@ export const fetchList = async (
           url = `/v1/manager/resume/evaluate/final`;
           break;
         case "최종 면접 평가":
-          url = `/v1/manager/resume/evaluate/final`;
+          url = `/v1/admin/interview-final`;
           break;
       }
     }

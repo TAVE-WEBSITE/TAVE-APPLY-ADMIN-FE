@@ -20,16 +20,16 @@ const FinalInterview = () => {
   const dialogRefFirst = useRef<HTMLDialogElement>(null);
   const dialogRefSecond = useRef<HTMLDialogElement>(null);
 
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [emailConfig , setEmailConfig] = useState(false);
   const [activeTab, setActiveTab] = useState("전체");
 
   const getStatusFromTab = (tab: string) => {
     switch (tab) {
       case "전체":
-        return "PASS";
+        return undefined;
       case "평가 진행 전":
-        return "PASS";
+        return "NOTCHECKED";
       case "불합격":
         return "FAIL";
       case "합격":
@@ -39,7 +39,7 @@ const FinalInterview = () => {
     }
   };
 
-  const { entireList, isLoading, totalPages } = usePagination<EvaluationItem>({
+  const { entireList, isLoading, totalPages,countData } = usePagination<EvaluationItem>({
     type: "최종 면접 평가",
     page: currentPage,
     size: 7,
@@ -178,9 +178,9 @@ const FinalInterview = () => {
       </Modal>
       <Body className="pt-4 gap-8">
         <FlexBox className="gap-4 mx-auto">
-          <CountCard text="현재 지원자 수" boxColor={"blue"} count={200} />
-          <CountCard text="최종 평가 완료 수" boxColor={"green"} count={37} />
-          <CountCard text="합격자 수" boxColor={"orange"} count={80} />
+          <CountCard text="현재 지원자 수" boxColor={"blue"} count={countData.totalRecruiter} />
+          <CountCard text="최종 평가 완료 수" boxColor={"green"} count={countData.completedRecruiter} />
+          <CountCard text="최종 평가 남은 수" boxColor={"orange"} count={countData.notCompletedRecruiter} />
         </FlexBox>
         <FlexBox className="justify-between w-[1320px] mx-auto">
           <Tab
@@ -218,7 +218,7 @@ const FinalInterview = () => {
             setCurrentPage={setCurrentPage}
             baseUrl="/evaluation/interview/final"
             navigate={navigate}
-            pageType="final"
+            pageType="interview"
           />
         </div>
       </Body>

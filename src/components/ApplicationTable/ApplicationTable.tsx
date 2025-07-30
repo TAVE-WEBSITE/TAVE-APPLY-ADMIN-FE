@@ -106,15 +106,15 @@ const ApplicationTable = ({
             </tr>
           </thead>
           <tbody className="bg-white">
-            {currentItems && !isLoading ? (
-              currentItems?.map((application, index) => {
+            {applications && !isLoading ? (
+              applications?.map((application, index) => {
               
                 return (
                 <tr
                   key={application.id + index}
                   className={`hover:bg-slate-600/5 border-b border-gray-200 ${
                     navigate && "cursor-pointer"
-                  } ${index === currentItems.length - 1 ? "rounded-b-xl" : ""}`}
+                  } ${index === applications.length - 1 ? "rounded-b-xl" : ""}`}
                   onClick={() => {
                     navigate &&
                       baseUrl &&
