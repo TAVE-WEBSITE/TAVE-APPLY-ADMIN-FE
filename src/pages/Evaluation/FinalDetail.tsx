@@ -12,9 +12,12 @@ import SkeletonAccordion from "@/components/Accordion/Skeleton";
 import Icon from "@/components/Icon/Icon";
 import DecisionTab from "./TabContents/DecisionTab";
 
+interface FinalDetailProps {
+  type: "document" | "interview"; // 문서/면접 타입
+}
 const tabCategories = ["파트별 질문", "공통 질문"];
 
-const FinalDetail = () => {
+const FinalDetail = ({ type }: FinalDetailProps) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { state } = useLocation();
@@ -49,7 +52,7 @@ const FinalDetail = () => {
   });
 
   const [activeLeftTab, setActiveLeftTab] = useState("공통 질문");
-  const [activeRightTab, setActiveRightTab] = useState("서류 평가 분석");
+  const [activeRightTab, setActiveRightTab] = useState(type === "document" ? "서류 평가 분석" : "합격 여부 결정");
 
   const isLoading = memberInfoLoading || questionsLoading || evaluationLoading;
 
@@ -97,7 +100,7 @@ const FinalDetail = () => {
             type="ChevronDown"
             size={40}
             className="rotate-90 cursor-pointer"
-            onClick={() => navigate("/evaluation/document/final")}
+            onClick={() => navigate(type === "document" ? "/evaluation/document/final" : "/evaluation/interview/final")}
           />
           <h1 className="font-bold text-4xl">
             {applicant?.username} ({applicant?.field})
@@ -194,20 +197,29 @@ const FinalDetail = () => {
           </div>
           <div className="flex flex-col gap-6 flex-1 rounded-xl min-h-[650px] px-6">
             <Tab
-              categories={["서류 평가 분석", "합격 여부 결정"]}
+              categories={
+                type === "document"
+                  ? ["서류 평가 분석", "합격 여부 결정"]
+                  : ["합격 여부 결정"]
+              }
               active={activeRightTab}
               onChange={setActiveRightTab}
             />
             <DecisionTab
-              message="서류 전형
-          결과를 선택해주세요"
+              message={
+                type === "document"
+                  ? "서류 전형 결과를 선택해주세요"
+                  : "면접 전형 결과를 선택해주세요"
+              }
               finalEvaluation={{
                 averageScore,
                 evaluatorCount: evaluations.length,
                 evaluations
               }}
               activeTab={activeRightTab}
-              resumeId={application?.resumeId}
+              resumeId={type === "document" ? application?.resumeId : application?.id}
+              userName={applicant?.username}
+              type={type}
             />
           </div>
         </div>

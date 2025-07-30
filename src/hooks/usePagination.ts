@@ -65,6 +65,14 @@ export const usePagination = <T>({
           
           allData.push(...transformedData);
           totalPagesRef.current = query?.data?.result?.resumeResDtos?.page?.totalPages;
+        }else if (query.data.result.dtos?.content) {
+          const transformedData = query.data.result.dtos.content.map((item: any) => ({
+            ...item,
+            id: String(item.id),
+          }));
+          
+          allData.push(...transformedData);
+          totalPagesRef.current = query.data.result.dtos.page?.totalPages;
         }
       }
     });

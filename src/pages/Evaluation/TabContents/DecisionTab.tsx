@@ -5,21 +5,25 @@ import Button from "@/components/Button/Button";
 import FlexBox from "@/components/Layout/FlexBox";
 import ToastMessage from "@/components/Modal/ToastMessage";
 import { submitFinalEvaluation } from "../api";
+import { useFinalInterviewEvaluation } from "../api/hooks";
 
 interface DecisionTabProps {
   message: string;
   finalEvaluation?: any; // 운영진 평가 데이터
   activeTab: string; // 현재 활성 탭
   resumeId?: string; // resumeId
+  userName?:string;
+  type:"document" | "interview";
 }
 
-const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId }: DecisionTabProps) => {
+const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId, userName,type }: DecisionTabProps) => {
   const navigate = useNavigate();
   const [isPassed, setIsPassed] = useState<boolean | null>(null);
   const isDisabled = typeof isPassed !== "boolean";
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [postMessage, setPostMessage] = useState("");
 
+  //최종 서류 평가?
   const { mutate, isPending, isError } = useMutation({
     mutationKey: ["final-evaluation", "submit"],
     mutationFn: (status: "PASS" | "FAIL") => {
@@ -52,13 +56,29 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId }: Decision
     mutate(status);
   };
 
+  //최종 면접 평가
+  const {
+    interviewFinalMutate,
+    isInterviewFinalPending,
+    isInterviewFinalError,
+    interviewFinalPostMessage,
+    isInterviewFinalToastOpen,
+    setIsInterviewFinalToastOpen,
+  } = useFinalInterviewEvaluation(resumeId);
+
+  const postInterviewDecision = () => {
+    if (isPassed === null) return;
+    const status = isPassed ? "FINAL_PASS" : "FINAL_FAIL";
+    interviewFinalMutate(status);
+  };
+
   return (
     <FlexBox direction="col" className="gap-4 text-gray-900 w-full">
       {activeTab === "서류 평가 분석" && (
         <div className="w-full flex flex-col gap-4">
           <div className="flex gap-4 items-center">
             <div className="px-3 py-1 bg-gray-200 rounded-md flex items-center justify-center font-bold text-xl text-gray-500">1</div>
-            <div className="w-full"><span className="font-bold text-blue-700">장진영</span>님의 점수를 <span className="font-bold text-blue-700">10점 만점</span>으로 입력해주세요</div>
+            <div className="w-full"><span className="font-bold text-blue-700">{userName}</span>님의 점수를 <span className="font-bold text-blue-700">10점 만점</span>으로 입력해주세요</div>
           </div>
        
         <div className="w-full border border-gray-300 rounded-lg font-normal bg-blue-50 p-4">
@@ -125,7 +145,7 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId }: Decision
         >
           
           <p className="font-semibold">
-            <span className="font-bold text-blue-700">장진영</span>님의 {message}
+            <span className="font-bold text-blue-700">{userName}</span>님의 {message}
           </p>
           <FlexBox className="gap-4 font-semibold">
             <button
@@ -152,7 +172,7 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId }: Decision
           <Button
             disabled={isDisabled}
             className="w-full"
-            onClick={postDecision}
+            onClick={type === "document" ? postDecision : postInterviewDecision}
             isPending={isPending}
           >
             완료
