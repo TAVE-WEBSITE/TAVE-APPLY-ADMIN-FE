@@ -14,7 +14,9 @@ axiosInstance.interceptors.request.use(
   async (config) => {
     if (typeof window !== "undefined") {
       const token = sessionStorage.getItem("access_token");
-      config.headers.set("Authorization", `Bearer ${token}`);
+      if (token) {
+        config.headers.set("Authorization", `Bearer ${token}`);
+      }
     }
     return config;
   },
@@ -28,19 +30,26 @@ axiosInstance.interceptors.response.use(
       if (error.response.data.message === "토큰 재발급이 필요합니다.") {
         const originalRequest = error.config;
         try {
+          const token = sessionStorage.getItem("access_token");
+          const email = sessionStorage.getItem("email");
+          
+          if (!token || !email) {
+            console.error("토큰 또는 이메일이 없습니다.");
+            return Promise.reject(error);
+          }
+
           const tokenResponse = await fetch(
-            "https://test.api.tave-wave.com/v1/auth/refresh",
+            "http://3.34.188.27:8080/v1/auth/refresh",
             {
               method: "POST",
-              body: JSON.stringify({ email: sessionStorage.getItem("email") }),
+              body: JSON.stringify({ email }),
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${sessionStorage.getItem(
-                  "access_token"
-                )}`,
+                Authorization: `Bearer ${token}`,
               },
             }
           );
+          
           if (tokenResponse.status === 200) {
             const newAccessTokenData = await tokenResponse.json();
             const newAccessToken = newAccessTokenData.result.accessToken;
@@ -50,10 +59,7 @@ axiosInstance.interceptors.response.use(
             return axiosInstance(originalRequest);
           }
         } catch (refreshError) {
-          if (axios.isAxiosError(refreshError)) {
-            //alert("로그인이 필요합니다.");
-            //window.location.replace("/");
-          }
+          console.error("토큰 갱신 실패:", refreshError);
           return Promise.reject(refreshError);
         }
       }

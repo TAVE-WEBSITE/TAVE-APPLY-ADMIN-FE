@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import Body from "@/components/Layout/Body";
 import FlexBox from "@/components/Layout/FlexBox";
 import { formatDateTime } from "@/utils/formatDate";
@@ -17,6 +18,7 @@ import Modal from "@/components/Modal/Modal";
 
 const FinalInterview = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const dialogRefFirst = useRef<HTMLDialogElement>(null);
   const dialogRefSecond = useRef<HTMLDialogElement>(null);
 
@@ -29,9 +31,9 @@ const FinalInterview = () => {
       case "전체":
         return undefined;
       case "평가 진행 전":
-        return "NOTCHECKED";
+        return "PASS";
       case "불합격":
-        return "FAIL";
+        return "FINAL_FAIL";
       case "합격":
         return "FINAL_PASS";
       default:
@@ -41,10 +43,18 @@ const FinalInterview = () => {
 
   const { entireList, isLoading, totalPages,countData } = usePagination<EvaluationItem>({
     type: "최종 면접 평가",
-    page: currentPage,
-    size: 7,
+    page: currentPage - 1, // 0-based index로 변환
+    size: 6,
     status: getStatusFromTab(activeTab),
   });
+
+  // API 요청 데이터 로깅
+  console.log("=== 최종 면접 평가 API 요청 정보 ===");
+  console.log("type:", "최종 면접 평가");
+  console.log("page:", currentPage);
+  console.log("size:", 6);
+  console.log("status:", getStatusFromTab(activeTab));
+  console.log("=============================");
 
   const {
     filteredList,
@@ -56,15 +66,16 @@ const FinalInterview = () => {
 
   // 응답 데이터 로깅
   useEffect(() => {
-    if (entireList.length > 0) {
-      console.log("=== 최종 면접 평가 API 응답 데이터 ===");
-      console.log("현재 탭:", activeTab);
-      console.log("현재 status:", getStatusFromTab(activeTab));
-      console.log("전체 리스트:", entireList);
-      console.log("필터된 리스트:", filteredList);
-      console.log("=============================");
-    }
-  }, [entireList, activeTab, filteredList]);
+    console.log("=== 최종 면접 평가 API 응답 데이터 ===");
+    console.log("현재 탭:", activeTab);
+    console.log("현재 status:", getStatusFromTab(activeTab));
+    console.log("전체 리스트:", entireList);
+    console.log("필터된 리스트:", filteredList);
+    console.log("isLoading:", isLoading);
+    console.log("totalPages:", totalPages);
+    console.log("countData:", countData);
+    console.log("=============================");
+  }, [entireList, activeTab, filteredList, isLoading, totalPages, countData]);
 
   
   const openModal = () => {
@@ -188,7 +199,12 @@ const FinalInterview = () => {
             active={activeTab}
             onChange={(tab) => {
               setActiveTab(tab);
-              setCurrentPage(0); // 탭 변경 시 첫 페이지로 이동
+              setCurrentPage(1); // 탭 변경 시 첫 페이지로 이동
+              setSearchInput(""); // 검색 입력값 초기화
+              // 캐시 무효화
+              queryClient.invalidateQueries({ 
+                queryKey: ["pagination", "최종 면접 평가"] 
+              });
             }}
           />
 
