@@ -198,9 +198,11 @@ const ApplicationTable = ({
                         ? "최종 합격"
                         : application.status === "FINAL_FAIL"
                         ? "최종 탈락"
-                        : application.status === "NOTCHECKED" || !application.status
+                        : application.status === "NOTCHECKED"
                         ? "평가 진행 전"
-                        : "평가 진행 전"}
+                        : !application.status && pageType !== "interview"
+                        ? "평가 진행 전"
+                        : ""}
                     </span>
                   </td>
                 </tr>
