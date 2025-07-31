@@ -72,8 +72,14 @@ const Detail = () => {
       return fetchDocumentDetail(application?.resumeId || id!, requestBody);
     },
     onSuccess: (response) => {
-      setPostMessage(response.message || "평가가 성공적으로 제출되었습니다.");
+      const applicantName = applicant?.name || applicant?.username || "지원자";
+      setPostMessage(`${applicantName}님의 서류 평가가 완료되었습니다`);
       setIsToastOpen(true);
+      
+      // 2초 후 서류 평가 페이지로 리다이렉트
+      setTimeout(() => {
+        navigate("/evaluation/document");
+      }, 2000);
     },
     onError: (error: any) => {
       setPostMessage(error.response?.data?.message || "평가 제출에 실패했습니다.");
