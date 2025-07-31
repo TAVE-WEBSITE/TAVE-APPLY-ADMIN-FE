@@ -23,11 +23,11 @@ const filters: RoleType[] = [
 
 const TimeTable = () => {
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const { entireList, isLoading, totalPages } = usePagination<InterviewItem>({
     type: "면접 설정",
-    page: currentPage,
-    size: 7,
+    page: currentPage - 1,
+    size: 6,
   });
 
   const {

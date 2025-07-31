@@ -28,7 +28,7 @@ const ApplicationTable = ({
   navigate,
   pageType,
 }: ApplicationTableProps) => {
-  const itemsPerPage = 7;
+  const itemsPerPage = 6;
 
   const getFieldColor = (field: string | number) => {
     const fieldStr = String(field);
@@ -80,10 +80,7 @@ const ApplicationTable = ({
     return gender === "MALE" ? "남" : "여";
   };
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems =
-    applications && applications.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = applications;
 
   const handlePageChange = (pageNumber: number): void => {
     setCurrentPage(pageNumber);
@@ -91,7 +88,7 @@ const ApplicationTable = ({
 
   return (
     <div className="w-full overflow-x-auto">
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden h-[580px]">
+      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden h-[574px]">
         <table className="border-separate border-spacing-0 table-auto w-full">
           <thead className="bg-white">
             <tr className="rounded-t-xl overflow-hidden">
@@ -106,15 +103,15 @@ const ApplicationTable = ({
             </tr>
           </thead>
           <tbody className="bg-white">
-            {applications && !isLoading ? (
-              applications?.map((application, index) => {
+            {currentItems && !isLoading ? (
+              currentItems?.map((application, index) => {
               
                 return (
                 <tr
                   key={application.id + index}
                   className={`hover:bg-slate-600/5 border-b border-gray-200 ${
                     navigate && "cursor-pointer"
-                  } ${index === applications.length - 1 ? "rounded-b-xl" : ""}`}
+                  } ${index === currentItems.length - 1 ? "rounded-b-xl" : ""}`}
                   onClick={() => {
                     navigate &&
                       baseUrl &&
@@ -135,40 +132,40 @@ const ApplicationTable = ({
                     />
                     <span>{getFieldDisplayName(application.fieldType || application.field)}</span>
                   </td>
-                  <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium min-w-32">
+                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium min-w-32">
                     <span>{application.name || application.username || ''}</span>
                   </td>
-                  <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium min-w-32">
+                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium min-w-32">
                     <span>{getGenderText(application.sex) || ''}</span>
                   </td>
-                  <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
                     <span>{application.school || application.university || ''}</span>
                   </td>
                   {/* Document 페이지: 지원 날짜 */}
                   {pageType === "document" && application.recruitTime && (
-                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
                       <span>{formatDateTime(application.recruitTime)}</span>
                     </td>
                   )}
                   {/* Final 페이지: 평가 완료 인원 */}
                   {pageType === "final" && application.count !== undefined && (
-                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
                       <span>{String(application.count)}명</span>
                     </td>
                   )}
                   {/* Interview 페이지: 면접 일자 */}
                   {pageType === "interview" && application.interviewDate && (
-                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
                       <span>{application.interviewDate}</span>
                     </td>
                   )}
                   {application.interviewTime && (
-                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
                       <span>{formatDateTime(application.interviewTime)}</span>
                     </td>
                   )}
                   {application.status !== undefined && application.status !== null && (
-                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 text-sm max-w-16">
+                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 text-sm max-w-16">
                       <span
                         className={`px-2 justify-start text-base leading-5 font-semibold rounded-full
                           ${
