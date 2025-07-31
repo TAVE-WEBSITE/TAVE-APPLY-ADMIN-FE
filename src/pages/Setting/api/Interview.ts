@@ -189,7 +189,7 @@ const uploadIntervieweeScheduleFile = async ({ file }: { file: File }) => {
     const formData = new FormData();
     formData.append("file", file);
     const res = await axiosInstance.post(
-      "/v1/manager/excel/interviewer/time-table",
+      "/v1/manager/interview-final",
       formData,
       {
         headers: {

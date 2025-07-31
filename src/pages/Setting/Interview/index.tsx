@@ -61,6 +61,7 @@ const InterviewSetting = () => {
     isPending: isPendingInterviewee,
   } = useMutation({
     mutationKey: ["setting", "interviewee-file"],
+    // 여기 
     mutationFn: (data: { file: File }) => uploadIntervieweeScheduleFile(data),
     onSuccess: () => {
       setToastMessage("면접자 시간표 파일이 성공적으로 업로드되었습니다.");
@@ -70,8 +71,9 @@ const InterviewSetting = () => {
         window.location.reload();
       }, 2000);
     },
-    onError: () => {
+    onError: (error) => {
       setToastMessage("면접자 시간표 파일 업로드에 실패했습니다.");
+      console.log("면접자 시간표 파일 업로드 실패:", error);
       setIsToastOpen(true);
     },
   });

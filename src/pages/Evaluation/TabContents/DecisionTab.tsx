@@ -23,6 +23,10 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId, userName,t
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [postMessage, setPostMessage] = useState("");
 
+  // 면접 평가 데이터 콘솔 출력
+  useEffect(() => {
+  }, [type, resumeId, userName, finalEvaluation, activeTab]);
+
   //최종 서류 평가?
   const { mutate, isPending, isError } = useMutation({
     mutationKey: ["final-evaluation", "submit"],
@@ -53,6 +57,7 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId, userName,t
     if (isPassed === null) return;
     
     const status = isPassed ? "PASS" : "FAIL";
+    console.log("서류 평가 제출 - status:", status);
     mutate(status);
   };
 
@@ -69,6 +74,8 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId, userName,t
   const postInterviewDecision = () => {
     if (isPassed === null) return;
     const status = isPassed ? "FINAL_PASS" : "FINAL_FAIL";
+    console.log("면접 평가 제출 - status:", status);
+    console.log("면접 평가 제출 - resumeId:", resumeId);
     interviewFinalMutate(status);
   };
 
@@ -173,7 +180,7 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId, userName,t
             disabled={isDisabled}
             className="w-full"
             onClick={type === "document" ? postDecision : postInterviewDecision}
-            isPending={isPending}
+            isPending={type === "document" ? isPending : isInterviewFinalPending}
           >
             완료
           </Button>
@@ -181,10 +188,10 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId, userName,t
       )}
 
       <ToastMessage
-        message={postMessage}
-        isOpen={isToastOpen}
-        setIsOpen={setIsToastOpen}
-        isError={isError}
+        message={type === "document" ? postMessage : interviewFinalPostMessage}
+        isOpen={type === "document" ? isToastOpen : isInterviewFinalToastOpen}
+        setIsOpen={type === "document" ? setIsToastOpen : setIsInterviewFinalToastOpen}
+        isError={type === "document" ? isError : isInterviewFinalError}
       />
     </FlexBox>
   );

@@ -19,7 +19,7 @@ const Interview = () => {
   useEffect(() => {
     const fetcher = async () => {
       const res = await getInterviewTimeTable(16);
-      setTimeTable(res.result.timetableList);
+      setTimeTable(res?.result?.timetableList);
     };
     fetcher();
   }, []);

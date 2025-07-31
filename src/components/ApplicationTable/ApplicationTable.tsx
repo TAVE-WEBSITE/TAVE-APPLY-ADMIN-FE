@@ -176,6 +176,10 @@ const ApplicationTable = ({
                             ? "text-green-600 font-semibold"
                             : application.status === "HOLD"
                             ? "text-orange-500 font-semibold"
+                            : application.status === "FINAL_PASS"
+                            ? "text-blue-600 font-semibold"
+                            : application.status === "FINAL_FAIL"
+                            ? "text-red-600 font-semibold"
                             : application.status === "NOTCHECKED" || !application.status
                             ? "text-gray-600 font-semibold"
                             : "text-gray-600 font-semibold"
@@ -187,9 +191,13 @@ const ApplicationTable = ({
                         : application.status === "FAIL"
                         ? "불합격"
                         : application.status === "PASS"
-                        ? "합격"
+                        ? "서류 합격"
                         : application.status === "HOLD"
                         ? "보류"
+                        : application.status === "FINAL_PASS"
+                        ? "최종 합격"
+                        : application.status === "FINAL_FAIL"
+                        ? "최종 탈락"
                         : application.status === "NOTCHECKED" || !application.status
                         ? "평가 진행 전"
                         : "평가 진행 전"}
