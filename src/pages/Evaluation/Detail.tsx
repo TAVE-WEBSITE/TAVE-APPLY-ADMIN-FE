@@ -46,6 +46,7 @@ const Detail = () => {
   const [activeTab, setActiveTab] = useState("공통 질문");
   const [postMessage, setPostMessage] = useState("");
   const [isToastOpen, setIsToastOpen] = useState(false);
+  const [isScoreError, setIsScoreError] = useState(false);
 
   const [score, setScore] = useState("");
   const [opinion, setOpinion] = useState("");
@@ -235,7 +236,17 @@ const Detail = () => {
                       className="w-full"
                       placeholder="점수를 입력해주세요"
                       value={score}
-                      onChange={(e) => setScore(e.target.value)}
+                      onChange={(e) => {
+                        const value = Number(e.target.value);
+                        if (value > 10) {
+                          setPostMessage("10점이하로 평가해주세요");
+                          setIsToastOpen(true);
+                          setIsScoreError(true);
+                          return;
+                        }
+                        setScore(e.target.value);
+                        setIsScoreError(false);
+                      }}
                     />
                   </div>
                 </FlexBox>
@@ -280,7 +291,7 @@ const Detail = () => {
           isOpen={isToastOpen}
           message={postMessage}
           setIsOpen={setIsToastOpen}
-          isError={isError}
+          isError={isError || isScoreError}
         />
       </Body>
     </div>
