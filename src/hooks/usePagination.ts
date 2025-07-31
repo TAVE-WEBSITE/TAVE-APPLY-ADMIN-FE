@@ -46,40 +46,40 @@ export const usePagination = <T>({
   const entireList = useMemo(() => {
     const allData: T[] = [];
 
-    pageQueries.forEach((query) => {
-      if (query.isSuccess && query.data?.result) {
-        if (query.data.result.dataList) {
-          const transformedData = query.data.result.dataList.map((item: any) => ({
-            ...item,
-            id: String(item.id),
-          }));
-          
-          allData.push(...transformedData);
-          totalPagesRef.current = query.data.result.totalPage;
-        }
-        else if (query.data.result.resumeResDtos?.content) {
-          const transformedData = query.data.result.resumeResDtos.content.map((item: any) => ({
-            ...item,
-            id: String(item.id), 
-            recruitTime: item.recruitTime || new Date().toISOString(), 
-            isEvaluated: item.isEvaluated || false,
-            memberId: item.memberId, 
-            resumeId: item.resumeId,
-          }));
-          
-          allData.push(...transformedData);
-          totalPagesRef.current = query?.data?.result?.resumeResDtos?.page?.totalPages;
-        }else if (query.data.result.dtos?.content) {
-          const transformedData = query.data.result.dtos.content.map((item: any) => ({
-            ...item,
-            id: String(item.id),
-          }));
-          
-          allData.push(...transformedData);
-          totalPagesRef.current = query.data.result.dtos.page?.totalPages;
-        }
+    // 현재 페이지의 쿼리만 처리
+    const currentPageQuery = pageQueries[page];
+    if (currentPageQuery?.isSuccess && currentPageQuery.data?.result) {
+      if (currentPageQuery.data.result.dataList) {
+        const transformedData = currentPageQuery.data.result.dataList.map((item: any) => ({
+          ...item,
+          id: String(item.id),
+        }));
+        
+        allData.push(...transformedData);
+        totalPagesRef.current = currentPageQuery.data.result.totalPage;
       }
-    });
+      else if (currentPageQuery.data.result.resumeResDtos?.content) {
+        const transformedData = currentPageQuery.data.result.resumeResDtos.content.map((item: any) => ({
+          ...item,
+          id: String(item.id), 
+          recruitTime: item.recruitTime || new Date().toISOString(), 
+          isEvaluated: item.isEvaluated || false,
+          memberId: item.memberId, 
+          resumeId: item.resumeId,
+        }));
+        
+        allData.push(...transformedData);
+        totalPagesRef.current = currentPageQuery?.data?.result?.resumeResDtos?.page?.totalPages;
+      }else if (currentPageQuery.data.result.dtos?.content) {
+        const transformedData = currentPageQuery.data.result.dtos.content.map((item: any) => ({
+          ...item,
+          id: String(item.id),
+        }));
+        
+        allData.push(...transformedData);
+        totalPagesRef.current = currentPageQuery.data.result.dtos.page?.totalPages;
+      }
+    }
     return allData;
 
   }, [pageQueries, page, status]); // pageQueries, page, status 변경 시 재계산
