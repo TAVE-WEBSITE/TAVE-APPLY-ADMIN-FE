@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import type { SettingDefaultResponse } from "@/pages/Setting/api/types";
 import { fetchSettingDefault } from "@/pages/Setting/api/Default";
 import { postSettingDefault } from "@/pages/Setting/api/Default";
-import { formatDateOnly } from "@/utils/formatDate";
+import { formatDateOnly, formatDateTime } from "@/utils/formatDate";
 
 export const useDefaultSetting = () => {
   const { data, isLoading, error } = useQuery<SettingDefaultResponse>({
@@ -38,11 +38,11 @@ export const useDefaultSetting = () => {
     setDocumentStartDate(formatDateOnly(data.result.documentRecruitStartDate));
     setDocumentEndDate(formatDateOnly(data.result.documentRecruitEndDate));
     setDocumentResultDateTime(
-      formatDateOnly(data.result.documentAnnouncementDate)
+      formatDateTime(data.result.documentAnnouncementDate)
     );
     setInterviewStartDate(formatDateOnly(data.result.interviewStartDate));
     setInterviewEndDate(formatDateOnly(data.result.interviewEndDate));
-    setFinalResultDateTime(formatDateOnly(data.result.lastAnnouncementDate));
+    setFinalResultDateTime(formatDateTime(data.result.lastAnnouncementDate));
     setHomepageOpenStartDate(formatDateOnly(data.result.accessStartDate));
     setHomepageOpenEndDate(formatDateOnly(data.result.accessEndDate));
   }, [data]);
