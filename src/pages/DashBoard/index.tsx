@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import FlexBox from "@/components/Layout/FlexBox";
 import CountCard from "@/components/Card/CountCard";
 import DonutChart from "@/components/Chart/DonutChart";
@@ -11,6 +12,7 @@ import { fetchSettingDefault } from "@/pages/Setting/api/Default";
 
 export const Page = () => {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const navigate = useNavigate();
   const {
     genderQuery: {
       data: genderData,
@@ -137,6 +139,7 @@ export const Page = () => {
           title="신규 지원 초기 설정"
           buttonCount={1}
           confirmText="설정하러 가기"
+          onConfirm={() => navigate("/setting/default")}
         >
           <p className="text-center text-gray-500">
             안녕하세요, {sessionStorage.getItem("username") && sessionStorage.getItem("username")} 회장님!
