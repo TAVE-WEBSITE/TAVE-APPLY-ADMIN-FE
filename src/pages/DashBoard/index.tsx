@@ -6,6 +6,8 @@ import Modal from "@/components/Modal/Modal";
 import { formatDateTime } from "@/utils/formatDate";
 import SkeletonDonutChart from "@/components/Chart/SkeletonUI/SkeletonDonutChart";
 import { useDashBoard } from "@/hooks/DashBoard/useDashBoard";
+import { useQuery } from "@tanstack/react-query";
+import { fetchSettingDefault } from "@/pages/Setting/api/Default";
 
 export const Page = () => {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -26,9 +28,36 @@ export const Page = () => {
     }
   } = useDashBoard();
 
+  // 기본 설정 데이터 조회
+  const { data: defaultSettingData } = useQuery({
+    queryKey: ["setting", "default"],
+    queryFn: fetchSettingDefault,
+    staleTime: 1000 * 60 * 60 * 24,
+  });
+
   const calculateSum = () => {
     if (genderData) return genderData.reduce((a, b) => a + b.count, 0);
     return 0;
+  };
+
+  // 날짜 표시 로직
+  const getDateDisplay = () => {
+    if (isBeforeRecruitment()) {
+      return "모집 시작 전";
+    }
+    return formatDateTime(new Date().toISOString()) + " 기준";
+  };
+
+  // 모집 시작 전 여부 확인
+  const isBeforeRecruitment = () => {
+    if (!defaultSettingData?.result?.documentRecruitStartDate) {
+      return true;
+    }
+
+    const currentDate = new Date();
+    const documentStartDate = new Date(defaultSettingData.result.documentRecruitStartDate);
+    
+    return currentDate < documentStartDate;
   };
 
   return (
@@ -38,14 +67,14 @@ export const Page = () => {
         <FlexBox className="w-full justify-between">
           <h2 className="font-semibold text-xl">16기 지원 현황</h2>
           <p className="text-gray-500">
-            {formatDateTime(new Date().toISOString()) + " 기준"}
+            {getDateDisplay()}
           </p>
         </FlexBox>
       </FlexBox>
 
       <section className="min-h-[calc(100vh-244px)] bg-gray-100 flex flex-col gap-8">
         <FlexBox className="w-full pt-8 justify-center gap-4">
-          {isDashboardLoading ? (
+          {isDashboardLoading || isBeforeRecruitment() ? (
             <CountCard text="현재 지원자수" boxColor="blue" count={"-"} />
           ) : (
             <CountCard
@@ -54,12 +83,12 @@ export const Page = () => {
               count={dashboardData?.totalCount ?? 0}
             />
           )}
-          {isDashboardLoading ? (
+          {isDashboardLoading || isBeforeRecruitment() ? (
             <CountCard text="전 기수 대비" boxColor="green" count={"-"} />
           ) : (
             <CountCard text="전 기수 대비" boxColor="green" count={`${dashboardData?.comparisonRatio ?? 0}%`} />
           )}
-          {isDashboardLoading ? (
+          {isDashboardLoading || isBeforeRecruitment() ? (
             <CountCard text="임시 저장 수" boxColor="orange" count={"-"} />
           ) : (
             <CountCard text="임시 저장 수" boxColor="orange" count={dashboardData?.temperCount ?? 0} />
@@ -68,7 +97,7 @@ export const Page = () => {
 
         <FlexBox className="justify-center gap-4">
           <div className="bg-white rounded-xl px-4 py-5 justify-between w-[640px] border border-gray-200">
-            {isGenderLoading || isGenderError ? (
+            {isGenderLoading || isGenderError || isBeforeRecruitment() ? (
               <SkeletonDonutChart />
             ) : (
               genderData && (
@@ -81,7 +110,7 @@ export const Page = () => {
             )}
           </div>
           <div className="bg-white rounded-xl px-4 py-5 justify-between w-[640px] border border-gray-200">
-            {isSkillLoading || isSkillError ? (
+            {isSkillLoading || isSkillError || isBeforeRecruitment() ? (
               <SkeletonDonutChart />
             ) : (
               skillData && (
