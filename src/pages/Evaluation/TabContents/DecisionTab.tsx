@@ -118,10 +118,10 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId, userName,t
           {/* 개별 평가*/}
           {finalEvaluation?.evaluations && finalEvaluation.evaluations.length > 0 && (
             <div className="w-full p-4">
-              <div className="space-y-3">
+              <div className="flex flex-col gap-4">
                 {finalEvaluation.evaluations.map((evaluation: any, index: number) => (
                     <div key={index} className="grid grid-cols-2 gap-4 items-center mb-1 font-medium text-gray-700">
-                      <div className="flex flex-col gap-4">
+                      <div className="flex flex-col gap-1">
                         <span className="text-gray-500 font-medium">{evaluation.username}</span>
                         <span className="text-gray-700">{evaluation.opinion}</span>
                       </div>

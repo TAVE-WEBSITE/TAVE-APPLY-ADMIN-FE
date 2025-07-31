@@ -143,17 +143,17 @@ const Default = () => {
           <FlexBox direction="col" className="gap-4">
             <div className="w-full border-t border-gray-300 mt-6"></div>
           </FlexBox>
-          <FlexBox direction="col" className="gap-4 w-full p-4 items-start">
+          <FlexBox direction="col" className="gap-1 w-full p-4 items-start">
             {Array.from({ length: Math.max(interviewDates.length, 4) }, (_, index) => (
               <Input.TitleContainer
                 key={index}
                 title={`${index + 1}일차 (${formattedDates[index] || '날짜 로딩 중...'})`}
               >
-                <FlexBox className="gap-4 w-full">
+                <FlexBox className="gap-4 w-full mb-8">
                   <div className="flex-1">
                     <Input.WithLabel
                       label="주소"
-                      iconType="Link"
+                      iconType="Map"
                       placeholder="면접 장소의 주소를 입력해주세요"
                       width="w-full"
                       value={addresses[index] || ""}
@@ -167,7 +167,7 @@ const Default = () => {
                   <div className="flex-1">
                     <Input.WithLabel
                       label="상세 주소"
-                      iconType="Link"
+                      iconType="Map"
                       placeholder="자세한 주소 입력 (예시: 강의실 호수)"
                       width="w-full"
                       value={detailAddress[index] || ""}
@@ -191,14 +191,14 @@ const Default = () => {
           <FlexBox direction="col" className="gap-4">
             <div className="w-full border-t border-gray-300 mt-6"></div>
           </FlexBox>
-          <FlexBox direction="col" className="gap-4 w-full p-4 items-start">
+          <FlexBox direction="col" className="gap-1 w-full p-4 items-start">
             {Array.from({ length: Math.max(interviewDates.length, 4) }, (_, index) => (
               <Input.TitleContainer
                 key={index}
                 title={`${index + 1}일차 (${formattedDates[index] || '날짜 로딩 중...'})`}
               
               >
-                <FlexBox className="gap-4 w-full">
+                <FlexBox className="gap-4 w-full mb-8">
                   <div className="flex-1">
                     <Input.WithLabel
                       label="오픈채팅방 링크"
@@ -216,7 +216,7 @@ const Default = () => {
                   <div className="flex-1">
                     <Input.WithLabel
                       label="비밀번호"
-                      iconType="Link"
+                      iconType="Key"
                       placeholder="비밀번호를 입력해주세요"
                       width="w-full"
                       value={documentLinks[index]}

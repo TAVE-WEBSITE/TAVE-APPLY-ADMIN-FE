@@ -91,7 +91,12 @@ const Modal = ({
       <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-gray-200">
         {buttonCount === 1 && (
           <Button
-            onClick={() => dialogRef.current?.close()}
+            onClick={() => {
+              if (onConfirm) {
+                onConfirm();
+              }
+              dialogRef.current?.close();
+            }}
             className="w-full bg-blue-600 text-white"
           >
             {confirmText}

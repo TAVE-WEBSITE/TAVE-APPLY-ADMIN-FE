@@ -35,7 +35,7 @@ const Document = () => {
   const { entireList, isLoading, totalPages, countData } = usePagination<EvaluationItem>({
     type: "서류 평가",
     page: currentPage - 1,
-    size: 7,
+    size: 6,
     status: currentStatus,
   });
   
