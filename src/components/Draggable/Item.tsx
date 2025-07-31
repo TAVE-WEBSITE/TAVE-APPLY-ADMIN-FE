@@ -90,6 +90,13 @@ const DraggableItem = ({
     }
   }, [inputValue]);
 
+  // mode가 focused일 때 자동으로 포커스
+  useEffect(() => {
+    if (item.mode === "focused" && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [item.mode]);
+
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
