@@ -185,11 +185,9 @@ export const fetchInterviewTime = async () => {
 };
 
 export const updateInterviewTime = async (payload: {
-  startDate: string;
-  endDate: string;
-  progressTime: string;
   startTime: string;
   endTime: string;
+  progressTime: string;
 }) => {
   try {
     const res = await axiosInstance.post("/v1/admin/config/interview-time", payload);

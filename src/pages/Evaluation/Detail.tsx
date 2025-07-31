@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import FlexBox from "@/components/Layout/FlexBox";
 import Body from "@/components/Layout/Body";
 import Tab from "@/components/Tab/Tab";
 import Accordion from "@/components/Accordion/Accordion";
-import { fetchDocumentDetail, fetchResumeQuestions, fetchMemberInfo } from "./api";
+import { fetchDocumentDetail, getDocumentDetail, fetchResumeQuestions, fetchMemberInfo } from "./api";
 import type { Resume, Question } from "@/types/interview";
 import TextArea from "@/components/Input/TextArea";
 import StepCounter from "@/components/StepCounter/StepCounter";
@@ -43,6 +43,16 @@ const Detail = () => {
     enabled: !!id && !!application?.resumeId, // id와 resumeId가 있을 때만 쿼리 실행
   });
 
+  // 기존 평가 데이터 조회
+  const { data: existingEvaluation, isLoading: evaluationLoading } = useQuery({
+    queryKey: ["evaluation", "existing", application?.resumeId],
+    queryFn: () => {
+      const resumeId = application?.resumeId;
+      return getDocumentDetail(resumeId);
+    },
+    enabled: !!application?.resumeId, // resumeId가 있을 때만 쿼리 실행
+  });
+
   const [activeTab, setActiveTab] = useState("공통 질문");
   const [postMessage, setPostMessage] = useState("");
   const [isToastOpen, setIsToastOpen] = useState(false);
@@ -51,7 +61,25 @@ const Detail = () => {
   const [score, setScore] = useState("");
   const [opinion, setOpinion] = useState("");
 
-  const isLoading = memberInfoLoading || questionsLoading;
+  const isLoading = memberInfoLoading || questionsLoading || evaluationLoading;
+
+  // 기존 평가 데이터가 있으면 input에 설정
+  useEffect(() => {
+    if (existingEvaluation?.result) {
+      console.log("=== 기존 평가 데이터 ===");
+      console.log("existingEvaluation:", existingEvaluation);
+      console.log("result:", existingEvaluation.result);
+      console.log("=========================");
+      
+      const { score: existingScore, opinion: existingOpinion } = existingEvaluation.result;
+      if (existingScore !== undefined) {
+        setScore(existingScore.toString());
+      }
+      if (existingOpinion) {
+        setOpinion(existingOpinion);
+      }
+    }
+  }, [existingEvaluation]);
 
   const questions = resumeQuestions?.result;
   const commonQuestions = questions?.commonQuestions || [];
@@ -207,6 +235,7 @@ const Detail = () => {
                       readOnly={true}
                       className="w-full h-full"
                     />
+                    // 여기에 면접 일자 띄우기
                   )}
                 </Accordion>
               ))}

@@ -21,6 +21,23 @@ export const fetchDocumentDetail = async (resumeId: string, body?: DocumentEvalu
   }
 };
 
+// 서류 평가 조회
+export const getDocumentDetail = async (resumeId: string, body?: DocumentEvaluationBody) => {
+  try {
+    const requestBody = body || {};
+
+    const res = await axiosInstance.get(
+      `/v1/manager/resume/evaluate/${resumeId}`,
+      requestBody
+    );
+    return res.data;
+  } catch (error: any) {
+      console.error("에러 상태:", error.response.status);
+      console.error("에러 데이터:", error.response.data);
+    throw error; 
+  }
+};
+
 // 지원자 정보 조회 API
 export const fetchMemberInfo = async (memberId: string) => {
   try {
@@ -141,9 +158,10 @@ export const getInterviewTimeTable = async (generation: number | string) => {
   }
 };
 
+// 면접 시간표 다운로드
 export const getTimeTableForm = async () => {
   try {
-    const res = await axiosInstance.get("/v1/manager/interview-final/form", {
+    const res = await axiosInstance.get("/v1/manager/interview-final", {
       responseType: "blob",
     });
 
@@ -155,7 +173,7 @@ export const getTimeTableForm = async () => {
 
     const disposition = res.headers["content-disposition"];
     const match = disposition?.match(/filename="?(.+)"?/);
-    const filename = match?.[1] || "면접시간표 양식.xlsx";
+    const filename = match?.[1] || "면접시간표.xlsx";
 
     link.download = decodeURIComponent(filename);
     link.click();
