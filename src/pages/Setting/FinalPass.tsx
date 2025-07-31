@@ -177,6 +177,7 @@ const FinalPassSetting = () => {
                       placeholder="금액을 입력하세요"
                       value={String(clubFee)}
                       onChange={(e) => setClubFee(Number(e.target.value))}
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     <Icon type="Plus" size={18} className="text-gray-400" />
                     <div className="rounded-3xl border border-blue-300 bg-blue-100 text-blue-700 text-sm p-2">
@@ -187,6 +188,7 @@ const FinalPassSetting = () => {
                       placeholder="금액을 입력하세요"
                       value={String(mtFee)}
                       onChange={(e) => setMtFee(Number(e.target.value))}
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </FlexBox>
                 </FlexBox>
