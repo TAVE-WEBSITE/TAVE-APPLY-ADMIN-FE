@@ -27,3 +27,4 @@ export { default as Check } from "./tabler_check.svg?react";
 export { default as DownLoad } from "./tabler_download.svg?react";
 export { default as DownLoad2 } from "./tabler_download2.svg?react";
 export { default as Type } from "./type.svg?react";
+export { default as Map } from "./map_Pin.svg?react";
