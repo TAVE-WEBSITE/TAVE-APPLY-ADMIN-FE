@@ -21,6 +21,23 @@ export const fetchDocumentDetail = async (resumeId: string, body?: DocumentEvalu
   }
 };
 
+// 서류 평가 조회
+export const getDocumentDetail = async (resumeId: string, body?: DocumentEvaluationBody) => {
+  try {
+    const requestBody = body || {};
+
+    const res = await axiosInstance.get(
+      `/v1/manager/resume/evaluate/${resumeId}`,
+      requestBody
+    );
+    return res.data;
+  } catch (error: any) {
+      console.error("에러 상태:", error.response.status);
+      console.error("에러 데이터:", error.response.data);
+    throw error; 
+  }
+};
+
 // 지원자 정보 조회 API
 export const fetchMemberInfo = async (memberId: string) => {
   try {
