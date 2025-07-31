@@ -11,6 +11,17 @@ interface TimeTableProps {
 const TimeTable = ({ timeTable, onCellClick }: TimeTableProps) => {
   const navigate = useNavigate();
 
+  // timeTable이 없거나 빈 배열인 경우 처리
+  if (!timeTable || timeTable.length === 0) {
+    return (
+      <div className="w-full h-full rounded-xl bg-[#F3F4F6] flex items-center justify-center">
+        <div className="text-gray-500 text-center">
+          <p>면접 일정이 없습니다.</p>
+        </div>
+      </div>
+    );
+  }
+
   // 모든 시간대를 추출하여 정렬
   const getAllTimeSlots = () => {
     const timeSlots = new Set<string>();

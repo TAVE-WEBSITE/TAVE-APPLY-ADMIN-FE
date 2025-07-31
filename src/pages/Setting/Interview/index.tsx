@@ -66,10 +66,6 @@ const InterviewSetting = () => {
     onSuccess: () => {
       setToastMessage("면접자 시간표 파일이 성공적으로 업로드되었습니다.");
       setIsToastOpen(true);
-      // 2초 후 새로고침
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
     },
     onError: (error) => {
       setToastMessage("면접자 시간표 파일 업로드에 실패했습니다.");
@@ -89,10 +85,6 @@ const InterviewSetting = () => {
     onSuccess: () => {
       setToastMessage("면접관 시간표 파일이 성공적으로 업로드되었습니다.");
       setIsToastOpen(true);
-      // 2초 후 새로고침
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
     },
     onError: () => {
       setToastMessage("면접관 시간표 파일 업로드에 실패했습니다.");
@@ -111,10 +103,6 @@ const InterviewSetting = () => {
     onSuccess: () => {
       setToastMessage("면접 평가 시트 템플릿 파일이 성공적으로 업로드되었습니다.");
       setIsToastOpen(true);
-      // 2초 후 새로고침
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
     },
     onError: () => {
       setToastMessage("면접 평가 시트 템플릿 파일 업로드에 실패했습니다.");

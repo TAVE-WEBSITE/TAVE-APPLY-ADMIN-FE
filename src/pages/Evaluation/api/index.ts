@@ -158,9 +158,10 @@ export const getInterviewTimeTable = async (generation: number | string) => {
   }
 };
 
+// 면접 시간표 다운로드
 export const getTimeTableForm = async () => {
   try {
-    const res = await axiosInstance.get("/v1/manager/interview-final/form", {
+    const res = await axiosInstance.get("/v1/manager/interview-final", {
       responseType: "blob",
     });
 
@@ -172,7 +173,7 @@ export const getTimeTableForm = async () => {
 
     const disposition = res.headers["content-disposition"];
     const match = disposition?.match(/filename="?(.+)"?/);
-    const filename = match?.[1] || "면접시간표 양식.xlsx";
+    const filename = match?.[1] || "면접시간표.xlsx";
 
     link.download = decodeURIComponent(filename);
     link.click();
