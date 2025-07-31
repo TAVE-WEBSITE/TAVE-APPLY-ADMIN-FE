@@ -64,7 +64,7 @@ const useDocument = () => {
       question: "",
       maxLength: 100,
       required: false,
-      mode: "default", 
+      mode: "focused",
     };
 
     const temp = [...(questions ?? []), newQuestion];

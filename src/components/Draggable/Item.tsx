@@ -17,7 +17,7 @@ type QuestionItem = {
   id: string;
   question: string;
   required: boolean;
-  maxLength?: number;
+  textLength?: number;
   mode?: string;
 };
 
@@ -214,20 +214,18 @@ const DraggableItem = ({
             }`}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            style={{ 
-              width: `${Math.min(inputValue.length + 5, 80)}ch`,
-              minHeight: '1.5rem',
-              height: '1.5rem',
-              overflow: 'hidden'
-            }}
+                          style={{ 
+                width: `${Math.min(inputValue.length + 10, (item.textLength || 100))}ch`,
+                minHeight: '1.5rem',
+                height: '1.5rem',
+                overflow: 'hidden'
+              }}
 
           />
-          {item.maxLength && (
-            <p className="text-gray-500 text-sm">{`(${item.maxLength}자 이내)`}</p>
-          )}
         </div>
 
         <FlexBox className="gap-4">
+          <p className="text-gray-500 text-sm">{`(${item.textLength || 100}자 이내)`}</p>
           <Switch
             title="필수 질문"
             setIsOn={handleToggleRequired}
@@ -289,7 +287,7 @@ const DraggableItem = ({
             )}
           </div>
 
-          {item.maxLength && (
+          {item.textLength && (
             <button
               className="p-2 border border-gray-300 rounded-lg hover:bg-blue-100 cursor-pointer"
               onClick={() => wordLimitModalRef.current?.showModal()}
@@ -311,9 +309,9 @@ const DraggableItem = ({
           currentContent={questionData?.content || item.question}
           currentFieldType={questionData?.fieldType}
           currentOrdered={questionData?.ordered}
-          currentTextLength={questionData?.textLength || item.maxLength}
+          currentTextLength={questionData?.textLength || item.textLength}
           onUpdateSuccess={() => {
-            console.log("글자수 제한 업데이트 완료");
+          
           }}
         />
         <TypeChangeModal 
@@ -322,7 +320,7 @@ const DraggableItem = ({
           currentContent={questionData?.content || item.question}
           currentFieldType={questionData?.fieldType}
           currentOrdered={questionData?.ordered}
-          currentTextLength={questionData?.textLength || item.maxLength}
+          currentTextLength={questionData?.textLength || item.textLength}
           currentAnswerType={questionData?.answerType}
           currentRequired={questionData?.required}
           onUpdateSuccess={async () => {
