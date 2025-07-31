@@ -80,18 +80,27 @@ const FinalPassSetting = () => {
   const [otDeadlineInput, setOtDeadlineInput] = useState("");
 
   useEffect(() => {
-    if (feeDeadline) setFeeDeadlineInput(formatDateTime(feeDeadline));
-    else setFeeDeadlineInput("");
+    if (feeDeadline) {
+      setFeeDeadlineInput(formatDateTime(feeDeadline));
+    } else {
+      setFeeDeadlineInput("");
+    }
   }, [feeDeadline]);
 
   useEffect(() => {
-    if (surveyDeadline) setSurveyDeadlineInput(formatDateTime(surveyDeadline));
-    else setSurveyDeadlineInput("");
+    if (surveyDeadline) {
+      setSurveyDeadlineInput(formatDateTime(surveyDeadline));
+    } else {
+      setSurveyDeadlineInput("");
+    }
   }, [surveyDeadline]);
 
   useEffect(() => {
-    if (otDeadline) setOtDeadlineInput(formatDateTime(otDeadline));
-    else setOtDeadlineInput("");
+    if (otDeadline) {
+      setOtDeadlineInput(formatDateTime(otDeadline));
+    } else {
+      setOtDeadlineInput("");
+    }
   }, [otDeadline]);
 
   const [isPending, setIsPending] = useState(false);
@@ -111,6 +120,12 @@ const FinalPassSetting = () => {
     setTimeout(() => {
       setIsToastOpen(true);
       setIsPending(false);
+      // API 등록 성공 시 2초 후 새로고침
+      if (!isError) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
     }, 1000);
   };
 
@@ -147,6 +162,13 @@ const FinalPassSetting = () => {
         <h1 className="font-bold text-4xl">최종 합격 안내 설정</h1>
       </FlexBox>
 
+      {isLoading && (
+        <div className="text-center py-8">
+          <p className="text-gray-600">설정 데이터를 불러오는 중...</p>
+        </div>
+      )}
+
+      {!isLoading && (
       <Body>
         <FlexBox direction="col" className="justify-center mx-auto pt-8 gap-8">
           <Input.NumberContainer number={1} className="items-start">
@@ -331,6 +353,7 @@ const FinalPassSetting = () => {
           setIsOpen={setIsToastOpen}
         />
       </Body>
+      )}
     </div>
   );
 };
