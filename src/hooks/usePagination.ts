@@ -17,7 +17,11 @@ export const usePagination = <T>({
   // currentMaxPage는 최소 1 이상이 되도록 보정
   const safePage = Math.max(0, page); // 실제 page는 0도 허용
   const currentMaxPage = Math.max(safePage + 1, maxPageRef.current); // +1로 최소 쿼리 1개 보장
-  maxPageRef.current = currentMaxPage;
+  
+  // 페이지가 변경되면 새로운 쿼리를 생성하기 위해 maxPageRef 업데이트
+  if (safePage + 1 > maxPageRef.current) {
+    maxPageRef.current = safePage + 1;
+  }
 
   const pageQueries = useQueries({
     
@@ -31,7 +35,7 @@ export const usePagination = <T>({
 
 
       return {
-        queryKey: [type, "list", queryParams],
+        queryKey: [type, "list", pageNum, status, size, page],
         queryFn: () => fetchList(type as ApplicationType, queryParams),
         staleTime: 5 * 60 * 1000, // 5분간 캐시 유지
       };
@@ -78,7 +82,7 @@ export const usePagination = <T>({
     });
     return allData;
 
-  }, [pageQueries.map(q => q.dataUpdatedAt).join(',')]); // dataUpdatedAt을 사용하여 더 안정적인 의존성
+  }, [pageQueries, page, status]); // pageQueries, page, status 변경 시 재계산
 
   // API 응답에서 count 데이터 추출
   const countData = useMemo(() => {
