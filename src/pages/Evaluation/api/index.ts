@@ -226,7 +226,7 @@ export const getInterviewTimeTable = async (generation: number | string) => {
 // 면접 시간표 다운로드
 export const getTimeTableForm = async () => {
   try {
-    const res = await axiosInstance.get("/v1/manager/interview-final", {
+    const res = await axiosInstance.get("/v1/manager/excel/interview/time-table", {
       responseType: "blob",
     });
 
