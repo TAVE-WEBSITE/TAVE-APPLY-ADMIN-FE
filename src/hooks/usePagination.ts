@@ -106,21 +106,17 @@ export const usePagination = <T>({
     // 첫 번째 페이지 쿼리에서 totalPages 정보 가져오기
     const firstQuery = pageQueries[0];
     if (firstQuery?.isSuccess && firstQuery.data?.result) {
-      console.log("=== totalPages 계산 ===");
-      console.log("첫 번째 쿼리 응답:", firstQuery.data.result);
-      
-      if (firstQuery.data.result.totalPage) {
-        console.log("totalPage 사용:", firstQuery.data.result.totalPage);
-        return firstQuery.data.result.totalPage;
-      } else if (firstQuery.data.result.resumeResDtos?.page?.totalPages) {
-        console.log("resumeResDtos.page.totalPages 사용:", firstQuery.data.result.resumeResDtos.page.totalPages);
+      // resumeResDtos.page.totalPages 구조 확인
+      if (firstQuery.data.result.resumeResDtos?.page?.totalPages) {
         return firstQuery.data.result.resumeResDtos.page.totalPages;
+      }
+      // 기존 구조들도 유지
+      else if (firstQuery.data.result.totalPage) {
+        return firstQuery.data.result.totalPage;
       } else if (firstQuery.data.result.dtos?.page?.totalPages) {
-        console.log("dtos.page.totalPages 사용:", firstQuery.data.result.dtos.page.totalPages);
         return firstQuery.data.result.dtos.page.totalPages;
       }
     }
-    console.log("기본값 사용:", totalPagesRef.current || 1);
     return totalPagesRef.current || 1;
   }, [pageQueries[0]?.dataUpdatedAt]); // 첫 번째 쿼리의 dataUpdatedAt만 사용
 
