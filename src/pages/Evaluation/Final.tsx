@@ -25,9 +25,6 @@ const Final = () => {
   const [currentTab, setCurrentTab] = useState("전체");
 
 
-  //일단 서류평가 이메일 전송 예약 되어있는지 유무를 useState()로 해놨습니다
-  //하지만 이러면 당연히 제대로 로직되로 구조가 안 흘러갈 것 같아서 
-  //백에서 예약되어있는지를 받아야할지 고민입니다. ( 최종 면접 결과 부분도 동일 )
   const [emailConfig , setEmailConfig] = useState(false); 
 
   const navigate = useNavigate();
@@ -64,7 +61,7 @@ const Final = () => {
     usePagination<FinalEvaluationItem>({
       type: "최종 서류 평가",
       page: currentPage - 1,
-      size: 7,
+      size: 6,
       status: getStatusFromTab(currentTab),
     });
 
