@@ -192,12 +192,12 @@ const InterviewSettingDetail = () => {
                 {commonQuestions.length > 0 ? (
                   commonQuestions.map((q: any, index: number) => (
                     <Accordion key={index} title={q.question} className="mb-2">
-                      <TextArea
+                  <TextArea
                         value={q.answer || "답변이 없습니다."}
-                        readOnly={true}
+                    readOnly={true}
                         className="w-full"
-                      />
-                    </Accordion>
+                  />
+                </Accordion>
                   ))
                 ) : (
                   <div className="text-gray-500 text-center py-8">
@@ -211,12 +211,12 @@ const InterviewSettingDetail = () => {
                 {partQuestions.length > 0 ? (
                   partQuestions.map((q: any, index: number) => (
                     <Accordion key={index} title={q.question} className="mb-2">
-                      <TextArea
+                    <TextArea
                         value={q.answer || "답변이 없습니다."}
-                        readOnly={true}
+                      readOnly={true}
                         className="w-full"
-                      />
-                    </Accordion>
+                    />
+                </Accordion>
                   ))
                 ) : (
                   <div className="text-gray-500 text-center py-8">

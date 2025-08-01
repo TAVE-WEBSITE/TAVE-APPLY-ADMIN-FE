@@ -111,14 +111,37 @@ const FinalInterview = () => {
     };
   
     const handleEmailUpdate = async () => {
+      console.log("=== 면접 평가 완료 프로세스 시작 ===");
+      console.log("현재 전체 지원자 목록:", entireList);
+      console.log("현재 상태별 분류:");
+      console.log("- 전체 지원자 수:", entireList.length);
+      console.log("- 합격자 수:", entireList.filter(e => e.status === "FINAL_PASS").length);
+      console.log("- 불합격자 수:", entireList.filter(e => e.status === "FINAL_FAIL").length);
+      console.log("- 평가 진행 전:", entireList.filter(e => e.status === "PASS").length);
+      
       // 기존 코드
       //await updateStatusByDocumentEvaluation();
       try {
-        await getFinalInterviewEmailConfig();
+        console.log("=== 메일 발송 예약 API 호출 ===");
+        console.log("API 엔드포인트: /v1/admin/config/recruitment/last/email");
+        const emailResponse = await getFinalInterviewEmailConfig();
+        console.log("메일 발송 예약 응답:", emailResponse);
+        
+        console.log("=== 메일 예약 상태 확인 API 호출 ===");
+        console.log("API 엔드포인트: /v1/admin/config/recruitment/last/email/find");
         const { isBooked } = await getFinalInterviewEmailFind(); // 최신 상태 조회
+        console.log("메일 예약 상태:", isBooked);
+        
         setEmailConfig(isBooked); // 상태 갱신
-      } catch (error) {
+        
+        console.log("=== 면접 평가 완료 프로세스 성공 ===");
+        console.log("모든 지원자의 최종 결과가 백엔드로 전송되었습니다.");
+        console.log("메일 발송이 예약되었습니다.");
+        
+      } catch (error: any) {
+        console.error("=== 면접 평가 완료 프로세스 실패 ===");
         console.error("이메일 예약 실패:", error);
+        console.error("에러 상세:", error.response?.data || error);
       } finally {
         dialogRefSecond.current?.close();
       }

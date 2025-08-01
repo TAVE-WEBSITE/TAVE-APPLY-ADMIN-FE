@@ -15,8 +15,6 @@ export const fetchDocumentDetail = async (resumeId: string, body?: DocumentEvalu
     );
     return res.data;
   } catch (error: any) {
-      console.error("에러 상태:", error.response.status);
-      console.error("에러 데이터:", error.response.data);
     throw error; 
   }
 };
@@ -32,9 +30,19 @@ export const getDocumentDetail = async (resumeId: string, body?: DocumentEvaluat
     );
     return res.data;
   } catch (error: any) {
-      console.error("에러 상태:", error.response.status);
-      console.error("에러 데이터:", error.response.data);
-    throw error; 
+  
+    // resumeEvaluation이 null인 경우 빈 결과 반환
+    if (error.response?.data?.message?.includes("resumeEvaluation") && 
+        error.response?.data?.message?.includes("null")) {
+      console.log("resumeEvaluation이 null이므로 빈 결과 반환");
+      return {
+        code: "200",
+        message: "평가 데이터가 없습니다.",
+        result: null
+      };
+    }
+    
+    throw error;
   }
 };
 
@@ -82,34 +90,91 @@ export const submitFinalEvaluation = async (resumeId: string, status: "PASS" | "
 // 지원서 질문 & 답변 정보 API
 export const fetchResumeQuestions = async (resumeId: string) => {
   try {
-    const allQuestions = [];
+    console.log("=== fetchResumeQuestions API 호출 ===");
+    console.log("resumeId:", resumeId);
+    console.log("API 엔드포인트:", `/v1/member/resumes/${resumeId}/details`);
     
-    for (let page = 1; page <= 2; page++) {
-      const res = await axiosInstance.get(
-        `/v1/member/resumes/${resumeId}/questions?page=${page}`
-      );
-      const pageData = res.data?.result || [];
-      allQuestions.push(...pageData);
-    }
+    const res = await axiosInstance.get(
+      `/v1/member/resumes/${resumeId}/details`
+    );
     
- 
-    const transformedQuestions = allQuestions.map((q: any) => ({
+    console.log("=== API 응답 결과 ===");
+    console.log("전체 응답:", res.data);
+    console.log("응답 코드:", res.data?.code);
+    console.log("응답 메시지:", res.data?.message);
+    console.log("응답 결과:", res.data?.result);
+    console.log("================================");
+    
+    const result = res.data?.result;
+    
+    // 공통 질문과 파트별 질문을 분리하여 변환
+    const commonQuestions = result?.common?.commonQuestions?.map((q: any) => ({
       question: q.question,
-      answer: q.answer || "답변이 없습니다."
-    }));
+      answer: q.answer || "답변이 없습니다.",
+      id: q.id,
+      fieldType: q.fieldType,
+      ordered: q.ordered,
+      answerType: q.answerType,
+      textLength: q.textLength,
+      required: q.required,
+      common: q.common
+    })) || [];
     
-    // page 1 = 파트별 질문 / [age 2 =공통 질문
-    const partQuestions = transformedQuestions.slice(0, transformedQuestions.length / 2);
-    const commonQuestions = transformedQuestions.slice(transformedQuestions.length / 2);
+    const partQuestions = result?.specific?.specificQuestions?.map((q: any) => ({
+      question: q.question,
+      answer: q.answer || "답변이 없습니다.",
+      id: q.id,
+      fieldType: q.fieldType,
+      ordered: q.ordered,
+      answerType: q.answerType,
+      textLength: q.textLength,
+      required: q.required,
+      common: q.common
+    })) || [];
     
     return {
       result: {
         commonQuestions: commonQuestions,
-        partQuestions: partQuestions
+        partQuestions: partQuestions,
+        timeSlots: result?.common?.timeSlots || [],
+        languageLevels: result?.specific?.languageLevels || [],
+        blogUrl: result?.common?.blogUrl,
+        githubUrl: result?.common?.githubUrl,
+        portfolioUrl: result?.common?.portfolioUrl
+      }
+    };
+    
+    console.log("=== 변환된 데이터 ===");
+    console.log("commonQuestions:", commonQuestions);
+    console.log("partQuestions:", partQuestions);
+    console.log("timeSlots:", result?.common?.timeSlots);
+    console.log("languageLevels:", result?.specific?.languageLevels);
+    console.log("URL 정보:", {
+      blogUrl: result?.common?.blogUrl,
+      githubUrl: result?.common?.githubUrl,
+      portfolioUrl: result?.common?.portfolioUrl
+    });
+    console.log("================================");
+    
+    return {
+      result: {
+        commonQuestions: commonQuestions,
+        partQuestions: partQuestions,
+        timeSlots: result?.common?.timeSlots || [],
+        languageLevels: result?.specific?.languageLevels || [],
+        blogUrl: result?.common?.blogUrl,
+        githubUrl: result?.common?.githubUrl,
+        portfolioUrl: result?.common?.portfolioUrl
       }
     };
   } catch (error: any) {
-    console.error("에러:", error);
+    console.error("=== 질문&답변 조회 에러 ===");
+    console.error("resumeId:", resumeId);
+    console.error("에러 상태:", error.response?.status);
+    console.error("에러 메시지:", error.response?.data?.message);
+    console.error("에러 데이터:", error.response?.data);
+    console.error("전체 에러:", error);
+    console.error("==========================");
     throw error;
   }
 };

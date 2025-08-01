@@ -165,46 +165,46 @@ const ApplicationTable = ({
                     </td>
                   )}
                   <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 text-sm max-w-16">
-                    <span
-                      className={`px-2 justify-start text-base leading-5 font-semibold rounded-full
-                        ${
-                          application.status === "COMPLETE"
-                            ? "text-blue-600 font-semibold"
-                            : application.status === "FAIL"
-                            ? "text-red-600 font-semibold"
-                            : application.status === "PASS"
-                            ? "text-green-600 font-semibold"
-                            : application.status === "HOLD"
-                            ? "text-orange-500 font-semibold"
+                      <span
+                        className={`px-2 justify-start text-base leading-5 font-semibold rounded-full
+                          ${
+                            application.status === "COMPLETE"
+                              ? "text-blue-600 font-semibold"
+                              : application.status === "FAIL"
+                              ? "text-red-600 font-semibold"
+                              : application.status === "PASS"
+                              ? "text-green-600 font-semibold"
+                              : application.status === "HOLD"
+                              ? "text-orange-500 font-semibold"
                             : application.status === "FINAL_PASS"
                             ? "text-blue-600 font-semibold"
                             : application.status === "FINAL_FAIL"
                             ? "text-red-600 font-semibold"
                             : application.status === "NOTCHECKED" || !application.status
-                            ? "text-gray-600 font-semibold"
+                              ? "text-gray-600 font-semibold"
                             : "text-gray-600 font-semibold"
-                        }
-                        `}
-                    >
-                      {application.status === "COMPLETE"
-                        ? "완료"
-                        : application.status === "FAIL"
-                        ? "불합격"
-                        : application.status === "PASS"
+                          }
+                          `}
+                      >
+                        {application.status === "COMPLETE"
+                          ? "완료"
+                          : application.status === "FAIL"
+                          ? "불합격"
+                          : application.status === "PASS"
                         ? "서류 합격"
-                        : application.status === "HOLD"
-                        ? "보류"
+                          : application.status === "HOLD"
+                          ? "보류"
                         : application.status === "FINAL_PASS"
                         ? "최종 합격"
                         : application.status === "FINAL_FAIL"
                         ? "최종 탈락"
-                        : application.status === "NOTCHECKED"
+                          : application.status === "NOTCHECKED"
                         ? "평가 진행 전"
                         : !application.status && pageType !== "interview"
-                        ? "평가 진행 전"
-                        : ""}
-                    </span>
-                  </td>
+                          ? "평가 진행 전"
+                          : ""}
+                      </span>
+                    </td>
                 </tr>
               );
               })

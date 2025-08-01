@@ -63,13 +63,21 @@ const Detail = () => {
 
   const isLoading = memberInfoLoading || questionsLoading || evaluationLoading;
 
+  // 질문&답변 데이터 조회 결과를 콘솔에 로그로 출력
+  useEffect(() => {
+    if (resumeQuestions) {
+      console.log("=== 질문&답변 데이터 조회 결과 ===");
+      console.log("resumeQuestions:", resumeQuestions);
+      console.log("result:", resumeQuestions.result);
+      console.log("commonQuestions:", resumeQuestions.result?.commonQuestions);
+      console.log("partQuestions:", resumeQuestions.result?.partQuestions);
+      console.log("================================");
+    }
+  }, [resumeQuestions]);
+
   // 기존 평가 데이터가 있으면 input에 설정
   useEffect(() => {
     if (existingEvaluation?.result) {
-      console.log("=== 기존 평가 데이터 ===");
-      console.log("existingEvaluation:", existingEvaluation);
-      console.log("result:", existingEvaluation.result);
-      console.log("=========================");
       
       const { score: existingScore, opinion: existingOpinion } = existingEvaluation.result;
       if (existingScore !== undefined) {
@@ -216,26 +224,34 @@ const Detail = () => {
               partQuestions.map((q: Question, index: number) => (
                 <Accordion
                   key={q.question}
-                  title={
-                    index === 0 ? (application?.name || '') + q.question : q.question
-                  }
+                  title={q.question}
                   className="w-full"
                 >
-                  {index === 0 ? (
-                    <StepCounter
-                      title="Javascript"
-                      currentStep={2}
-                      setCurrentStep={() => {}}
-                      maxStep={5}
-                      stepLabels={["입문", "초급", "중급", "고급", "전문가"]}
-                    />
+                  {index === 0 && questions?.languageLevels && questions.languageLevels.length > 0 ? (
+                    <div className="space-y-4">
+                      {/* 언어 레벨 정보 */}
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">언어 레벨</h4>
+                        <div className="space-y-4">
+                          {questions.languageLevels.map((lang: any, langIndex: number) => (
+                            <StepCounter
+                              key={langIndex}
+                              title={lang.language}
+                              currentStep={lang.level}
+                              setCurrentStep={() => {}}
+                              maxStep={5}
+                              stepLabels={["입문", "초급", "중급", "고급", "전문가"]}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   ) : (
                     <TextArea
                       value={q.answer}
                       readOnly={true}
                       className="w-full h-full"
                     />
-                    // 여기에 면접 일자 띄우기
                   )}
                 </Accordion>
               ))}
