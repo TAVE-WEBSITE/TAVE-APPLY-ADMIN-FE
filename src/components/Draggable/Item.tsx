@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useRef, useState, useCallback, useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import FlexBox from "../Layout/FlexBox";
 import Icon from "@/components/Icon/Icon";
 import Switch from "../Input/Switch";
@@ -9,9 +9,22 @@ import ChipController from "@/pages/Setting/Document/ChipController";
 import WordLimitModal from "@/pages/Setting/Document/WordLimitModal";
 import TypeChangeModal from "@/pages/Setting/Document/TypeChangeModal";
 import InterviewScheduleModal from "@/pages/Setting/Document/InterviewScheduleModal";
+import ToastMessage from "@/components/Modal/ToastMessage";
+import { axiosInstance } from "@/api/axiosInstance";
 
 import useDocumentStore from "@/hooks/Setting/Document/useDocumentStore";
 import type { SkillSet } from "@/hooks/Setting/Document/useDocumentStore";
+
+// 프로그래밍 언어 조회 API
+const fetchProgrammingLanguages = async (field: string) => {
+  try {
+    const res = await axiosInstance.get(`/v1/member/lan/field/${field}`);
+    return res.data;
+  } catch (error) {
+    console.error("프로그래밍 언어 조회 실패:", error);
+    return { result: [] };
+  }
+};
 
 type QuestionItem = {
   id: string;
@@ -42,9 +55,8 @@ const DraggableItem = ({
   onDelete,
   onToggleRequired,
 }: DraggableItemProps) => {
-  // 전달받은 데이터 로깅
-  // console.log("DraggableItem - item:", item);
-  // console.log("DraggableItem - questionData:", questionData);
+
+  
   const queryClient = useQueryClient();
   const wordLimitModalRef = useRef<HTMLDialogElement>(null);
   const typeChangeModalRef = useRef<HTMLDialogElement>(null);
@@ -54,6 +66,52 @@ const DraggableItem = ({
     questionData?.content || item.question || ""
   );
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+
+  // 프로그래밍 언어 조회 (answerType이 PROGRAMMING일 때만)
+  const { data: programmingLanguages } = useQuery({
+    queryKey: ["programming-languages", questionData?.fieldType],
+    queryFn: () => fetchProgrammingLanguages(questionData?.fieldType || ""),
+    enabled: questionData?.answerType === "PROGRAMMING" && !!questionData?.fieldType,
+  });
+
+  // 프로그래밍 언어를 chips 형태로 변환
+  const programmingLanguageChips = programmingLanguages?.result
+    ?.filter((lang: any) => lang.field === questionData?.fieldType) // fieldType에 따라 필터링
+    ?.map((lang: any) => ({
+      id: lang.id,
+      language: lang.language, // ChipController가 기대하는 속성명
+      field: questionData?.fieldType,
+      selected: false
+    })) || [];
+
+  // answerType에 따라 표시할 chips 결정
+  const displayChips = questionData?.answerType === "PROGRAMMING" 
+    ? (programmingLanguageChips || []) // undefined 방지
+    : (skills || []); // undefined 방지
+
+  // 언어 삭제 핸들러
+  const handleLanguageDelete = useCallback(async (languageId: number, languageName: string) => {
+    try {
+      // 프로그래밍 언어 삭제 API 호출
+      await axiosInstance.delete(`/v1/manager/lan/${languageId}`);
+      
+      // 토스트 메시지 표시
+      setToastMessage(`${languageName} 삭제했습니다.`);
+      setIsToastOpen(true);
+      
+      // 2초 후 새로고침
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+      
+    } catch (error) {
+      console.error("언어 삭제 실패:", error);
+      setToastMessage("언어 삭제에 실패했습니다.");
+      setIsToastOpen(true);
+    }
+  }, []);
 
   const {
     attributes,
@@ -331,11 +389,23 @@ const DraggableItem = ({
         />
         <InterviewScheduleModal ref={interviewScheduleModal} />
       </div>
-      {skills.length > 0 && (
+      {(displayChips.length > 0 || questionData?.answerType === "PROGRAMMING") && (
         <div className="px-4 pb-4">
-          <ChipController chips={skills} focused={item.mode === "focused"} />
+          <ChipController 
+            chips={displayChips} 
+            focused={item.mode === "focused"}
+            onLanguageDelete={questionData?.answerType === "PROGRAMMING" ? handleLanguageDelete : undefined}
+            answerType={questionData?.answerType}
+          />
         </div>
       )}
+      
+      <ToastMessage
+        message={toastMessage}
+        isOpen={isToastOpen}
+        setIsOpen={setIsToastOpen}
+        isError={false}
+      />
     </li>
   );
 };
