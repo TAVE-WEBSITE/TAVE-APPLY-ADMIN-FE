@@ -62,7 +62,7 @@ const Interview = () => {
         </FlexBox>
       </FlexBox>
       <Body className="pt-8 gap-8">
-        <FlexBox className="justify-between w-[1320px] rounded-xl border border-gray-300 mx-auto">
+        <FlexBox className="justify-between w-full max-w-[1400px] rounded-xl border border-gray-300 mx-auto overflow-hidden">
           <TimeTable timeTable={timeTable} onCellClick={handleCellClick} />
         </FlexBox>
         <FlexBox className="mx-auto gap-4 justify-center pb-12">

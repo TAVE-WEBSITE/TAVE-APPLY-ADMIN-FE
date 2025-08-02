@@ -48,6 +48,7 @@ export const usePagination = <T>({
 
     // 현재 페이지의 쿼리만 처리
     const currentPageQuery = pageQueries[page];
+    
     if (currentPageQuery?.isSuccess && currentPageQuery.data?.result) {
       if (currentPageQuery.data.result.dataList) {
         const transformedData = currentPageQuery.data.result.dataList.map((item: any) => ({
@@ -101,24 +102,38 @@ export const usePagination = <T>({
     };
   }, [pageQueries[0]?.dataUpdatedAt]); // 첫 번째 쿼리의 dataUpdatedAt만 사용
 
-  // totalPages를 별도로 계산하여 모든 페이지에서 올바른 값 반환
+  // totalPages를 totalRecruiter와 size를 기반으로 계산
   const totalPages = useMemo(() => {
-    // 첫 번째 페이지 쿼리에서 totalPages 정보 가져오기
+    // 첫 번째 페이지 쿼리에서 totalRecruiter 정보 가져오기
     const firstQuery = pageQueries[0];
+    
     if (firstQuery?.isSuccess && firstQuery.data?.result) {
-      // resumeResDtos.page.totalPages 구조 확인
+      const totalRecruiter = firstQuery.data.result.totalRecruiter;
+      
+      if (totalRecruiter !== undefined && totalRecruiter !== null) {
+        // totalRecruiter를 size로 나누어 올림하여 totalPages 계산
+        const calculatedTotalPages = Math.ceil(totalRecruiter / size);
+        console.log("=== totalPages 계산 ===");
+        console.log("totalRecruiter:", totalRecruiter);
+        console.log("size:", size);
+        console.log("계산된 totalPages:", calculatedTotalPages);
+        return calculatedTotalPages;
+      }
+    }
+    
+    // fallback: 기존 구조들 확인
+    if (firstQuery?.isSuccess && firstQuery.data?.result) {
       if (firstQuery.data.result.resumeResDtos?.page?.totalPages) {
         return firstQuery.data.result.resumeResDtos.page.totalPages;
-      }
-      // 기존 구조들도 유지
-      else if (firstQuery.data.result.totalPage) {
+      } else if (firstQuery.data.result.totalPage) {
         return firstQuery.data.result.totalPage;
       } else if (firstQuery.data.result.dtos?.page?.totalPages) {
         return firstQuery.data.result.dtos.page.totalPages;
       }
     }
+    
     return totalPagesRef.current || 1;
-  }, [pageQueries[0]?.dataUpdatedAt]); // 첫 번째 쿼리의 dataUpdatedAt만 사용
+  }, [pageQueries[0]?.dataUpdatedAt, size]); // size도 의존성에 추가
 
   const isLoading = pageQueries.some((query) => query.isLoading);
   return {

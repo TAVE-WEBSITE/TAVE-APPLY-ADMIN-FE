@@ -88,7 +88,7 @@ const ApplicationTable = ({
 
   return (
     <div className="w-full overflow-x-auto">
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden h-[574px]">
+      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden h-[656px]">
         <table className="border-separate border-spacing-0 table-auto w-full">
           <thead className="bg-white">
             <tr className="rounded-t-xl overflow-hidden">

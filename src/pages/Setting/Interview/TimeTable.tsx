@@ -27,7 +27,7 @@ const TimeTable = () => {
   const { entireList, isLoading, totalPages } = usePagination<InterviewItem>({
     type: "면접 설정",
     page: currentPage - 1,
-    size: 6,
+    size: 7,
   });
 
   const {

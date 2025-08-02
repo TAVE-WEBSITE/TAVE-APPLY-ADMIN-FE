@@ -61,7 +61,7 @@ const Final = () => {
     usePagination<FinalEvaluationItem>({
       type: "최종 서류 평가",
       page: currentPage - 1,
-      size: 6,
+      size: 7,
       status: getStatusFromTab(currentTab),
     });
 

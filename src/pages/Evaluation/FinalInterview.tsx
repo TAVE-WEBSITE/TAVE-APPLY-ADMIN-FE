@@ -44,7 +44,7 @@ const FinalInterview = () => {
   const { entireList, isLoading, totalPages,countData } = usePagination<EvaluationItem>({
     type: "최종 면접 평가",
     page: currentPage - 1, // 0-based index로 변환
-    size: 6,
+    size: 7,
     status: getStatusFromTab(activeTab),
   });
 
