@@ -9,11 +9,21 @@ import ToastMessage from "@/components/Modal/ToastMessage";
 
 const options = ["15분", "20분", "25분", "30분"];
 
+interface InterviewScheduleModalProps {
+  dialogRef: React.RefObject<HTMLDialogElement | null>;
+  onConfirm: () => void;
+  isPending?: boolean;
+  confirmText?: string;
+  title?: string;
+}
+
 const InterviewScheduleModal = ({
-  ref,
-}: {
-  ref: React.RefObject<HTMLDialogElement | null>;
-}) => {
+  dialogRef,
+  onConfirm,
+  isPending = false,
+  confirmText = "저장",
+  title = "면접 시간 설정"
+}: InterviewScheduleModalProps) => {
   const [selected, setSelected] = useState("15분");
   const [open, setOpen] = useState(false);
 
@@ -51,8 +61,8 @@ const InterviewScheduleModal = ({
         
         // 성공 후 모달 닫기
         setTimeout(() => {
-          if (ref && 'current' in ref && ref.current) {
-            ref.current.close();
+          if (dialogRef && 'current' in dialogRef && dialogRef.current) {
+            dialogRef.current.close();
           }
         }, 2000);
       } else {
@@ -69,10 +79,10 @@ const InterviewScheduleModal = ({
 
   return (
     <Modal
-      dialogRef={ref}
-      title="면접 시간 설정"
+      dialogRef={dialogRef}
+      title={title}
       buttonCount={2}
-      confirmText="등록"
+      confirmText={confirmText}
       isPending={isLoading}
       onConfirm={updateInterviewSchedule}
       width=""
@@ -170,8 +180,8 @@ const InterviewScheduleModal = ({
         isOpen={isToastOpen}
         setIsOpen={(open) => {
           setIsToastOpen(open);
-          if (!open && ref && 'current' in ref && ref.current) {
-            ref.current.close();
+          if (!open && dialogRef && 'current' in dialogRef && dialogRef.current) {
+            dialogRef.current.close();
           }
         }}
       />
