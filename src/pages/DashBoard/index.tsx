@@ -7,12 +7,21 @@ import Modal from "@/components/Modal/Modal";
 import { formatDateTime } from "@/utils/formatDate";
 import SkeletonDonutChart from "@/components/Chart/SkeletonUI/SkeletonDonutChart";
 import { useDashBoard } from "@/hooks/DashBoard/useDashBoard";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchSettingDefault } from "@/pages/Setting/api/Default";
+import { axiosInstance } from "@/api/axiosInstance";
+
+// 대시보드 업데이트 API 함수
+const updateDashboard = async () => {
+  const response = await axiosInstance.post("/v1/manager/dashboard");
+  return response.data;
+};
 
 export const Page = () => {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  
   const {
     genderQuery: {
       data: genderData,
@@ -35,6 +44,27 @@ export const Page = () => {
     queryKey: ["setting", "default"],
     queryFn: fetchSettingDefault,
     staleTime: 1000 * 60 * 60 * 24,
+  });
+
+  // 대시보드 업데이트 mutation
+  const updateDashboardMutation = useMutation({
+    mutationFn: updateDashboard,
+    onSuccess: async () => {
+      console.log("대시보드 업데이트 완료");
+      
+      // POST 요청 성공 후 GET 요청으로 최신 데이터 조회
+      try {
+        await queryClient.refetchQueries({ queryKey: ["chart-data", "dashboard"] });
+        await queryClient.refetchQueries({ queryKey: ["chart-data", "gender"] });
+        await queryClient.refetchQueries({ queryKey: ["chart-data", "skill"] });
+        console.log("대시보드 데이터 재조회 완료");
+      } catch (error) {
+        console.error("대시보드 데이터 재조회 실패:", error);
+      }
+    },
+    onError: (error) => {
+      console.error("대시보드 업데이트 실패:", error);
+    }
   });
 
   const calculateSum = () => {
@@ -60,6 +90,11 @@ export const Page = () => {
     const documentStartDate = new Date(defaultSettingData.result.documentRecruitStartDate);
     
     return currentDate < documentStartDate;
+  };
+
+  // 대시보드 업데이트 핸들러
+  const handleDashboardUpdate = () => {
+    updateDashboardMutation.mutate();
   };
 
   return (
@@ -133,6 +168,12 @@ export const Page = () => {
             )}
           </div>
         </FlexBox>
+        <button 
+        className="mx-auto w-44 py-1 bg-blue-600 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-blue-700 disabled:bg-gray-400"
+        onClick={handleDashboardUpdate}
+        disabled={updateDashboardMutation.isPending}>
+          {updateDashboardMutation.isPending ? "업데이트 중..." : "대시보드 업데이트"}
+        </button>
                 {(() => {
           // 기본 설정에 generation이 없으면 모달 표시
           if (defaultSettingData?.result?.generation) {

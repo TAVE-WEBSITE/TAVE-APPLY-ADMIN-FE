@@ -22,6 +22,60 @@ const DonutChart = ({ title, data = [], colors }: DonutChartProps<any>) => {
 
     return data.map((item, index) => {
       const angle = (item.ratio / 100) * 360;
+      console.log(`Item ${index}: ${item.label}, ratio: ${item.ratio}, angle: ${angle}, color: ${colors[index]}`);
+      
+      // 100% 비율인 경우 전체 원을 그리기 위한 특별 처리
+      if (item.ratio === 100) {
+        console.log("100% 항목 색상:", colors[index]);
+        
+        // 간단한 원형 도넛 차트 직접 생성
+        const centerX = 200;
+        const centerY = 200;
+        const outerRadius = selectedSegment === index ? 108 : 100;
+        const innerRadius = 60;
+        
+        return (
+          <g key={index} className="block">
+            {/* 외부 원 */}
+            <circle
+              cx={centerX}
+              cy={centerY}
+              r={outerRadius}
+              fill={colors[index]}
+              style={{
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                filter: selectedSegment === index ? "brightness(1.1)" : "none",
+              }}
+              onClick={() => handleSegmentClick(index)}
+            />
+            {/* 내부 원 (구멍) */}
+            <circle
+              cx={centerX}
+              cy={centerY}
+              r={innerRadius}
+              fill="white"
+              style={{ pointerEvents: "none" }}
+            />
+            {/* 텍스트 - count가 0인 경우 숨김 */}
+            {item.count > 0 && (
+              <text
+                x={centerX}
+                y={centerY - 20}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill="#111827"
+                fontSize="12"
+                fontWeight="600"
+                style={{ pointerEvents: "none", transition: "all 0.3s ease" }}
+              >
+                {item.label} ({Math.round(item.ratio)}%)
+              </text>
+            )}
+          </g>
+        );
+      }
+      
       const path = createPath(
         currentAngle,
         currentAngle + angle,
@@ -33,7 +87,6 @@ const DonutChart = ({ title, data = [], colors }: DonutChartProps<any>) => {
       const textPos = getTextPosition(midAngle, selectedSegment === index);
 
       currentAngle += angle;
-
       return (
         <g key={index} className="block">
           <path
@@ -46,28 +99,33 @@ const DonutChart = ({ title, data = [], colors }: DonutChartProps<any>) => {
             }}
             onClick={() => handleSegmentClick(index)}
           />
-          {/* 연결선 */}
-          <line
-            x1={textPos.lineStart.x}
-            y1={textPos.lineStart.y}
-            x2={textPos.lineEnd.x}
-            y2={textPos.lineEnd.y}
-            stroke="#6B7280"
-            strokeWidth="1"
-            style={{ transition: "all 0.3s ease" }}
-          />
-          <text
-            x={textPos.text.x}
-            y={textPos.text.y}
-            textAnchor={textPos.text.x > 200 ? "start" : "end"}
-            dominantBaseline="middle"
-            fill="#111827"
-            fontSize="12"
-            fontWeight="600"
-            style={{ pointerEvents: "none", transition: "all 0.3s ease" }}
-          >
-            {item.topic} ({Math.round(item.ratio)}%)
-          </text>
+          {/* 연결선 - count가 0인 경우 숨김 */}
+          {item.count > 0 && (
+            <line
+              x1={textPos.lineStart.x}
+              y1={textPos.lineStart.y}
+              x2={textPos.lineEnd.x}
+              y2={textPos.lineEnd.y}
+              stroke="#6B7280"
+              strokeWidth="1"
+              style={{ transition: "all 0.3s ease" }}
+            />
+          )}
+          {/* 텍스트 - count가 0인 경우 숨김 */}
+          {item.count > 0 && (
+            <text
+              x={textPos.text.x}
+              y={textPos.text.y}
+              textAnchor={textPos.text.x > 200 ? "start" : "end"}
+              dominantBaseline="middle"
+              fill="#111827"
+              fontSize="12"
+              fontWeight="600"
+              style={{ pointerEvents: "none", transition: "all 0.3s ease" }}
+            >
+              {item.label} ({Math.round(item.ratio)}%)
+            </text>
+          )}
         </g>
       );
     });
@@ -109,7 +167,7 @@ const DonutChart = ({ title, data = [], colors }: DonutChartProps<any>) => {
                 style={{ backgroundColor: colors[index] }}
               ></div>
               <span className="text-gray-700 text-sm font-medium whitespace-nowrap">
-                {item.topic}
+                {item.label}
               </span>
             </button>
           ))}
