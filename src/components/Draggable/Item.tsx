@@ -8,7 +8,6 @@ import Switch from "../Input/Switch";
 import ChipController from "@/pages/Setting/Document/ChipController";
 import WordLimitModal from "@/pages/Setting/Document/WordLimitModal";
 import TypeChangeModal from "@/pages/Setting/Document/TypeChangeModal";
-import InterviewScheduleModal from "@/pages/Setting/Document/InterviewScheduleModal";
 import ToastMessage from "@/components/Modal/ToastMessage";
 import { axiosInstance } from "@/api/axiosInstance";
 
@@ -387,7 +386,7 @@ const DraggableItem = ({
             console.log("데이터 무효화 완료");
           }}
         />
-        <InterviewScheduleModal ref={interviewScheduleModal} />
+    
       </div>
       {(displayChips.length > 0 || questionData?.answerType === "PROGRAMMING") && (
         <div className="px-4 pb-4">

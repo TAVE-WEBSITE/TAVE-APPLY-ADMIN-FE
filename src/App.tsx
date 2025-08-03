@@ -78,6 +78,7 @@ function App() {
                 path="/evaluation/interview/final/:id"
                 element={<FinalEvaluationDetail type="interview"/>}
               />
+
             </Routes>
           </main>
         </div>
