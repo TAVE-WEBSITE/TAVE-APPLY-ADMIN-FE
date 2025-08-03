@@ -344,14 +344,14 @@ const DraggableItem = ({
             )}
           </div>
 
-          {item.textLength && (
+          {/* {item.textLength && (
             <button
               className="p-2 border border-gray-300 rounded-lg hover:bg-blue-100 cursor-pointer"
               onClick={() => wordLimitModalRef.current?.showModal()}
             >
               <Icon type="TextLength" size={20} />
             </button>
-          )}
+          )} */}
 
           <button
             className="p-2 border border-gray-300 rounded-lg hover:bg-blue-100 cursor-pointer"
