@@ -22,9 +22,7 @@ const DonutChart = ({ title, data = [], colors }: DonutChartProps<any>) => {
 
     return data.map((item, index) => {
       const angle = (item.ratio / 100) * 360;
-      console.log(`Item ${index}: ${item.label}, ratio: ${item.ratio}, angle: ${angle}, color: ${colors[index]}`);
-      
-      // 100% 비율인 경우 전체 원을 그리기 위한 특별 처리
+
       if (item.ratio === 100) {
         // 간단한 원형 도넛 차트 직접 생성
         const centerX = 200;
