@@ -320,8 +320,8 @@ const Detail = () => {
 
                     <TextArea
                       className="w-full h-36"
-                      maxLength={50}
-                      placeholder="50자 이내로 입력해주세요"
+                      maxLength={100}
+                      placeholder="100자 이내로 입력해주세요"
                       value={opinion}
                       onChange={(e) => setOpinion(e.target.value)}
                     />
