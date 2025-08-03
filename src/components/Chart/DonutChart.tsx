@@ -26,8 +26,6 @@ const DonutChart = ({ title, data = [], colors }: DonutChartProps<any>) => {
       
       // 100% 비율인 경우 전체 원을 그리기 위한 특별 처리
       if (item.ratio === 100) {
-        console.log("100% 항목 색상:", colors[index]);
-        
         // 간단한 원형 도넛 차트 직접 생성
         const centerX = 200;
         const centerY = 200;
