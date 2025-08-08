@@ -123,7 +123,7 @@ export const Page = () => {
           {isDashboardLoading || isBeforeRecruitment() ? (
             <CountCard text="전 기수 대비" boxColor="green" count={"-"} />
           ) : (
-            <CountCard text="전 기수 대비" boxColor="green" count={`${dashboardData?.comparisonRatio ?? 0}%`} />
+            <CountCard text="전 기수 대비" boxColor="green" count={`${dashboardData?.comparisonRatio.toFixed(2) ?? 0}%`} />
           )}
           {isDashboardLoading || isBeforeRecruitment() ? (
             <CountCard text="임시 저장 수" boxColor="orange" count={"-"} />

@@ -210,6 +210,60 @@ const Detail = () => {
               ))}
             {applicant &&
               !isLoading &&
+              activeTab === "공통 질문" && (
+                <Accordion
+                  title="아래의 목록 중 소유하신 것이 있다면 자유롭게 첨부해주세요 :)"
+                  className="w-full"
+                >
+                  <div className="space-y-4">
+                    {questions?.githubUrl && (
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">GitHub</h4>
+                        <a 
+                          href={questions.githubUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline break-all"
+                        >
+                          {questions.githubUrl}
+                        </a>
+                      </div>
+                    )}
+                    {questions?.blogUrl && (
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">블로그</h4>
+                        <a 
+                          href={questions.blogUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline break-all"
+                        >
+                          {questions.blogUrl}
+                        </a>
+                      </div>
+                    )}
+                    {questions?.portfolioUrl && (
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">포트폴리오</h4>
+                        <a 
+                          href={questions.portfolioUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline break-all"
+                        >
+                          포트폴리오 보기
+                        </a>
+                      </div>
+                    )}
+                    {!questions?.githubUrl && !questions?.blogUrl && !questions?.portfolioUrl && (
+                      <p className="text-gray-500">첨부된 링크가 없습니다.</p>
+                    )}
+                  </div>
+                </Accordion>
+              )}
+              {}
+            {applicant &&
+              !isLoading &&
               activeTab === "공통 질문" &&
               commonQuestions.length === 0 && (
                 <div className="flex flex-col justify-center items-center gap-4 p-4 text-gray-700 w-full h-full text-center">
