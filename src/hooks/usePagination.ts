@@ -119,10 +119,6 @@ export const usePagination = <T>({
       if (totalRecruiter !== undefined && totalRecruiter !== null) {
         // totalRecruiter를 size로 나누어 올림하여 totalPages 계산
         const calculatedTotalPages = Math.ceil(totalRecruiter / size);
-        console.log("=== totalPages 계산 ===");
-        console.log("totalRecruiter:", totalRecruiter);
-        console.log("size:", size);
-        console.log("계산된 totalPages:", calculatedTotalPages);
         return calculatedTotalPages;
       }
     }

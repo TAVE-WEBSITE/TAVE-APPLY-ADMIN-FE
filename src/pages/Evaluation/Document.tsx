@@ -55,22 +55,7 @@ const Document = () => {
     setSelectedRole(role);
   };
 
-  // 검색어 변경 시 로그 출력
-  useEffect(() => {
-    console.log("=== Document.tsx 검색어 변경 ===");
-    console.log("searchInput:", searchInput);
-    console.log("searchValue:", searchValue);
-    console.log("전달되는 name 파라미터:", searchInput);
-    console.log("name 파라미터 길이:", searchInput.length);
-  }, [searchInput, searchValue]);
 
-  // usePagination 호출 시 파라미터 확인
-  useEffect(() => {
-    console.log("=== Document.tsx usePagination 파라미터 ===");
-    console.log("전달되는 name:", searchInput);
-    console.log("전달되는 type:", selectedRole);
-    console.log("전달되는 pageType:", "서류 평가");
-  }, [searchInput, selectedRole]);
 
 
   return (
@@ -112,6 +97,7 @@ const Document = () => {
                 if (e.key === 'Enter') {
                   console.log("Enter 키 입력됨, searchValue:", searchValue);
                   setSearchInput(searchValue);
+                  setCurrentPage(1); // 검색 시 1페이지로 이동
                 }
               }}
             />

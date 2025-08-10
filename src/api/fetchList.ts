@@ -73,18 +73,7 @@ export const fetchList = async (
       }
     }
 
-    console.log("=== fetchList API 요청 ===");
-    console.log("전달받은 type (ApplicationType):", type);
-    console.log("전달받은 params:", params);
-    console.log("추출된 pageType:", extractedPageType);
-    console.log("추출된 type (지원분야):", extractedType);
-    console.log("최종 URL:", url);
-    console.log("최종 requestParams:", requestParams);
-
-
     const res = await axiosInstance.get(url, { params: requestParams });
-
-    console.log("응답 데이터:", res.data);
     return res.data;
   } catch (error: any) {
     console.error("전체 에러:", error);
