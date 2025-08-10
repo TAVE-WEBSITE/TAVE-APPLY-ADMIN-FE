@@ -1,7 +1,7 @@
 export type RoleType =
-  | "웹 프론트"
-  | "백엔드"
-  | "디자인"
-  | "데이터 분석"
-  | "딥러닝"
-  | "앱 프론트";
+  | "WEBFRONTEND"
+  | "BACKEND"
+  | "DESIGN"
+  | "DATAANALYSIS"
+  | "DEEPLEARNING"
+  | "APPFRONTEND";

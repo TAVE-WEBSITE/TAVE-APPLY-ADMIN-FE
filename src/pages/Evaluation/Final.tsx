@@ -13,7 +13,7 @@ import FilterButton from "@/components/Button/FilterButton";
 import ApplicationTable from "@/components/ApplicationTable/ApplicationTable";
 import { type FinalEvaluationItem } from "@/types/application";
 import { usePagination } from "@/hooks/usePagination";
-import { useFilter } from "@/hooks/useFilter";
+import { type RoleType } from "@/types/role.d";
 import Button from "@/components/Button/Button";
 import { getRecruitmentEmailCancel, getRecruitmentEmailConfig, getRecruitmentDocumentEmailFind } from "./api";
 
@@ -26,6 +26,9 @@ const Final = () => {
 
 
   const [emailConfig , setEmailConfig] = useState(false); 
+  const [selectedRole, setSelectedRole] = useState<RoleType | null>(null);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchValue, setSearchValue] = useState("");
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -59,21 +62,34 @@ const Final = () => {
   const { entireList, isLoading, totalPages, countData } =
 
     usePagination<FinalEvaluationItem>({
-      type: "최종 서류 평가",
+      pageType: "최종 서류 평가",
       page: currentPage - 1,
       size: 7,
       status: getStatusFromTab(currentTab),
+      name: searchInput,
+      type: selectedRole || undefined,
     });
 
-  const {
-    filteredList,
-    checkedRoles,
-    searchInput,
-    activeTab,
-    setActiveTab,
-    setSearchInput,
-    handleFilter,
-  } = useFilter<FinalEvaluationItem>(entireList);
+  const handleFilter = (role: RoleType | null) => {
+    setSelectedRole(role);
+  };
+
+  // 검색어 변경 시 로그 출력
+  useEffect(() => {
+    console.log("=== Final.tsx 검색어 변경 ===");
+    console.log("searchInput:", searchInput);
+    console.log("searchValue:", searchValue);
+    console.log("전달되는 name 파라미터:", searchInput);
+    console.log("name 파라미터 길이:", searchInput.length);
+  }, [searchInput, searchValue]);
+
+  // usePagination 호출 시 파라미터 확인
+  useEffect(() => {
+    console.log("=== Final.tsx usePagination 파라미터 ===");
+    console.log("전달되는 name:", searchInput);
+    console.log("전달되는 type:", selectedRole);
+    console.log("전달되는 pageType:", "최종 서류 평가");
+  }, [searchInput, selectedRole]);
 
   const openModal = () => {
   //서류 평가 상태 : FAIL, PASS, HOLD, NOTCHECKED, COMPLETE
@@ -211,7 +227,6 @@ useEffect(() => {
             categories={["전체", "평가 진행 전", "불합격", "합격"]}
             active={currentTab}
             onChange={(tab) => {
-              setActiveTab(tab);
               setCurrentTab(tab);
               setCurrentPage(1);
               // 탭 변경 시 캐시 무효화
@@ -220,11 +235,17 @@ useEffect(() => {
           />
 
           <FlexBox className="gap-4">
-            <FilterButton checkedList={checkedRoles} onChange={handleFilter} />
+            <FilterButton selectedRole={selectedRole} onChange={handleFilter} />
             <SearchInput
               placeholder="이름을 입력해주세요"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  console.log("Enter 키 입력됨, searchValue:", searchValue);
+                  setSearchInput(searchValue);
+                }
+              }}
             />
           </FlexBox>
         </FlexBox>
@@ -238,7 +259,7 @@ useEffect(() => {
               "평가 완료 인원",
               "최종 평가",
             ]}
-            applications={filteredList}
+            applications={entireList}
             totalPages={totalPages}
             isLoading={isLoading}
             currentPage={currentPage}
