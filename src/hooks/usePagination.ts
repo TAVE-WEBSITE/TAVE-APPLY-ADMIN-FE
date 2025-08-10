@@ -3,13 +3,18 @@ import { fetchList, type Pagination } from "@/api/fetchList";
 import { type ApplicationType } from "@/types/application";
 import { useQueries } from "@tanstack/react-query";
 
-type UseFilterProps = { type: ApplicationType } & Pagination;
+type UseFilterProps = { 
+  pageType: ApplicationType;
+  type?: string; // 지원 분야 필터
+} & Pagination;
 
 export const usePagination = <T>({
+  pageType,
   type,
   page,
   size,
   status,
+  name,
 }: UseFilterProps) => {
   const totalPagesRef = useRef<number>(undefined);
   const maxPageRef = useRef<number>(0);
@@ -30,13 +35,14 @@ export const usePagination = <T>({
       const pageNum = index ;
       const queryParams =
         status === "ALL"
-          ? { page: pageNum, size}
-          : { page: pageNum, size, status: status };
+          ? { page: pageNum, size, ...(name && { name }), ...(type && { type }) }
+          : { page: pageNum, size, status: status, ...(name && { name }), ...(type && { type }) };
+
 
 
       return {
-        queryKey: [type, "list", pageNum, status, size, page],
-        queryFn: () => fetchList(type as ApplicationType, queryParams),
+        queryKey: [pageType, "list", pageNum, status, size, page, name, type],
+        queryFn: () => fetchList(pageType as ApplicationType, { ...queryParams, pageType }),
         staleTime: 5 * 60 * 1000, // 5분간 캐시 유지
       };
     }),
@@ -83,7 +89,7 @@ export const usePagination = <T>({
     }
     return allData;
 
-  }, [pageQueries, page, status]); // pageQueries, page, status 변경 시 재계산
+  }, [pageQueries, page, status, name, type]); // pageQueries, page, status, name, type 변경 시 재계산
 
   // API 응답에서 count 데이터 추출
   const countData = useMemo(() => {
@@ -113,10 +119,6 @@ export const usePagination = <T>({
       if (totalRecruiter !== undefined && totalRecruiter !== null) {
         // totalRecruiter를 size로 나누어 올림하여 totalPages 계산
         const calculatedTotalPages = Math.ceil(totalRecruiter / size);
-        console.log("=== totalPages 계산 ===");
-        console.log("totalRecruiter:", totalRecruiter);
-        console.log("size:", size);
-        console.log("계산된 totalPages:", calculatedTotalPages);
         return calculatedTotalPages;
       }
     }

@@ -11,7 +11,7 @@ import FilterButton from "@/components/Button/FilterButton";
 import ApplicationTable from "@/components/ApplicationTable/ApplicationTable";
 import { type EvaluationItem } from "@/types/application";
 import { usePagination } from "@/hooks/usePagination";
-import { useFilter } from "@/hooks/useFilter";
+import { type RoleType } from "@/types/role.d";
 import Button from "@/components/Button/Button";
 import { getFinalInterviewEmailCancel, getFinalInterviewEmailConfig, getFinalInterviewEmailFind } from "./api";
 import Modal from "@/components/Modal/Modal";
@@ -25,6 +25,9 @@ const FinalInterview = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [emailConfig , setEmailConfig] = useState(false);
   const [activeTab, setActiveTab] = useState("전체");
+  const [selectedRole, setSelectedRole] = useState<RoleType | null>(null);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchValue, setSearchValue] = useState("");
 
   const getStatusFromTab = (tab: string) => {
     switch (tab) {
@@ -42,27 +45,27 @@ const FinalInterview = () => {
   };
 
   const { entireList, isLoading, totalPages,countData } = usePagination<EvaluationItem>({
-    type: "최종 면접 평가",
+    pageType: "최종 면접 평가",
     page: currentPage - 1, // 0-based index로 변환
     size: 7,
     status: getStatusFromTab(activeTab),
+    name: searchInput,
+    type: selectedRole || undefined,
   });
 
   // API 요청 데이터 로깅
   console.log("=== 최종 면접 평가 API 요청 정보 ===");
-  console.log("type:", "최종 면접 평가");
+  console.log("pageType:", "최종 면접 평가");
   console.log("page:", currentPage);
-  console.log("size:", 6);
+  console.log("size:", 7);
   console.log("status:", getStatusFromTab(activeTab));
   console.log("=============================");
 
-  const {
-    filteredList,
-    checkedRoles,
-    searchInput,
-    setSearchInput,
-    handleFilter,
-  } = useFilter<EvaluationItem>(entireList);
+  const handleFilter = (role: RoleType | null) => {
+    setSelectedRole(role);
+  };
+
+
 
   // 응답 데이터 로깅
   useEffect(() => {
@@ -70,12 +73,11 @@ const FinalInterview = () => {
     console.log("현재 탭:", activeTab);
     console.log("현재 status:", getStatusFromTab(activeTab));
     console.log("전체 리스트:", entireList);
-    console.log("필터된 리스트:", filteredList);
     console.log("isLoading:", isLoading);
     console.log("totalPages:", totalPages);
     console.log("countData:", countData);
     console.log("=============================");
-  }, [entireList, activeTab, filteredList, isLoading, totalPages, countData]);
+  }, [entireList, activeTab, isLoading, totalPages, countData]);
 
   
   const openModal = () => {
@@ -220,23 +222,32 @@ const FinalInterview = () => {
           <Tab
             categories={["전체", "평가 진행 전", "불합격", "합격"]}
             active={activeTab}
-            onChange={(tab) => {
-              setActiveTab(tab);
-              setCurrentPage(1); // 탭 변경 시 첫 페이지로 이동
-              setSearchInput(""); // 검색 입력값 초기화
-              // 캐시 무효화
-              queryClient.invalidateQueries({ 
-                queryKey: ["pagination", "최종 면접 평가"] 
-              });
-            }}
+                          onChange={(tab) => {
+                setActiveTab(tab);
+                setCurrentPage(1); // 탭 변경 시 첫 페이지로 이동
+                setSearchInput(""); // 검색 입력값 초기화
+                setSearchValue(""); // 검색 입력값 초기화
+                setSelectedRole(null); // 지원 분야 필터 초기화
+                // 캐시 무효화
+                queryClient.invalidateQueries({ 
+                  queryKey: ["pagination", "최종 면접 평가"] 
+                });
+              }}
           />
 
           <FlexBox className="gap-4">
-            <FilterButton checkedList={checkedRoles} onChange={handleFilter} />
+            <FilterButton selectedRole={selectedRole} onChange={handleFilter} />
             <SearchInput
               placeholder="이름을 입력해주세요"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  console.log("Enter 키 입력됨, searchValue:", searchValue);
+                  setSearchInput(searchValue);
+                  setCurrentPage(1); // 검색 시 1페이지로 이동
+                }
+              }}
             />
           </FlexBox>
         </FlexBox>
@@ -250,7 +261,7 @@ const FinalInterview = () => {
               "면접 일자",
               "최종 평가",
             ]}
-            applications={filteredList}
+            applications={entireList}
             totalPages={totalPages}
             isLoading={isLoading}
             currentPage={currentPage}
