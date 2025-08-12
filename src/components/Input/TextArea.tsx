@@ -30,7 +30,7 @@ const TextArea = ({
       maxLength={maxLength}
       disabled={disabled}
       readOnly={readOnly}
-      className={`px-4 py-5 text-base text-black leading-[135%] tracking-[-0.56px] focus:border-black bg-white border border-gray-300 rounded-lg ${
+      className={`min-h-[180px] px-4 py-5 text-base text-black leading-[135%] tracking-[-0.56px] focus:border-black bg-white border border-gray-300 rounded-lg ${
         disabled ? "opacity-50" : ""
       } ${width} ${height} ${className}`}
     />
