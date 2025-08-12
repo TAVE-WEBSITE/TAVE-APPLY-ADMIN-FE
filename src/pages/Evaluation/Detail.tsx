@@ -63,17 +63,6 @@ const Detail = () => {
 
   const isLoading = memberInfoLoading || questionsLoading || evaluationLoading;
 
-  // 질문&답변 데이터 조회 결과를 콘솔에 로그로 출력
-  useEffect(() => {
-    if (resumeQuestions) {
-      console.log("=== 질문&답변 데이터 조회 결과 ===");
-      console.log("resumeQuestions:", resumeQuestions);
-      console.log("result:", resumeQuestions.result);
-      console.log("commonQuestions:", resumeQuestions.result?.commonQuestions);
-      console.log("partQuestions:", resumeQuestions.result?.partQuestions);
-      console.log("================================");
-    }
-  }, [resumeQuestions]);
 
   // 기존 평가 데이터가 있으면 input에 설정
   useEffect(() => {

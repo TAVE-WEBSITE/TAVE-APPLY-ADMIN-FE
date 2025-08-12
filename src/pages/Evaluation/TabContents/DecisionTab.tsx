@@ -120,28 +120,24 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId, userName,t
             <div className="px-3 py-1 bg-gray-200 rounded-md flex items-center justify-center font-bold text-xl text-gray-500">2</div>
             <div className="w-full"><span className="text-blue-700">점수를 뒷받침하는 의견</span>을 간략하게 작성해주세요.</div>
           </div>
-          <div className="w-full border border-gray-300 rounded-lg font-normal bg-white p-4">
-           
+
           {/* 개별 평가*/}
           {finalEvaluation?.evaluations && finalEvaluation.evaluations.length > 0 && (
-            <div className="w-full p-4">
-              <div className="flex flex-col gap-4">
-                {finalEvaluation.evaluations.map((evaluation: any, index: number) => (
-                    <div key={index} className="grid grid-cols-2 gap-4 items-center mb-1 font-medium text-gray-700">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-gray-500 font-medium">{evaluation.username}</span>
-                        <span className="text-gray-700">{evaluation.opinion}</span>
-                      </div>
-                    </div>
-                  
-                ))}
-              </div>
+            <div className="flex flex-col gap-4">
+              {finalEvaluation.evaluations.map((evaluation: any, index: number) => (
+                <div key={index} className="border border-gray-300 rounded-lg font-normal bg-white p-4">
+                  <div className="flex flex-col gap-2">
+                    <span className="text-gray-500 font-medium">{evaluation.username}</span>
+                    <span className="text-gray-700">{evaluation.opinion}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
           
         </div>
-        </div>
+
         
       )}
 
