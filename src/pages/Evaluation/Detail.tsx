@@ -204,7 +204,7 @@ const Detail = () => {
                   <TextArea
                     value={q.answer}
                     readOnly={true}
-                    className="w-full h-full"
+                    className="w-full min-h-[120px]"
                   />
                 </Accordion>
               ))}
@@ -245,14 +245,62 @@ const Detail = () => {
                     {questions?.portfolioUrl && (
                       <div>
                         <h4 className="font-semibold text-gray-900 mb-2">포트폴리오</h4>
-                        <a 
-                          href={questions.portfolioUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 underline break-all"
+                        <button 
+                          onClick={() => {
+                            const url = questions.portfolioUrl;
+                            // S3 URL에서 파일명 추출 (UUID 형식)
+                            const fileName = url.split('/').pop() || 'portfolio.pdf';
+                            
+                            // fetch로 파일을 가져와서 강제 다운로드
+                            fetch(url, {
+                              method: 'GET',
+                              headers: {
+                                'Accept': 'application/pdf',
+                              },
+                            })
+                              .then(response => {
+                                if (!response.ok) throw new Error('Network response was not ok');
+                                return response.blob();
+                              })
+                              .then(blob => {
+                                // blob을 다운로드 가능한 형태로 변환
+                                const blobUrl = window.URL.createObjectURL(blob);
+                                const downloadLink = document.createElement('a');
+                                downloadLink.href = blobUrl;
+                                downloadLink.download = fileName;
+                                downloadLink.style.display = 'none';
+                                
+                                // DOM에 추가하고 클릭
+                                document.body.appendChild(downloadLink);
+                                downloadLink.click();
+                                
+                                // 정리
+                                setTimeout(() => {
+                                  document.body.removeChild(downloadLink);
+                                  window.URL.revokeObjectURL(blobUrl);
+                                }, 100);
+                              })
+                              .catch(error => {
+                                console.error('다운로드 실패:', error);
+                                // fallback: 새 창에서 다운로드 시도
+                                const newWindow = window.open(url, '_blank');
+                                if (newWindow) {
+                                  newWindow.document.write(`
+                                    <html>
+                                      <head><title>다운로드 중...</title></head>
+                                      <body>
+                                        <p>파일이 다운로드되지 않았습니다. 
+                                        <a href="${url}" download="${fileName}">여기를 클릭하여 다운로드</a></p>
+                                      </body>
+                                    </html>
+                                  `);
+                                }
+                              });
+                          }}
+                          className="text-blue-600 hover:text-blue-800 underline break-all cursor-pointer bg-transparent border-none p-0"
                         >
-                          포트폴리오 보기
-                        </a>
+                          포트폴리오 다운로드
+                        </button>
                       </div>
                     )}
                     {!questions?.githubUrl && !questions?.blogUrl && !questions?.portfolioUrl && (
@@ -304,7 +352,7 @@ const Detail = () => {
                     <TextArea
                       value={q.answer}
                       readOnly={true}
-                      className="w-full h-full"
+                      className="w-full min-h-[250px] h-full"
                     />
                   )}
                 </Accordion>
