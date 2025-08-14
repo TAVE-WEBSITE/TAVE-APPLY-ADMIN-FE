@@ -5,7 +5,7 @@ import FlexBox from "@/components/Layout/FlexBox";
 import Body from "@/components/Layout/Body";
 import Tab from "@/components/Tab/Tab";
 import Accordion from "@/components/Accordion/Accordion";
-import { fetchDocumentDetail, getDocumentDetail, fetchResumeQuestions, fetchMemberInfo } from "./api";
+import { fetchDocumentDetail, getDocumentDetail, fetchResumeQuestions, fetchMemberInfo, downloadPortfolio } from "./api";
 import type { Resume, Question } from "@/types/interview";
 import TextArea from "@/components/Input/TextArea";
 import StepCounter from "@/components/StepCounter/StepCounter";
@@ -235,56 +235,43 @@ const Detail = () => {
                       <div>
                         <h4 className="font-semibold text-gray-900 mb-2">포트폴리오</h4>
                         <button 
-                          onClick={() => {
-                            const url = questions.portfolioUrl;
-                            // S3 URL에서 파일명 추출 (UUID 형식)
-                            const fileName = url.split('/').pop() || 'portfolio.pdf';
-                            
-                            // fetch로 파일을 가져와서 강제 다운로드
-                            fetch(url, {
-                              method: 'GET',
-                              headers: {
-                                'Accept': 'application/pdf',
-                              },
-                            })
-                              .then(response => {
-                                if (!response.ok) throw new Error('Network response was not ok');
-                                return response.blob();
-                              })
-                              .then(blob => {
-                                // blob을 다운로드 가능한 형태로 변환
-                                const blobUrl = window.URL.createObjectURL(blob);
-                                const downloadLink = document.createElement('a');
-                                downloadLink.href = blobUrl;
-                                downloadLink.download = fileName;
-                                downloadLink.style.display = 'none';
-                                
-                                // DOM에 추가하고 클릭
-                                document.body.appendChild(downloadLink);
-                                downloadLink.click();
-                                
-                                // 정리
-                                setTimeout(() => {
-                                  document.body.removeChild(downloadLink);
-                                  window.URL.revokeObjectURL(blobUrl);
-                                }, 100);
-                              })
-                              .catch(error => {
-                                console.error('다운로드 실패:', error);
-                                // fallback: 새 창에서 다운로드 시도
-                                const newWindow = window.open(url, '_blank');
-                                if (newWindow) {
-                                  newWindow.document.write(`
-                                    <html>
-                                      <head><title>다운로드 중...</title></head>
-                                      <body>
-                                        <p>파일이 다운로드되지 않았습니다. 
-                                        <a href="${url}" download="${fileName}">여기를 클릭하여 다운로드</a></p>
-                                      </body>
-                                    </html>
-                                  `);
-                                }
-                              });
+                          onClick={async () => {
+                            const resumeId = application?.resumeId;
+                            if (!resumeId) {
+                              setPostMessage("포트폴리오 다운로드에 실패했습니다.");
+                              setIsToastOpen(true);
+                              return;
+                            }
+
+                            try {
+
+                              const blob = await downloadPortfolio(resumeId);
+
+                              // 지원자 이름으로 파일명 생성
+                              const applicantName = applicant?.username || applicant?.name || '지원자';
+                              const fileName = `portfolio_${applicantName}.pdf`;
+                              
+                              // blob을 다운로드 가능한 형태로 변환
+                              const blobUrl = window.URL.createObjectURL(blob);
+                              const downloadLink = document.createElement('a');
+                              downloadLink.href = blobUrl;
+                              downloadLink.download = fileName;
+                              downloadLink.style.display = 'none';
+                              
+                              // DOM에 추가하고 클릭
+                              document.body.appendChild(downloadLink);
+                              downloadLink.click();
+                              
+                              // 정리
+                              setTimeout(() => {
+                                document.body.removeChild(downloadLink);
+                                window.URL.revokeObjectURL(blobUrl);
+                              }, 100);
+                            } catch (error: any) {
+                              console.error('포트폴리오 다운로드 실패:', error);
+                              setPostMessage(`포트폴리오 다운로드에 실패했습니다: ${error.message}`);
+                              setIsToastOpen(true);
+                            }
                           }}
                           className="text-blue-600 hover:text-blue-800 underline break-all cursor-pointer bg-transparent border-none p-0"
                         >
