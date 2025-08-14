@@ -87,6 +87,31 @@ export const submitFinalEvaluation = async (resumeId: string, status: "PASS" | "
   }
 };
 
+// 포트폴리오 다운로드 API
+export const downloadPortfolio = async (resumeId: string) => {
+  try {
+    const res = await axiosInstance.get(
+      `/v1/manager/resume/portfolio/${resumeId}`,
+      {
+        responseType: 'blob',
+        headers: {
+          'Accept': 'application/octet-stream',
+        },
+      }
+    );
+    
+    if (res.data instanceof Blob) {
+      return res.data;
+    } else {
+      throw new Error('응답이 Blob 형태가 아닙니다.');
+    }
+  } catch (error: any) {
+    console.error("포트폴리오 다운로드 에러:", error);
+    
+    throw error;
+  }
+};
+
 // 지원서 질문 & 답변 정보 API
 export const fetchResumeQuestions = async (resumeId: string) => {
   try {
@@ -97,14 +122,6 @@ export const fetchResumeQuestions = async (resumeId: string) => {
     const res = await axiosInstance.get(
       `/v1/member/resumes/${resumeId}/details`
     );
-    
-    console.log("=== API 응답 결과 ===");
-    console.log("전체 응답:", res.data);
-    console.log("응답 코드:", res.data?.code);
-    console.log("응답 메시지:", res.data?.message);
-    console.log("응답 결과:", res.data?.result);
-    console.log("================================");
-    
     const result = res.data?.result;
     
     // 공통 질문과 파트별 질문을 분리하여 변환
