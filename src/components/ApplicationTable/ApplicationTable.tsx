@@ -33,10 +33,10 @@ const ApplicationTable = ({
   const getFieldColor = (field: string | number) => {
     const fieldStr = String(field);
     switch (fieldStr) {
-      case "웹 프론트":
+      case "Web 프론트엔드":
       case "WEBFRONTEND":
         return "bg-blue-600";
-      case "앱 프론트":
+      case "App 프론트엔드":
       case "APPFRONTEND":
         return "bg-blue-400";
       case "백엔드":
@@ -45,7 +45,7 @@ const ApplicationTable = ({
       case "디자인":
       case "DESIGN":
         return "bg-pink-500";
-      case "데이터 분석":
+      case "데이터분석":
       case "DATAANALYSIS":
         return "bg-orange-300";
       case "딥러닝":
