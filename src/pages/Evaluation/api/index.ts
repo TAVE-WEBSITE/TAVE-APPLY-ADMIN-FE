@@ -34,7 +34,6 @@ export const getDocumentDetail = async (resumeId: string, body?: DocumentEvaluat
     // resumeEvaluation이 null인 경우 빈 결과 반환
     if (error.response?.data?.message?.includes("resumeEvaluation") && 
         error.response?.data?.message?.includes("null")) {
-      console.log("resumeEvaluation이 null이므로 빈 결과 반환");
       return {
         code: "200",
         message: "평가 데이터가 없습니다.",
@@ -115,10 +114,6 @@ export const downloadPortfolio = async (resumeId: string) => {
 // 지원서 질문 & 답변 정보 API
 export const fetchResumeQuestions = async (resumeId: string) => {
   try {
-    console.log("=== fetchResumeQuestions API 호출 ===");
-    console.log("resumeId:", resumeId);
-    console.log("API 엔드포인트:", `/v1/member/resumes/${resumeId}/details`);
-    
     const res = await axiosInstance.get(
       `/v1/member/resumes/${resumeId}/details`
     );
@@ -161,18 +156,6 @@ export const fetchResumeQuestions = async (resumeId: string) => {
       }
     };
     
-    console.log("=== 변환된 데이터 ===");
-    console.log("commonQuestions:", commonQuestions);
-    console.log("partQuestions:", partQuestions);
-    console.log("timeSlots:", result?.common?.timeSlots);
-    console.log("languageLevels:", result?.specific?.languageLevels);
-    console.log("URL 정보:", {
-      blogUrl: result?.common?.blogUrl,
-      githubUrl: result?.common?.githubUrl,
-      portfolioUrl: result?.common?.portfolioUrl
-    });
-    console.log("================================");
-    
     return {
       result: {
         commonQuestions: commonQuestions,
@@ -185,14 +168,7 @@ export const fetchResumeQuestions = async (resumeId: string) => {
       }
     };
   } catch (error: any) {
-    console.error("=== 질문&답변 조회 에러 ===");
-    console.error("resumeId:", resumeId);
-    console.error("에러 상태:", error.response?.status);
-    console.error("에러 메시지:", error.response?.data?.message);
-    console.error("에러 데이터:", error.response?.data);
-    console.error("전체 에러:", error);
-    console.error("==========================");
-    throw error;
+
   }
 };
 
@@ -287,7 +263,6 @@ export const getSheet = async () => {
     link.click();
     window.URL.revokeObjectURL(url);
     
-    console.log("면접 평가 시트 다운로드 완료:", filename);
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'response' in error) {
       const response = error.response as { data: Blob };
