@@ -13,19 +13,19 @@ import { useState } from "react";
 const tableRows = ["지원 분야", "이름", "성별", "학교", "면접 일자"];
 
 const filters: RoleType[] = [
-  "디자인",
-  "웹 프론트",
-  "앱 프론트",
-  "백엔드",
-  "데이터 분석",
-  "딥러닝",
+  "DESIGN",
+  "WEBFRONTEND",
+  "APPFRONTEND",
+  "BACKEND",
+  "DATAANALYSIS",
+  "DEEPLEARNING",
 ];
 
 const TimeTable = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const { entireList, isLoading, totalPages } = usePagination<InterviewItem>({
-    type: "면접 설정",
+    pageType: "면접 설정",
     page: currentPage - 1,
     size: 7,
   });
