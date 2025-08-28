@@ -22,24 +22,16 @@ const BANKS = [
   "씨티은행",
 ];
 
-// ISO <-> "YYYY.MM.DD HH:MM" 문자열 변환 함수 (예시)
+// "YYYY.MM.DD HH:MM" -> "2026-08-05T12:12:00" 형식 변환 함수
 function parseToISO(dateTimeStr: string): string | null {
   const regex = /^(\d{4})\.(\d{2})\.(\d{2}) (\d{2}):(\d{2})$/;
   const match = dateTimeStr.match(regex);
   if (!match) return null;
 
   const [_, yyyy, mm, dd, hh, min] = match;
-  const date = new Date(
-    Number(yyyy),
-    Number(mm) - 1,
-    Number(dd),
-    Number(hh),
-    Number(min),
-    0
-  );
-
-  if (isNaN(date.getTime())) return null;
-  return date.toISOString();
+  
+  // 2026-08-05T12:12:00 형식으로 반환
+  return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}T${hh.padStart(2, '0')}:${min.padStart(2, '0')}:00`;
 }
 
 const FinalPassSetting = () => {
