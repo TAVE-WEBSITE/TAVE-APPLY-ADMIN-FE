@@ -229,10 +229,12 @@ const DraggableItem = ({
 
   const handleKeyDown = useCallback(
     async (e: React.KeyboardEvent) => {
-      if (e.key === "Enter") {
+      // textarea 내부에서 입력 중일 때는 이벤트 전파를 막지 않음
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault(); // Enter 키의 기본 동작 방지
         await handleEdit();
       }
+      // 스페이스 바와 다른 키들은 정상적으로 작동하도록 함
     },
     [handleEdit]
   );
@@ -251,33 +253,37 @@ const DraggableItem = ({
       {...attributes}
     >
       <div className="flex items-center justify-between">
-        <div
-          className={`flex items-center rounded-lg p-4 ${
-            !isDragging && "hover:outline-2 hover:outline-blue-500"
-          } ${
-            isDragging
-              ? "cursor-grabbing outline-2 outline-blue-500"
-              : "cursor-pointer"
-          }`}
-          {...listeners}
-        >
-          <Icon type="Menu" size={20} className="mr-2" />
+        <div className="flex items-center rounded-lg p-4">
+          <div
+            className={`flex items-center ${
+              !isDragging && "hover:outline-2 hover:outline-blue-500"
+            } ${
+              isDragging
+                ? "cursor-grabbing outline-2 outline-blue-500"
+                : "cursor-grab"
+            }`}
+            {...listeners}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Icon type="Menu" size={20} className="mr-2" />
+          </div>
           <textarea
             ref={inputRef}
             readOnly={item.mode !== "focused"}
             value={inputValue}
             className={`text-gray-900 font-medium resize-none border-none outline-none bg-transparent ${
-              isDragging ? "cursor-grabbing" : ""
+              isDragging ? "cursor-grabbing" : "cursor-text"
             }`}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-                          style={{ 
-                width: `${Math.min(inputValue.length + 10, (item.textLength || 100))}ch`,
-                minHeight: '1.5rem',
-                height: '1.5rem',
-                overflow: 'hidden'
-              }}
-
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            style={{ 
+              width: `${Math.min(inputValue.length + 10, (item.textLength || 100))}ch`,
+              minHeight: '1.5rem',
+              height: '1.5rem',
+              overflow: 'hidden'
+            }}
           />
         </div>
 
