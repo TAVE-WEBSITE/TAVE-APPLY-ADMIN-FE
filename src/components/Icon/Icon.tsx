@@ -30,7 +30,8 @@ export type IconType =
   | "Email"
   | "CheckCircle"
   | "ClockCircle"
-  | "Type";
+  | "Type"
+  | "Map";
 
 interface BaseIconProps extends SVGProps<SVGSVGElement> {
   type: IconType;

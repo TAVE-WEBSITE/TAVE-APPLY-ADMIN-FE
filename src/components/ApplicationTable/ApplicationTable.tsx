@@ -28,15 +28,15 @@ const ApplicationTable = ({
   navigate,
   pageType,
 }: ApplicationTableProps) => {
-  const itemsPerPage = 7;
+  const itemsPerPage = 6;
 
   const getFieldColor = (field: string | number) => {
     const fieldStr = String(field);
     switch (fieldStr) {
-      case "웹 프론트":
+      case "Web 프론트엔드":
       case "WEBFRONTEND":
         return "bg-blue-600";
-      case "앱 프론트":
+      case "App 프론트엔드":
       case "APPFRONTEND":
         return "bg-blue-400";
       case "백엔드":
@@ -45,7 +45,7 @@ const ApplicationTable = ({
       case "디자인":
       case "DESIGN":
         return "bg-pink-500";
-      case "데이터 분석":
+      case "데이터분석":
       case "DATAANALYSIS":
         return "bg-orange-300";
       case "딥러닝":
@@ -80,10 +80,7 @@ const ApplicationTable = ({
     return gender === "MALE" ? "남" : "여";
   };
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems =
-    applications && applications.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = applications;
 
   const handlePageChange = (pageNumber: number): void => {
     setCurrentPage(pageNumber);
@@ -91,7 +88,7 @@ const ApplicationTable = ({
 
   return (
     <div className="w-full overflow-x-auto">
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden h-[580px]">
+      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden h-[656px]">
         <table className="border-separate border-spacing-0 table-auto w-full">
           <thead className="bg-white">
             <tr className="rounded-t-xl overflow-hidden">
@@ -135,40 +132,39 @@ const ApplicationTable = ({
                     />
                     <span>{getFieldDisplayName(application.fieldType || application.field)}</span>
                   </td>
-                  <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium min-w-32">
+                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium min-w-32">
                     <span>{application.name || application.username || ''}</span>
                   </td>
-                  <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium min-w-32">
+                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium min-w-32">
                     <span>{getGenderText(application.sex) || ''}</span>
                   </td>
-                  <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
                     <span>{application.school || application.university || ''}</span>
                   </td>
                   {/* Document 페이지: 지원 날짜 */}
                   {pageType === "document" && application.recruitTime && (
-                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
                       <span>{formatDateTime(application.recruitTime)}</span>
                     </td>
                   )}
                   {/* Final 페이지: 평가 완료 인원 */}
                   {pageType === "final" && application.count !== undefined && (
-                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 justify-start text-gray-700 text-base font-medium">
                       <span>{String(application.count)}명</span>
                     </td>
                   )}
                   {/* Interview 페이지: 면접 일자 */}
                   {pageType === "interview" && application.interviewDate && (
-                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
                       <span>{application.interviewDate}</span>
                     </td>
                   )}
                   {application.interviewTime && (
-                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 opacity-60 justify-start text-gray-700 text-base font-medium">
                       <span>{formatDateTime(application.interviewTime)}</span>
                     </td>
                   )}
-                  {application.status !== undefined && application.status !== null && (
-                    <td className="px-6 py-6 whitespace-nowrap border-b border-gray-200 text-sm max-w-16">
+                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 text-sm max-w-16">
                       <span
                         className={`px-2 justify-start text-base leading-5 font-semibold rounded-full
                           ${
@@ -180,9 +176,13 @@ const ApplicationTable = ({
                               ? "text-green-600 font-semibold"
                               : application.status === "HOLD"
                               ? "text-orange-500 font-semibold"
-                              : application.status === "NOTCHECKED"
+                            : application.status === "FINAL_PASS"
+                            ? "text-blue-600 font-semibold"
+                            : application.status === "FINAL_FAIL"
+                            ? "text-red-600 font-semibold"
+                            : application.status === "NOTCHECKED" || !application.status
                               ? "text-gray-600 font-semibold"
-                              : ""
+                            : "text-gray-600 font-semibold"
                           }
                           `}
                       >
@@ -191,15 +191,20 @@ const ApplicationTable = ({
                           : application.status === "FAIL"
                           ? "불합격"
                           : application.status === "PASS"
-                          ? "합격"
+                        ? "서류 합격"
                           : application.status === "HOLD"
                           ? "보류"
+                        : application.status === "FINAL_PASS"
+                        ? "최종 합격"
+                        : application.status === "FINAL_FAIL"
+                        ? "최종 탈락"
                           : application.status === "NOTCHECKED"
+                        ? "평가 진행 전"
+                        : !application.status && pageType !== "interview"
                           ? "평가 진행 전"
                           : ""}
                       </span>
                     </td>
-                  )}
                 </tr>
               );
               })

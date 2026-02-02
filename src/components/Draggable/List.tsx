@@ -33,10 +33,6 @@ const DraggableList = () => {
   // 조회된 전체 질문들
   const allQuestions = allQuestionsData?.result || [];
   
-  // 전체 질문 데이터 로깅
-  // console.log("DraggableList - 전체 질문 데이터:", allQuestions);
-  // console.log("DraggableList - 현재 questions:", questions);
-
   const handleDragEnd = useCallback(
     async (event: DragEndEvent) => {
       const { active, over } = event;

@@ -20,8 +20,8 @@ interface DashboardResponse {
 export const useDashBoard = () => {
   const fetchChartData = async (): Promise<DashboardResponse> => {
     try {
-      const res = await axiosInstance.get(`/v1/admin/dashboard`);
-      // console.log("res", res);
+      const res = await axiosInstance.get(`/v1/manager/dashboard`);
+      console.log("res", res);
       return res.data;
     } catch (error) {
       console.error(`Failed to fetch chart data`, error);
@@ -32,13 +32,21 @@ export const useDashBoard = () => {
   const genderQuery = useQuery({
     queryKey: ["chart-data", "gender"],
     queryFn: fetchChartData,
-    select: (data: DashboardResponse) => data.result.sexRatioDtos,
+    select: (data: DashboardResponse) => data.result.sexRatioDtos.map(item => ({
+      label: item.topic,
+      count: item.count,
+      ratio: item.ratio
+    })),
   });
 
   const skillQuery = useQuery({
     queryKey: ["chart-data", "skill"],
     queryFn: fetchChartData,
-    select: (data: DashboardResponse) => data.result.fieldRatioDtos,
+    select: (data: DashboardResponse) => data.result.fieldRatioDtos.map(item => ({
+      label: item.topic,
+      count: item.count,
+      ratio: item.ratio
+    })),
   });
 
   const dashboardQuery = useQuery({

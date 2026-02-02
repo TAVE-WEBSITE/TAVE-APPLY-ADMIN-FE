@@ -15,9 +15,33 @@ export const fetchDocumentDetail = async (resumeId: string, body?: DocumentEvalu
     );
     return res.data;
   } catch (error: any) {
-      console.error("에러 상태:", error.response.status);
-      console.error("에러 데이터:", error.response.data);
     throw error; 
+  }
+};
+
+// 서류 평가 조회
+export const getDocumentDetail = async (resumeId: string, body?: DocumentEvaluationBody) => {
+  try {
+    const requestBody = body || {};
+
+    const res = await axiosInstance.get(
+      `/v1/manager/resume/evaluate/${resumeId}`,
+      requestBody
+    );
+    return res.data;
+  } catch (error: any) {
+  
+    // resumeEvaluation이 null인 경우 빈 결과 반환
+    if (error.response?.data?.message?.includes("resumeEvaluation") && 
+        error.response?.data?.message?.includes("null")) {
+      return {
+        code: "200",
+        message: "평가 데이터가 없습니다.",
+        result: null
+      };
+    }
+    
+    throw error;
   }
 };
 
@@ -62,38 +86,89 @@ export const submitFinalEvaluation = async (resumeId: string, status: "PASS" | "
   }
 };
 
+// 포트폴리오 다운로드 API
+export const downloadPortfolio = async (resumeId: string) => {
+  try {
+    const res = await axiosInstance.get(
+      `/v1/manager/resume/portfolio/${resumeId}`,
+      {
+        responseType: 'blob',
+        headers: {
+          'Accept': 'application/octet-stream',
+        },
+      }
+    );
+    
+    if (res.data instanceof Blob) {
+      return res.data;
+    } else {
+      throw new Error('응답이 Blob 형태가 아닙니다.');
+    }
+  } catch (error: any) {
+    console.error("포트폴리오 다운로드 에러:", error);
+    
+    throw error;
+  }
+};
+
 // 지원서 질문 & 답변 정보 API
 export const fetchResumeQuestions = async (resumeId: string) => {
   try {
-    const allQuestions = [];
+    const res = await axiosInstance.get(
+      `/v1/member/resumes/${resumeId}/details`
+    );
+    const result = res.data?.result;
     
-    for (let page = 1; page <= 2; page++) {
-      const res = await axiosInstance.get(
-        `/v1/member/resumes/${resumeId}/questions?page=${page}`
-      );
-      const pageData = res.data?.result || [];
-      allQuestions.push(...pageData);
-    }
-    
- 
-    const transformedQuestions = allQuestions.map((q: any) => ({
+    // 공통 질문과 파트별 질문을 분리하여 변환
+    const commonQuestions = result?.common?.commonQuestions?.map((q: any) => ({
       question: q.question,
-      answer: q.answer || "답변이 없습니다."
-    }));
+      answer: q.answer || "답변이 없습니다.",
+      id: q.id,
+      fieldType: q.fieldType,
+      ordered: q.ordered,
+      answerType: q.answerType,
+      textLength: q.textLength,
+      required: q.required,
+      common: q.common
+    })) || [];
     
-    // page 1 = 파트별 질문 / [age 2 =공통 질문
-    const partQuestions = transformedQuestions.slice(0, transformedQuestions.length / 2);
-    const commonQuestions = transformedQuestions.slice(transformedQuestions.length / 2);
+    const partQuestions = result?.specific?.specificQuestions?.map((q: any) => ({
+      question: q.question,
+      answer: q.answer || "답변이 없습니다.",
+      id: q.id,
+      fieldType: q.fieldType,
+      ordered: q.ordered,
+      answerType: q.answerType,
+      textLength: q.textLength,
+      required: q.required,
+      common: q.common
+    })) || [];
     
     return {
       result: {
         commonQuestions: commonQuestions,
-        partQuestions: partQuestions
+        partQuestions: partQuestions,
+        timeSlots: result?.common?.timeSlots || [],
+        languageLevels: result?.specific?.languageLevels || [],
+        blogUrl: result?.common?.blogUrl,
+        githubUrl: result?.common?.githubUrl,
+        portfolioUrl: result?.common?.portfolioUrl
+      }
+    };
+    
+    return {
+      result: {
+        commonQuestions: commonQuestions,
+        partQuestions: partQuestions,
+        timeSlots: result?.common?.timeSlots || [],
+        languageLevels: result?.specific?.languageLevels || [],
+        blogUrl: result?.common?.blogUrl,
+        githubUrl: result?.common?.githubUrl,
+        portfolioUrl: result?.common?.portfolioUrl
       }
     };
   } catch (error: any) {
-    console.error("에러:", error);
-    throw error;
+
   }
 };
 
@@ -141,9 +216,10 @@ export const getInterviewTimeTable = async (generation: number | string) => {
   }
 };
 
+// 면접 시간표 다운로드
 export const getTimeTableForm = async () => {
   try {
-    const res = await axiosInstance.get("/v1/manager/interview-final/form", {
+    const res = await axiosInstance.get("/v1/manager/excel/interview/time-table", {
       responseType: "blob",
     });
 
@@ -155,7 +231,7 @@ export const getTimeTableForm = async () => {
 
     const disposition = res.headers["content-disposition"];
     const match = disposition?.match(/filename="?(.+)"?/);
-    const filename = match?.[1] || "면접시간표 양식.xlsx";
+    const filename = match?.[1] || "면접시간표.xlsx";
 
     link.download = decodeURIComponent(filename);
     link.click();
@@ -187,7 +263,6 @@ export const getSheet = async () => {
     link.click();
     window.URL.revokeObjectURL(url);
     
-    console.log("면접 평가 시트 다운로드 완료:", filename);
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'response' in error) {
       const response = error.response as { data: Blob };
@@ -274,5 +349,22 @@ export const getFinalInterviewEmailFind = async (): Promise<{ isBooked: boolean 
     return {
       isBooked: false,
     };
+  }
+};
+
+
+// 최종 면접 평가 제출 API
+export const submitInterviewFinalEvaluation = async (
+  interviewFinalId: string,
+  status: "FINAL_PASS" | "FINAL_FAIL"
+) => {
+  try {
+    const res = await axiosInstance.post(
+      `/v1/admin/interview-final/${interviewFinalId}?status=${status}`
+    );
+    return res.data;
+  } catch (error: any) {
+    console.error("최종 면접 평가 제출 에러:", error.response?.data || error);
+    throw error;
   }
 };

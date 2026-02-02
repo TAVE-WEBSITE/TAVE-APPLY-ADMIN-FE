@@ -5,6 +5,9 @@ export interface Pagination {
   page: number;
   size: number;
   status?: Status;
+  name?: string;
+  pageType?: string;
+  type?: string;
 }
 
 export interface InterviewTimeParams {
@@ -19,18 +22,31 @@ export const fetchList = async (
   try {
     let url = "";
     let requestParams: Record<string, any> = {};
+    let extractedPageType: string | undefined;
+    let extractedType: string | undefined;
 
     if (type === "면접 현황") {
       const { date, time } = params as InterviewTimeParams;
       url = "/v1/manager/resume/interview-time";
       requestParams = { date, time };
     } else {
-      const { page, size, status } = params as Pagination;
+      const { page, size, status, name, pageType, type: fieldType } = params as Pagination;
+      extractedPageType = pageType;
+      extractedType = fieldType;
       requestParams = { page, size };
       if (status !== undefined && status !== null) {
         requestParams.status = status;
       }
-      switch (type) {
+      if (name && name.trim() !== "") {
+        requestParams.name = name.trim();
+      }
+      if (pageType && pageType.trim() !== "") {
+        requestParams.pageType = pageType;
+      }
+      if (fieldType && fieldType.trim() !== "") {
+        requestParams.type = fieldType;
+      }
+      switch (pageType) {
         case "알림 신청":
           url = "/v1/admin/notification";
           break;
@@ -52,19 +68,12 @@ export const fetchList = async (
           url = `/v1/manager/resume/evaluate/final`;
           break;
         case "최종 면접 평가":
-          url = `/v1/manager/resume/evaluate/final`;
+          url = `/v1/admin/interview-final`;
           break;
       }
     }
 
-    console.log("=== fetchList API 요청 ===");
-    console.log("Params:", requestParams);
-    console.log("URL:", url);
-    console.log("Type:", type);
-
     const res = await axiosInstance.get(url, { params: requestParams });
-
-    console.log("응답 데이터:", res.data);
     return res.data;
   } catch (error: any) {
     console.error("전체 에러:", error);

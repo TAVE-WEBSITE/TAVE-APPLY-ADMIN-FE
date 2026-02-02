@@ -5,21 +5,29 @@ import Button from "@/components/Button/Button";
 import FlexBox from "@/components/Layout/FlexBox";
 import ToastMessage from "@/components/Modal/ToastMessage";
 import { submitFinalEvaluation } from "../api";
+import { useFinalInterviewEvaluation } from "../api/hooks";
 
 interface DecisionTabProps {
   message: string;
   finalEvaluation?: any; // 운영진 평가 데이터
   activeTab: string; // 현재 활성 탭
   resumeId?: string; // resumeId
+  userName?:string;
+  type:"document" | "interview";
 }
 
-const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId }: DecisionTabProps) => {
+const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId, userName,type }: DecisionTabProps) => {
   const navigate = useNavigate();
   const [isPassed, setIsPassed] = useState<boolean | null>(null);
   const isDisabled = typeof isPassed !== "boolean";
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [postMessage, setPostMessage] = useState("");
 
+  // 면접 평가 데이터 콘솔 출력
+  useEffect(() => {
+  }, [type, resumeId, userName, finalEvaluation, activeTab]);
+
+  //최종 서류 평가?
   const { mutate, isPending, isError } = useMutation({
     mutationKey: ["final-evaluation", "submit"],
     mutationFn: (status: "PASS" | "FAIL") => {
@@ -49,7 +57,26 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId }: Decision
     if (isPassed === null) return;
     
     const status = isPassed ? "PASS" : "FAIL";
+    console.log("서류 평가 제출 - status:", status);
     mutate(status);
+  };
+
+  //최종 면접 평가
+  const {
+    interviewFinalMutate,
+    isInterviewFinalPending,
+    isInterviewFinalError,
+    interviewFinalPostMessage,
+    isInterviewFinalToastOpen,
+    setIsInterviewFinalToastOpen,
+  } = useFinalInterviewEvaluation(resumeId);
+
+  const postInterviewDecision = () => {
+    if (isPassed === null) return;
+    const status = isPassed ? "FINAL_PASS" : "FINAL_FAIL";
+    console.log("면접 평가 제출 - status:", status);
+    console.log("면접 평가 제출 - resumeId:", resumeId);
+    interviewFinalMutate(status);
   };
 
   return (
@@ -58,7 +85,7 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId }: Decision
         <div className="w-full flex flex-col gap-4">
           <div className="flex gap-4 items-center">
             <div className="px-3 py-1 bg-gray-200 rounded-md flex items-center justify-center font-bold text-xl text-gray-500">1</div>
-            <div className="w-full"><span className="font-bold text-blue-700">장진영</span>님의 점수를 <span className="font-bold text-blue-700">10점 만점</span>으로 입력해주세요</div>
+            <div className="w-full"><span className="font-bold text-blue-700">{userName}</span>님의 점수를 <span className="font-bold text-blue-700">10점 만점</span>으로 입력해주세요</div>
           </div>
        
         <div className="w-full border border-gray-300 rounded-lg font-normal bg-blue-50 p-4">
@@ -93,28 +120,24 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId }: Decision
             <div className="px-3 py-1 bg-gray-200 rounded-md flex items-center justify-center font-bold text-xl text-gray-500">2</div>
             <div className="w-full"><span className="text-blue-700">점수를 뒷받침하는 의견</span>을 간략하게 작성해주세요.</div>
           </div>
-          <div className="w-full border border-gray-300 rounded-lg font-normal bg-white p-4">
-           
+
           {/* 개별 평가*/}
           {finalEvaluation?.evaluations && finalEvaluation.evaluations.length > 0 && (
-            <div className="w-full p-4">
-              <div className="space-y-3">
-                {finalEvaluation.evaluations.map((evaluation: any, index: number) => (
-                    <div key={index} className="grid grid-cols-2 gap-4 items-center mb-1 font-medium text-gray-700">
-                      <div className="flex flex-col gap-4">
-                        <span className="text-gray-500 font-medium">{evaluation.username}</span>
-                        <span className="text-gray-700">{evaluation.opinion}</span>
-                      </div>
-                    </div>
-                  
-                ))}
-              </div>
+            <div className="flex flex-col gap-4">
+              {finalEvaluation.evaluations.map((evaluation: any, index: number) => (
+                <div key={index} className="border border-gray-300 rounded-lg font-normal bg-white p-4">
+                  <div className="flex flex-col gap-2">
+                    <span className="text-gray-500 font-medium">{evaluation.username}</span>
+                    <span className="text-gray-700">{evaluation.opinion}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
           
         </div>
-        </div>
+
         
       )}
 
@@ -125,7 +148,7 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId }: Decision
         >
           
           <p className="font-semibold">
-            <span className="font-bold text-blue-700">장진영</span>님의 {message}
+            <span className="font-bold text-blue-700">{userName}</span>님의 {message}
           </p>
           <FlexBox className="gap-4 font-semibold">
             <button
@@ -152,8 +175,8 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId }: Decision
           <Button
             disabled={isDisabled}
             className="w-full"
-            onClick={postDecision}
-            isPending={isPending}
+            onClick={type === "document" ? postDecision : postInterviewDecision}
+            isPending={type === "document" ? isPending : isInterviewFinalPending}
           >
             완료
           </Button>
@@ -161,10 +184,10 @@ const DecisionTab = ({ message, finalEvaluation, activeTab, resumeId }: Decision
       )}
 
       <ToastMessage
-        message={postMessage}
-        isOpen={isToastOpen}
-        setIsOpen={setIsToastOpen}
-        isError={isError}
+        message={type === "document" ? postMessage : interviewFinalPostMessage}
+        isOpen={type === "document" ? isToastOpen : isInterviewFinalToastOpen}
+        setIsOpen={type === "document" ? setIsToastOpen : setIsInterviewFinalToastOpen}
+        isError={type === "document" ? isError : isInterviewFinalError}
       />
     </FlexBox>
   );

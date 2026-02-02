@@ -13,20 +13,20 @@ import { useState } from "react";
 const tableRows = ["지원 분야", "이름", "성별", "학교", "면접 일자"];
 
 const filters: RoleType[] = [
-  "디자인",
-  "웹 프론트",
-  "앱 프론트",
-  "백엔드",
-  "데이터 분석",
-  "딥러닝",
+  "DESIGN",
+  "WEBFRONTEND",
+  "APPFRONTEND",
+  "BACKEND",
+  "DATAANALYSIS",
+  "DEEPLEARNING",
 ];
 
 const TimeTable = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const { entireList, isLoading, totalPages } = usePagination<InterviewItem>({
-    type: "면접 설정",
-    page: currentPage,
+    pageType: "면접 설정",
+    page: currentPage - 1,
     size: 7,
   });
 
@@ -37,9 +37,6 @@ const TimeTable = () => {
     setSearchInput,
     handleFilter,
   } = useFilter<InterviewItem>(entireList);
-
-  console.log("전체 리스트:", entireList);
-
 
   return (
     <div className="flex flex-col gap-4">
@@ -75,8 +72,9 @@ const TimeTable = () => {
         setCurrentPage={setCurrentPage}
         rows={tableRows}
         isLoading={isLoading}
-        baseUrl="/setting/interview"
-        navigate={navigate}
+        // 아래 두 줄 주석처리 해제 시 상세 조회로 이동
+        // baseUrl="/setting/interview"
+        // navigate={navigate}
         pageType="interview"
       />
     </div>

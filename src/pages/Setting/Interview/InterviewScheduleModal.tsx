@@ -1,5 +1,4 @@
 import { useState } from "react";
-import DatePicker from "@/components/DatePicker/DatePicker";
 import FlexBox from "@/components/Layout/FlexBox";
 import Modal from "@/components/Modal/Modal";
 import Input from "@/components/Input/Input";
@@ -10,31 +9,32 @@ import ToastMessage from "@/components/Modal/ToastMessage";
 
 const options = ["15분", "20분", "25분", "30분"];
 
-const InterviewScheduleModal = ({
-  ref,
-}: {
-  ref: React.RefObject<HTMLDialogElement | null>;
-}) => {
-  const [interviewStartDate, setInterviewStartDate] = useState("");
-  const [interviewEndDate, setInterviewEndDate] = useState("");
+interface InterviewScheduleModalProps {
+  dialogRef: React.RefObject<HTMLDialogElement | null>;
+  onConfirm: () => void;
+  isPending?: boolean;
+  confirmText?: string;
+  title?: string;
+}
 
+const InterviewScheduleModal = ({
+  dialogRef,
+  onConfirm,
+  isPending = false,
+  confirmText = "저장",
+  title = "면접 시간 설정"
+}: InterviewScheduleModalProps) => {
   const [selected, setSelected] = useState("15분");
   const [open, setOpen] = useState(false);
 
   const [interviewStartTime, setInterviewStartTime] = useState("");
   const [interviewEndTime, setInterviewEndTime] = useState("");
 
-
   const [isLoading, setIsLoading] = useState(false);
   const [isToastOpen, setIsToastOpen] = useState(false);
 
   const updateInterviewSchedule = async () => {
     // 입력값 검증
-    if (!interviewStartDate || !interviewEndDate) {
-      alert("면접 진행 일자를 선택해주세요.");
-      return;
-    }
-
     if (!interviewStartTime || !interviewEndTime) {
       alert("면접 시작/종료 시간을 입력해주세요.");
       return;
@@ -43,11 +43,9 @@ const InterviewScheduleModal = ({
     const progressTime = selected.replace("분", "");
     
     const payload = {
-      startDate: interviewStartDate,
-      endDate: interviewEndDate,
-      progressTime: progressTime,
       startTime: interviewStartTime,
-      endTime: interviewEndTime
+      endTime: interviewEndTime,
+      progressTime: progressTime
     };
 
     console.log("면접 시간 설정:", payload);
@@ -63,8 +61,8 @@ const InterviewScheduleModal = ({
         
         // 성공 후 모달 닫기
         setTimeout(() => {
-          if (ref && 'current' in ref && ref.current) {
-            ref.current.close();
+          if (dialogRef && 'current' in dialogRef && dialogRef.current) {
+            dialogRef.current.close();
           }
         }, 2000);
       } else {
@@ -81,10 +79,10 @@ const InterviewScheduleModal = ({
 
   return (
     <Modal
-      dialogRef={ref}
-      title="면접 시간 설정"
+      dialogRef={dialogRef}
+      title={title}
       buttonCount={2}
-      confirmText="등록"
+      confirmText={confirmText}
       isPending={isLoading}
       onConfirm={updateInterviewSchedule}
       width=""
@@ -92,32 +90,9 @@ const InterviewScheduleModal = ({
       <FlexBox direction="col" className="p-2 gap-4">
         {/* Step 1 */}
         <div className="w-full">
-          <FlexBox className="gap-2 mb-2 text-gray-900">
-            <div className="bg-gray-200 py-2 px-4 rounded-full font-semibold min-w-[32px] text-center">
-              1
-            </div>
-            <h3 className="font-semibold text-base">면접 진행 일자</h3>
-          </FlexBox>
-
-          <div className="pl-12">
-            <FlexBox className="gap-2 w-full">
-              <DatePicker
-                value={interviewStartDate}
-                setValue={setInterviewStartDate}
-              />
-              <DatePicker
-                value={interviewEndDate}
-                setValue={setInterviewEndDate}
-              />
-            </FlexBox>
-          </div>
-        </div>
-
-        {/* Step 2 */}
-        <div className="w-full">
           <FlexBox className="gap-2 text-gray-900">
             <div className="bg-gray-200 py-2 px-4 rounded-full font-semibold min-w-[32px] text-center">
-              2
+              1
             </div>
             <h3 className="font-semibold text-base">타임별 진행 시간</h3>
           </FlexBox>
@@ -161,23 +136,23 @@ const InterviewScheduleModal = ({
             </div>
           </div>
         </div>
-        {/* Step 3 */}
+
+        {/* Step 2 */}
         <div className="w-full">
           <FlexBox className="gap-2 text-gray-900">
             <div className="bg-gray-200 py-2 px-4 rounded-full font-semibold min-w-[32px] text-center">
-              3
+              2
             </div>
             <h3 className="font-semibold text-base">면접 시간대</h3>
           </FlexBox>
 
-                    <div className="pl-12 w-full">
+          <div className="pl-12 w-full">
             <div className="w-full flex flex-col gap-4">
               <Input.WithLabel 
                 label="면접 시작 시간" 
                 iconType="Calendar"
                 value={interviewStartTime}
                 onChange={(e) => {
-                
                   setInterviewStartTime(e.target.value);
                 }}
                 placeholder="24시간 기준으로 작성 (예시 - 12:00)"
@@ -190,7 +165,6 @@ const InterviewScheduleModal = ({
                 iconType="Calendar"
                 value={interviewEndTime}
                 onChange={(e) => {
-                 
                   setInterviewEndTime(e.target.value);
                 }}
                 placeholder="24시간 기준으로 작성 (예시 - 12:00)"
@@ -206,8 +180,8 @@ const InterviewScheduleModal = ({
         isOpen={isToastOpen}
         setIsOpen={(open) => {
           setIsToastOpen(open);
-          if (!open && ref && 'current' in ref && ref.current) {
-            ref.current.close();
+          if (!open && dialogRef && 'current' in dialogRef && dialogRef.current) {
+            dialogRef.current.close();
           }
         }}
       />

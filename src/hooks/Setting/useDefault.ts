@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import type { SettingDefaultResponse } from "@/pages/Setting/api/types";
 import { fetchSettingDefault } from "@/pages/Setting/api/Default";
 import { postSettingDefault } from "@/pages/Setting/api/Default";
-import { formatDateOnly } from "@/utils/formatDate";
+import { formatDateOnly, formatDateTime } from "@/utils/formatDate";
 
 export const useDefaultSetting = () => {
   const { data, isLoading, error } = useQuery<SettingDefaultResponse>({
@@ -34,34 +34,46 @@ export const useDefaultSetting = () => {
 
   useEffect(() => {
     if (!data) return;
-    setNextGeneration(data.result.generation || "");
-    setDocumentStartDate(formatDateOnly(data.result.documentRecruitStartDate));
-    setDocumentEndDate(formatDateOnly(data.result.documentRecruitEndDate));
+    setNextGeneration(data?.result?.generation || "");
+    setDocumentStartDate(formatDateOnly(data?.result?.documentRecruitStartDate));
+    setDocumentEndDate(formatDateOnly(data?.result?.documentRecruitEndDate));
     setDocumentResultDateTime(
-      formatDateOnly(data.result.documentAnnouncementDate)
+      formatDateTime(data?.result?.documentAnnouncementDate)
     );
-    setInterviewStartDate(formatDateOnly(data.result.interviewStartDate));
-    setInterviewEndDate(formatDateOnly(data.result.interviewEndDate));
-    setFinalResultDateTime(formatDateOnly(data.result.lastAnnouncementDate));
-    setHomepageOpenStartDate(formatDateOnly(data.result.accessStartDate));
-    setHomepageOpenEndDate(formatDateOnly(data.result.accessEndDate));
+    setInterviewStartDate(formatDateOnly(data?.result?.interviewStartDate));
+    setInterviewEndDate(formatDateOnly(data?.result?.interviewEndDate));
+    setFinalResultDateTime(formatDateTime(data?.result?.lastAnnouncementDate));
+    setHomepageOpenStartDate(formatDateOnly(data?.result?.accessStartDate));
+    setHomepageOpenEndDate(formatDateOnly(data?.result?.accessEndDate));
   }, [data]);
 
   const updateDefaultSetting = () => {
     const toLocalDateTime = (date: string, time: string) =>
       date.replace(/\./g, "-") + "T" + time;
 
+    // documentResultDateTime과 finalResultDateTime에서 시간 추출
+    const extractTimeFromDateTime = (dateTime: string) => {
+      const timeMatch = dateTime.match(/(\d{2}):(\d{2})$/);
+      if (timeMatch) {
+        return `${timeMatch[1]}:${timeMatch[2]}:00`;
+      }
+      return "10:00:00"; // 기본값
+    };
+
     mutate({
       generation: nextGeneration,
       documentRecruitStartDate: toLocalDateTime(documentStartDate, "00:00:00"),
       documentRecruitEndDate: toLocalDateTime(documentEndDate, "23:59:59"),
       documentAnnouncementDate: toLocalDateTime(
-        documentResultDateTime,
-        "10:00:00"
+        documentResultDateTime.split(" ")[0].replace(/\./g, "-"),
+        extractTimeFromDateTime(documentResultDateTime)
       ),
       interviewStartDate: toLocalDateTime(interviewStartDate, "09:00:00"),
       interviewEndDate: toLocalDateTime(interviewEndDate, "18:00:00"),
-      lastAnnouncementDate: toLocalDateTime(finalResultDateTime, "10:00:00"),
+      lastAnnouncementDate: toLocalDateTime(
+        finalResultDateTime.split(" ")[0].replace(/\./g, "-"),
+        extractTimeFromDateTime(finalResultDateTime)
+      ),
       accessStartDate: toLocalDateTime(homepageOpenStartDate, "00:00:00"),
       accessEndDate: toLocalDateTime(homepageOpenEndDate, "23:59:59"),
     });

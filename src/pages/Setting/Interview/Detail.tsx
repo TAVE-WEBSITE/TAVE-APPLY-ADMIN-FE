@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import FlexBox from "@/components/Layout/FlexBox";
@@ -7,6 +7,7 @@ import Tab from "@/components/Tab/Tab";
 import Accordion from "@/components/Accordion/Accordion";
 import { fetchMemberInfo, fetchResumeQuestions } from "@/pages/Evaluation/api";
 import { postInterviewDate } from "@/pages/Setting/api/Interview";
+import { axiosInstance } from "@/api/axiosInstance";
 import type { Resume } from "@/types/interview";
 import TextArea from "@/components/Input/TextArea";
 import TimePicker from "@/components/DatePicker/TimePicker";
@@ -14,6 +15,16 @@ import Button from "@/components/Button/Button";
 import ToastMessage from "@/components/Modal/ToastMessage";
 import Icon from "@/components/Icon/Icon";
 import { formatMMDD, formatHHMin } from "@/utils/formatDate";
+
+// 이 페이지에서만 사용할 날짜 포맷 함수 (요일 포함, 괄호 없음)
+const formatDateWithDay = (isoString: string) => {
+  const date = new Date(isoString);
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  const day = dayNames[date.getDay()];
+  return `${mm}.${dd} ${day}`;
+};
 import { useMutation } from "@tanstack/react-query";
 
 const tabCategories = ["파트별 질문", "공통 질문"];
@@ -27,9 +38,9 @@ const InterviewSettingDetail = () => {
 
   // 지원자 정보 조회
   const { data: memberInfo, isLoading: memberInfoLoading } = useQuery({
-    queryKey: ["member-info", id],
-    queryFn: () => fetchMemberInfo(id || ""),
-    enabled: !!id,
+    queryKey: ["member-info", application?.memberId],
+    queryFn: () => fetchMemberInfo(application?.memberId?.toString() || ""),
+    enabled: !!application?.memberId,
   });
 
   // 지원서 질문 정보 조회
@@ -40,20 +51,46 @@ const InterviewSettingDetail = () => {
   });
 
   const [activeTab, setActiveTab] = useState("공통 질문");
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDateTime, setSelectedDateTime] = useState("");
   const [isToastOpen, setIsToastOpen] = useState(false);
 
-  // 면접 일자 선택을 위한 샘플 데이터
-  const schedules = [
-    "2025-11-20T13:00:00.96078",
-    "2025-11-20T13:30:00.96078",
-    "2025-11-20T14:00:00.96078",
-    "2025-11-20T14:30:00.96078",
-    "2025-11-20T15:00:00.96078",
-    "2025-11-20T15:30:00.96078",
-    "2025-11-20T16:00:00.96078",
-    "2025-11-20T16:30:00.96078",
-  ];
+  // 전체 면접 날짜+시간 조회
+  const { data: interviewTimeConfig, isLoading: interviewTimeLoading } = useQuery({
+    queryKey: ["interview-time-config"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/v1/member/config/interview-time");
+      return res.data;
+    },
+  });
+
+  // 면접 일자 선택을 위한 데이터 - API에서 가져온 데이터 사용
+  const schedules = useMemo(() => {
+    if (!interviewTimeConfig?.result) return [];
+    
+    return interviewTimeConfig.result.map((item: any) => item.time);
+  }, [interviewTimeConfig]);
+
+  // 날짜별로 그룹화된 시간 데이터
+  const groupedSchedules = useMemo(() => {
+    if (!schedules.length) return [];
+    
+    const grouped: Record<string, string[]> = {};
+    
+    schedules.forEach((timeStr: string) => {
+      const date = new Date(timeStr);
+      const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+      
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey].push(timeStr);
+    });
+    
+    return Object.entries(grouped).map(([date, times]) => ({
+      date,
+      times: times.sort() // 시간순 정렬
+    }));
+  }, [schedules]);
 
   // 면접 일자 업데이트 mutation
   const {
@@ -73,7 +110,7 @@ const InterviewSettingDetail = () => {
   });
 
   const handleUpdateInterviewData = () => {
-    mutate({ selectedDate });
+    mutate({ selectedDate: selectedDateTime });
   };
 
   // 지원자 기본 정보는 API에서 가져온 데이터 우선 사용, 없으면 state에서 가져오기
@@ -103,21 +140,7 @@ const InterviewSettingDetail = () => {
     }
   };
 
-  const isLoading = memberInfoLoading || questionsLoading;
-
-  // 응답 데이터 로깅
-  console.log("=== 면접 설정 상세 페이지 데이터 ===");
-  console.log("URL 파라미터 id:", id);
-  console.log("State application:", application);
-  console.log("지원자 정보 API 응답:", memberInfo);
-  console.log("질문 정보 API 응답:", resumeQuestions);
-  console.log("가공된 지원자 정보:", applicant);
-  console.log("가공된 질문 정보:", questions);
-  console.log("공통 질문:", commonQuestions);
-  console.log("파트별 질문:", partQuestions);
-  console.log("로딩 상태:", { memberInfoLoading, questionsLoading, isLoading });
-  console.log("=============================");
-
+  const isLoading = memberInfoLoading || questionsLoading || interviewTimeLoading;
   return (
     <div className="text-white">
       <FlexBox className="gap-8 px-16 pb-8 items-start" direction="col">
@@ -169,12 +192,12 @@ const InterviewSettingDetail = () => {
                 {commonQuestions.length > 0 ? (
                   commonQuestions.map((q: any, index: number) => (
                     <Accordion key={index} title={q.question} className="mb-2">
-                      <TextArea
+                  <TextArea
                         value={q.answer || "답변이 없습니다."}
-                        readOnly={true}
+                    readOnly={true}
                         className="w-full"
-                      />
-                    </Accordion>
+                  />
+                </Accordion>
                   ))
                 ) : (
                   <div className="text-gray-500 text-center py-8">
@@ -188,12 +211,12 @@ const InterviewSettingDetail = () => {
                 {partQuestions.length > 0 ? (
                   partQuestions.map((q: any, index: number) => (
                     <Accordion key={index} title={q.question} className="mb-2">
-                      <TextArea
+                    <TextArea
                         value={q.answer || "답변이 없습니다."}
-                        readOnly={true}
+                      readOnly={true}
                         className="w-full"
-                      />
-                    </Accordion>
+                    />
+                </Accordion>
                   ))
                 ) : (
                   <div className="text-gray-500 text-center py-8">
@@ -213,17 +236,17 @@ const InterviewSettingDetail = () => {
             <FlexBox direction="col" className="gap-4">
               <div className="w-full border-t border-gray-300 mt-6"></div>
               <TimePicker>
-                {Array.from({ length: 4 }, (_, index) => (
+                {groupedSchedules.map((group, index) => (
                   <TimePicker.DateRow
-                    key={index}
-                    date={formatMMDD(schedules[0])}
+                    key={group.date}
+                    date={formatDateWithDay(group.date)}
                   >
-                    {schedules.map((timeSlot: string, timeIndex: number) => (
+                    {group.times.map((timeSlot: string, timeIndex: number) => (
                       <TimePicker.TimeSlotButton
                         key={timeSlot + timeIndex}
                         time={formatHHMin(timeSlot)}
-                        isSelected={selectedDate === formatHHMin(timeSlot)}
-                        onClick={() => setSelectedDate(formatHHMin(timeSlot))}
+                        isSelected={selectedDateTime === timeSlot}
+                        onClick={() => setSelectedDateTime(timeSlot)}
                       />
                     ))}
                   </TimePicker.DateRow>

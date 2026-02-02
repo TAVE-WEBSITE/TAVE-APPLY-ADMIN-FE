@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import FlexBox from "@/components/Layout/FlexBox";
 import Body from "@/components/Layout/Body";
 import Tab from "@/components/Tab/Tab";
 import Accordion from "@/components/Accordion/Accordion";
-import { fetchDocumentDetail, fetchResumeQuestions, fetchMemberInfo } from "./api";
+import { fetchDocumentDetail, getDocumentDetail, fetchResumeQuestions, fetchMemberInfo, downloadPortfolio } from "./api";
 import type { Resume, Question } from "@/types/interview";
 import TextArea from "@/components/Input/TextArea";
 import StepCounter from "@/components/StepCounter/StepCounter";
@@ -43,14 +43,40 @@ const Detail = () => {
     enabled: !!id && !!application?.resumeId, // id와 resumeId가 있을 때만 쿼리 실행
   });
 
+  // 기존 평가 데이터 조회
+  const { data: existingEvaluation, isLoading: evaluationLoading } = useQuery({
+    queryKey: ["evaluation", "existing", application?.resumeId],
+    queryFn: () => {
+      const resumeId = application?.resumeId;
+      return getDocumentDetail(resumeId);
+    },
+    enabled: !!application?.resumeId, // resumeId가 있을 때만 쿼리 실행
+  });
+
   const [activeTab, setActiveTab] = useState("공통 질문");
   const [postMessage, setPostMessage] = useState("");
   const [isToastOpen, setIsToastOpen] = useState(false);
+  const [isScoreError, setIsScoreError] = useState(false);
 
   const [score, setScore] = useState("");
   const [opinion, setOpinion] = useState("");
 
-  const isLoading = memberInfoLoading || questionsLoading;
+  const isLoading = memberInfoLoading || questionsLoading || evaluationLoading;
+
+
+  // 기존 평가 데이터가 있으면 input에 설정
+  useEffect(() => {
+    if (existingEvaluation?.result) {
+      
+      const { score: existingScore, opinion: existingOpinion } = existingEvaluation.result;
+      if (existingScore !== undefined) {
+        setScore(existingScore.toString());
+      }
+      if (existingOpinion) {
+        setOpinion(existingOpinion);
+      }
+    }
+  }, [existingEvaluation]);
 
   const questions = resumeQuestions?.result;
   const commonQuestions = questions?.commonQuestions || [];
@@ -71,8 +97,14 @@ const Detail = () => {
       return fetchDocumentDetail(application?.resumeId || id!, requestBody);
     },
     onSuccess: (response) => {
-      setPostMessage(response.message || "평가가 성공적으로 제출되었습니다.");
+      const applicantName = applicant?.name || applicant?.username || "지원자";
+      setPostMessage(`${applicantName}님의 서류 평가가 완료되었습니다`);
       setIsToastOpen(true);
+      
+      // 2초 후 서류 평가 페이지로 리다이렉트
+      setTimeout(() => {
+        navigate("/evaluation/document");
+      }, 2000);
     },
     onError: (error: any) => {
       setPostMessage(error.response?.data?.message || "평가 제출에 실패했습니다.");
@@ -161,10 +193,99 @@ const Detail = () => {
                   <TextArea
                     value={q.answer}
                     readOnly={true}
-                    className="w-full h-full"
+                    className="w-full min-h-[120px]"
                   />
                 </Accordion>
               ))}
+            {applicant &&
+              !isLoading &&
+              activeTab === "공통 질문" && (
+                <Accordion
+                  title="아래의 목록 중 소유하신 것이 있다면 자유롭게 첨부해주세요 :)"
+                  className="w-full"
+                >
+                  <div className="space-y-4">
+                    {questions?.githubUrl && (
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">GitHub</h4>
+                        <a 
+                          href={questions.githubUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline break-all"
+                        >
+                          {questions.githubUrl}
+                        </a>
+                      </div>
+                    )}
+                    {questions?.blogUrl && (
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">블로그</h4>
+                        <a 
+                          href={questions.blogUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline break-all"
+                        >
+                          {questions.blogUrl}
+                        </a>
+                      </div>
+                    )}
+                    {questions?.portfolioUrl && (
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">포트폴리오</h4>
+                        <button 
+                          onClick={async () => {
+                            const resumeId = application?.resumeId;
+                            if (!resumeId) {
+                              setPostMessage("포트폴리오 다운로드에 실패했습니다.");
+                              setIsToastOpen(true);
+                              return;
+                            }
+
+                            try {
+
+                              const blob = await downloadPortfolio(resumeId);
+
+                              // 지원자 이름으로 파일명 생성
+                              const applicantName = applicant?.username || applicant?.name || '지원자';
+                              const fileName = `portfolio_${applicantName}.pdf`;
+                              
+                              // blob을 다운로드 가능한 형태로 변환
+                              const blobUrl = window.URL.createObjectURL(blob);
+                              const downloadLink = document.createElement('a');
+                              downloadLink.href = blobUrl;
+                              downloadLink.download = fileName;
+                              downloadLink.style.display = 'none';
+                              
+                              // DOM에 추가하고 클릭
+                              document.body.appendChild(downloadLink);
+                              downloadLink.click();
+                              
+                              // 정리
+                              setTimeout(() => {
+                                document.body.removeChild(downloadLink);
+                                window.URL.revokeObjectURL(blobUrl);
+                              }, 100);
+                            } catch (error: any) {
+                              console.error('포트폴리오 다운로드 실패:', error);
+                              setPostMessage(`포트폴리오 다운로드에 실패했습니다: ${error.message}`);
+                              setIsToastOpen(true);
+                            }
+                          }}
+                          className="text-blue-600 hover:text-blue-800 underline break-all cursor-pointer bg-transparent border-none p-0"
+                        >
+                          포트폴리오 다운로드
+                        </button>
+                      </div>
+                    )}
+                    {!questions?.githubUrl && !questions?.blogUrl && !questions?.portfolioUrl && (
+                      <p className="text-gray-500">첨부된 링크가 없습니다.</p>
+                    )}
+                  </div>
+                </Accordion>
+              )}
+              {}
             {applicant &&
               !isLoading &&
               activeTab === "공통 질문" &&
@@ -181,24 +302,33 @@ const Detail = () => {
               partQuestions.map((q: Question, index: number) => (
                 <Accordion
                   key={q.question}
-                  title={
-                    index === 0 ? (application?.name || '') + q.question : q.question
-                  }
+                  title={q.question}
                   className="w-full"
                 >
-                  {index === 0 ? (
-                    <StepCounter
-                      title="Javascript"
-                      currentStep={2}
-                      setCurrentStep={() => {}}
-                      maxStep={5}
-                      stepLabels={["입문", "초급", "중급", "고급", "전문가"]}
-                    />
+                  {index === 0 && questions?.languageLevels && questions.languageLevels.length > 0 ? (
+                    <div className="space-y-4">
+                      {/* 언어 레벨 정보 */}
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">언어 레벨</h4>
+                        <div className="space-y-4">
+                          {questions.languageLevels.map((lang: any, langIndex: number) => (
+                            <StepCounter
+                              key={langIndex}
+                              title={lang.language}
+                              currentStep={lang.level}
+                              setCurrentStep={() => {}}
+                              maxStep={5}
+                              stepLabels={["입문", "초급", "중급", "고급", "전문가"]}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   ) : (
                     <TextArea
                       value={q.answer}
                       readOnly={true}
-                      className="w-full h-full"
+                      className="w-full min-h-[250px] h-full"
                     />
                   )}
                 </Accordion>
@@ -235,7 +365,17 @@ const Detail = () => {
                       className="w-full"
                       placeholder="점수를 입력해주세요"
                       value={score}
-                      onChange={(e) => setScore(e.target.value)}
+                      onChange={(e) => {
+                        const value = Number(e.target.value);
+                        if (value > 10) {
+                          setPostMessage("10점이하로 평가해주세요");
+                          setIsToastOpen(true);
+                          setIsScoreError(true);
+                          return;
+                        }
+                        setScore(e.target.value);
+                        setIsScoreError(false);
+                      }}
                     />
                   </div>
                 </FlexBox>
@@ -258,8 +398,8 @@ const Detail = () => {
 
                     <TextArea
                       className="w-full h-36"
-                      maxLength={50}
-                      placeholder="50자 이내로 입력해주세요"
+                      maxLength={100}
+                      placeholder="100자 이내로 입력해주세요"
                       value={opinion}
                       onChange={(e) => setOpinion(e.target.value)}
                     />
@@ -280,7 +420,7 @@ const Detail = () => {
           isOpen={isToastOpen}
           message={postMessage}
           setIsOpen={setIsToastOpen}
-          isError={isError}
+          isError={isError || isScoreError}
         />
       </Body>
     </div>

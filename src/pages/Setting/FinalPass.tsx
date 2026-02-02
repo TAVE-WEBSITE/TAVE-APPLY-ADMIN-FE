@@ -22,24 +22,16 @@ const BANKS = [
   "씨티은행",
 ];
 
-// ISO <-> "YYYY.MM.DD HH:MM" 문자열 변환 함수 (예시)
+// "YYYY.MM.DD HH:MM" -> "2026-08-05T12:12:00" 형식 변환 함수
 function parseToISO(dateTimeStr: string): string | null {
   const regex = /^(\d{4})\.(\d{2})\.(\d{2}) (\d{2}):(\d{2})$/;
   const match = dateTimeStr.match(regex);
   if (!match) return null;
 
   const [_, yyyy, mm, dd, hh, min] = match;
-  const date = new Date(
-    Number(yyyy),
-    Number(mm) - 1,
-    Number(dd),
-    Number(hh),
-    Number(min),
-    0
-  );
-
-  if (isNaN(date.getTime())) return null;
-  return date.toISOString();
+  
+  // 2026-08-05T12:12:00 형식으로 반환
+  return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}T${hh.padStart(2, '0')}:${min.padStart(2, '0')}:00`;
 }
 
 const FinalPassSetting = () => {
@@ -80,18 +72,27 @@ const FinalPassSetting = () => {
   const [otDeadlineInput, setOtDeadlineInput] = useState("");
 
   useEffect(() => {
-    if (feeDeadline) setFeeDeadlineInput(formatDateTime(feeDeadline));
-    else setFeeDeadlineInput("");
+    if (feeDeadline) {
+      setFeeDeadlineInput(formatDateTime(feeDeadline));
+    } else {
+      setFeeDeadlineInput("");
+    }
   }, [feeDeadline]);
 
   useEffect(() => {
-    if (surveyDeadline) setSurveyDeadlineInput(formatDateTime(surveyDeadline));
-    else setSurveyDeadlineInput("");
+    if (surveyDeadline) {
+      setSurveyDeadlineInput(formatDateTime(surveyDeadline));
+    } else {
+      setSurveyDeadlineInput("");
+    }
   }, [surveyDeadline]);
 
   useEffect(() => {
-    if (otDeadline) setOtDeadlineInput(formatDateTime(otDeadline));
-    else setOtDeadlineInput("");
+    if (otDeadline) {
+      setOtDeadlineInput(formatDateTime(otDeadline));
+    } else {
+      setOtDeadlineInput("");
+    }
   }, [otDeadline]);
 
   const [isPending, setIsPending] = useState(false);
@@ -111,6 +112,12 @@ const FinalPassSetting = () => {
     setTimeout(() => {
       setIsToastOpen(true);
       setIsPending(false);
+      // API 등록 성공 시 2초 후 새로고침
+      if (!isError) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
     }, 1000);
   };
 
@@ -147,6 +154,13 @@ const FinalPassSetting = () => {
         <h1 className="font-bold text-4xl">최종 합격 안내 설정</h1>
       </FlexBox>
 
+      {isLoading && (
+        <div className="text-center py-8">
+          <p className="text-gray-600">설정 데이터를 불러오는 중...</p>
+        </div>
+      )}
+
+      {!isLoading && (
       <Body>
         <FlexBox direction="col" className="justify-center mx-auto pt-8 gap-8">
           <Input.NumberContainer number={1} className="items-start">
@@ -177,6 +191,7 @@ const FinalPassSetting = () => {
                       placeholder="금액을 입력하세요"
                       value={String(clubFee)}
                       onChange={(e) => setClubFee(Number(e.target.value))}
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     <Icon type="Plus" size={18} className="text-gray-400" />
                     <div className="rounded-3xl border border-blue-300 bg-blue-100 text-blue-700 text-sm p-2">
@@ -187,6 +202,7 @@ const FinalPassSetting = () => {
                       placeholder="금액을 입력하세요"
                       value={String(mtFee)}
                       onChange={(e) => setMtFee(Number(e.target.value))}
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </FlexBox>
                 </FlexBox>
@@ -329,6 +345,7 @@ const FinalPassSetting = () => {
           setIsOpen={setIsToastOpen}
         />
       </Body>
+      )}
     </div>
   );
 };

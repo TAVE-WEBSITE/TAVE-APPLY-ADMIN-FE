@@ -20,6 +20,7 @@ import { useMutation } from "@tanstack/react-query";
 import ToastMessage from "@/components/Modal/ToastMessage";
 import Default from "./Default";
 import TimeTable from "./TimeTable";
+import InterviewScheduleModal from "./InterviewScheduleModal";
 
 const tabCategories = ["면접 시간표 등록", "기본 설정"];
 
@@ -33,6 +34,7 @@ const InterviewSetting = () => {
   const CurrentTab = interviewSettingPageMap[activeTab];
 
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const interviewScheduleDialogRef = useRef<HTMLDialogElement>(null);
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [isDownloadingTimeTable, setIsDownloadingTimeTable] = useState(false);
   const [isDownloadingInterviewer, setIsDownloadingInterviewer] = useState(false);
@@ -61,13 +63,15 @@ const InterviewSetting = () => {
     isPending: isPendingInterviewee,
   } = useMutation({
     mutationKey: ["setting", "interviewee-file"],
+    // 여기 
     mutationFn: (data: { file: File }) => uploadIntervieweeScheduleFile(data),
     onSuccess: () => {
       setToastMessage("면접자 시간표 파일이 성공적으로 업로드되었습니다.");
       setIsToastOpen(true);
     },
-    onError: () => {
+    onError: (error) => {
       setToastMessage("면접자 시간표 파일 업로드에 실패했습니다.");
+      console.log("면접자 시간표 파일 업로드 실패:", error);
       setIsToastOpen(true);
     },
   });
@@ -111,6 +115,20 @@ const InterviewSetting = () => {
   const openModal = () => {
     if (dialogRef) {
       dialogRef.current?.showModal();
+    }
+  };
+
+  const openInterviewScheduleModal = () => {
+    if (interviewScheduleDialogRef) {
+      interviewScheduleDialogRef.current?.showModal();
+    }
+  };
+
+  const handleInterviewScheduleSave = () => {
+    setToastMessage("면접 시간이 성공적으로 저장되었습니다.");
+    setIsToastOpen(true);
+    if (interviewScheduleDialogRef.current) {
+      interviewScheduleDialogRef.current.close();
     }
   };
 
@@ -232,10 +250,16 @@ const InterviewSetting = () => {
     <div className="text-white">
       <FlexBox className="gap-8 px-16 pb-8 items-start" direction="col">
         <h1 className="font-bold text-4xl">면접 설정</h1>
-        <Button onClick={openModal}>
-          <Icon type="Plus" size={18} />
-          시간표 등록하기
-        </Button>
+        <FlexBox className="gap-4">
+          <Button onClick={openModal}>
+            <Icon type="Plus" size={18} />
+            시간표 등록하기
+          </Button>
+          <Button onClick={openInterviewScheduleModal}>
+            <Icon type="Arrow" size={18} />
+            면접 시간 설정
+          </Button>
+        </FlexBox>
       </FlexBox>
       <Body className="py-8 gap-8 px-12">
         <Tab
@@ -483,9 +507,17 @@ const InterviewSetting = () => {
             </div>
           </div>
         </div>
-      </Modal>
-    </div>
-  );
+                      </Modal>
+
+        <InterviewScheduleModal
+          dialogRef={interviewScheduleDialogRef}
+          onConfirm={handleInterviewScheduleSave}
+          isPending={false}
+          confirmText="저장"
+          title="면접 시간 설정"
+        />
+      </div>
+    );
 };
 
 export default InterviewSetting;

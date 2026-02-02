@@ -5,16 +5,21 @@ import FlexBox from "@/components/Layout/FlexBox";
 import Body from "@/components/Layout/Body";
 import Tab from "@/components/Tab/Tab";
 import Accordion from "@/components/Accordion/Accordion";
-import { fetchDocumentDetail, fetchResumeQuestions, fetchMemberInfo, fetchFinalEvaluation } from "./api";
+import { fetchDocumentDetail, fetchResumeQuestions, fetchMemberInfo, fetchFinalEvaluation, downloadPortfolio } from "./api";
 import type { Resume, Question } from "@/types/interview";
 import TextArea from "@/components/Input/TextArea";
 import SkeletonAccordion from "@/components/Accordion/Skeleton";
 import Icon from "@/components/Icon/Icon";
 import DecisionTab from "./TabContents/DecisionTab";
+import StepCounter from "@/components/StepCounter/StepCounter";
+import ToastMessage from "@/components/Modal/ToastMessage";
 
+interface FinalDetailProps {
+  type: "document" | "interview"; // 문서/면접 타입
+}
 const tabCategories = ["파트별 질문", "공통 질문"];
 
-const FinalDetail = () => {
+const FinalDetail = ({ type }: FinalDetailProps) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { state } = useLocation();
@@ -49,7 +54,9 @@ const FinalDetail = () => {
   });
 
   const [activeLeftTab, setActiveLeftTab] = useState("공통 질문");
-  const [activeRightTab, setActiveRightTab] = useState("서류 평가 분석");
+  const [activeRightTab, setActiveRightTab] = useState(type === "document" ? "서류 평가 분석" : "합격 여부 결정");
+  const [postMessage, setPostMessage] = useState("");
+  const [isToastOpen, setIsToastOpen] = useState(false);
 
   const isLoading = memberInfoLoading || questionsLoading || evaluationLoading;
 
@@ -97,7 +104,7 @@ const FinalDetail = () => {
             type="ChevronDown"
             size={40}
             className="rotate-90 cursor-pointer"
-            onClick={() => navigate("/evaluation/document/final")}
+            onClick={() => navigate(type === "document" ? "/evaluation/document/final" : "/evaluation/interview/final")}
           />
           <h1 className="font-bold text-4xl">
             {applicant?.username} ({applicant?.field})
@@ -155,6 +162,93 @@ const FinalDetail = () => {
                 ))}
               {applicant &&
                 !isLoading &&
+                activeLeftTab === "공통 질문" && (
+                  <Accordion
+                    title="아래의 목록 중 소유하신 것이 있다면 자유롭게 첨부해주세요 :)"
+                    className="w-full"
+                  >
+                    <div className="space-y-4">
+                      {questions?.githubUrl && (
+                        <div>
+                          <h4 className="font-semibold text-gray-900 mb-2">GitHub</h4>
+                          <a 
+                            href={questions.githubUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 underline break-all"
+                          >
+                            {questions.githubUrl}
+                          </a>
+                        </div>
+                      )}
+                      {questions?.blogUrl && (
+                        <div>
+                          <h4 className="font-semibold text-gray-900 mb-2">블로그</h4>
+                          <a 
+                            href={questions.blogUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 underline break-all"
+                          >
+                            {questions.blogUrl}
+                          </a>
+                        </div>
+                      )}
+                      {questions?.portfolioUrl && (
+                        <div>
+                          <h4 className="font-semibold text-gray-900 mb-2">포트폴리오</h4>
+                          <button 
+                            onClick={async () => {
+                              const resumeId = application?.resumeId;
+                              if (!resumeId) {
+                                setPostMessage("포트폴리오 다운로드에 실패했습니다.");
+                                setIsToastOpen(true);
+                                return;
+                              }
+
+                              try {
+                                const blob = await downloadPortfolio(resumeId);
+
+                                // 지원자 이름으로 파일명 생성
+                                const applicantName = applicant?.username || applicant?.name || '지원자';
+                                const fileName = `portfolio_${applicantName}.pdf`;
+                                
+                                // blob을 다운로드 가능한 형태로 변환
+                                const blobUrl = window.URL.createObjectURL(blob);
+                                const downloadLink = document.createElement('a');
+                                downloadLink.href = blobUrl;
+                                downloadLink.download = fileName;
+                                downloadLink.style.display = 'none';
+                                
+                                // DOM에 추가하고 클릭
+                                document.body.appendChild(downloadLink);
+                                downloadLink.click();
+                                
+                                // 정리
+                                setTimeout(() => {
+                                  document.body.removeChild(downloadLink);
+                                  window.URL.revokeObjectURL(blobUrl);
+                                }, 100);
+                              } catch (error: any) {
+                                console.error('포트폴리오 다운로드 실패:', error);
+                                setPostMessage(`포트폴리오 다운로드에 실패했습니다: ${error.message}`);
+                                setIsToastOpen(true);
+                              }
+                            }}
+                            className="text-blue-600 hover:text-blue-800 underline break-all cursor-pointer bg-transparent border-none p-0"
+                          >
+                            포트폴리오 다운로드
+                          </button>
+                        </div>
+                      )}
+                      {!questions?.githubUrl && !questions?.blogUrl && !questions?.portfolioUrl && (
+                        <p className="text-gray-500">첨부된 링크가 없습니다.</p>
+                      )}
+                    </div>
+                  </Accordion>
+                )}
+              {applicant &&
+                !isLoading &&
                 activeLeftTab === "공통 질문" &&
                 commonQuestions.length === 0 && (
                   <div className="flex flex-col justify-center items-center gap-4 p-4 text-gray-700 w-full h-full text-center">
@@ -174,11 +268,32 @@ const FinalDetail = () => {
                     }
                     className="w-full"
                   >
+                   {index === 0 && questions?.languageLevels && questions.languageLevels.length > 0 ? (
+                    <div className="space-y-4">
+                      {/* 언어 레벨 정보 */}
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">언어 레벨</h4>
+                        <div className="space-y-4">
+                          {questions.languageLevels.map((lang: any, langIndex: number) => (
+                            <StepCounter
+                              key={langIndex}
+                              title={lang.language}
+                              currentStep={lang.level}
+                              setCurrentStep={() => {}}
+                              maxStep={5}
+                              stepLabels={["입문", "초급", "중급", "고급", "전문가"]}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
                     <TextArea
                       value={q.answer}
                       readOnly={true}
-                      className="w-full h-full"
+                      className="w-full min-h-[250px] h-full"
                     />
+                  )}
                   </Accordion>
                 ))}
               {applicant &&
@@ -194,23 +309,38 @@ const FinalDetail = () => {
           </div>
           <div className="flex flex-col gap-6 flex-1 rounded-xl min-h-[650px] px-6">
             <Tab
-              categories={["서류 평가 분석", "합격 여부 결정"]}
+              categories={
+                type === "document"
+                  ? ["서류 평가 분석", "합격 여부 결정"]
+                  : ["합격 여부 결정"]
+              }
               active={activeRightTab}
               onChange={setActiveRightTab}
             />
             <DecisionTab
-              message="서류 전형
-          결과를 선택해주세요"
+              message={
+                type === "document"
+                  ? "서류 전형 결과를 선택해주세요"
+                  : "면접 전형 결과를 선택해주세요"
+              }
               finalEvaluation={{
                 averageScore,
                 evaluatorCount: evaluations.length,
                 evaluations
               }}
               activeTab={activeRightTab}
-              resumeId={application?.resumeId}
+              resumeId={type === "document" ? application?.resumeId : application?.id}
+              userName={applicant?.username}
+              type={type}
             />
           </div>
         </div>
+        <ToastMessage
+          isOpen={isToastOpen}
+          message={postMessage}
+          setIsOpen={setIsToastOpen}
+          isError={false}
+        />
       </Body>
     </div>
   );

@@ -1,23 +1,35 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useRef, useState, useCallback, useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import FlexBox from "../Layout/FlexBox";
 import Icon from "@/components/Icon/Icon";
 import Switch from "../Input/Switch";
 import ChipController from "@/pages/Setting/Document/ChipController";
 import WordLimitModal from "@/pages/Setting/Document/WordLimitModal";
 import TypeChangeModal from "@/pages/Setting/Document/TypeChangeModal";
-import InterviewScheduleModal from "@/pages/Setting/Document/InterviewScheduleModal";
+import ToastMessage from "@/components/Modal/ToastMessage";
+import { axiosInstance } from "@/api/axiosInstance";
 
 import useDocumentStore from "@/hooks/Setting/Document/useDocumentStore";
 import type { SkillSet } from "@/hooks/Setting/Document/useDocumentStore";
+
+// 프로그래밍 언어 조회 API
+const fetchProgrammingLanguages = async (field: string) => {
+  try {
+    const res = await axiosInstance.get(`/v1/member/lan/field/${field}`);
+    return res.data;
+  } catch (error) {
+    console.error("프로그래밍 언어 조회 실패:", error);
+    return { result: [] };
+  }
+};
 
 type QuestionItem = {
   id: string;
   question: string;
   required: boolean;
-  maxLength?: number;
+  textLength?: number;
   mode?: string;
 };
 
@@ -42,9 +54,8 @@ const DraggableItem = ({
   onDelete,
   onToggleRequired,
 }: DraggableItemProps) => {
-  // 전달받은 데이터 로깅
-  // console.log("DraggableItem - item:", item);
-  // console.log("DraggableItem - questionData:", questionData);
+
+  
   const queryClient = useQueryClient();
   const wordLimitModalRef = useRef<HTMLDialogElement>(null);
   const typeChangeModalRef = useRef<HTMLDialogElement>(null);
@@ -54,6 +65,52 @@ const DraggableItem = ({
     questionData?.content || item.question || ""
   );
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+
+  // 프로그래밍 언어 조회 (answerType이 PROGRAMMING일 때만)
+  const { data: programmingLanguages } = useQuery({
+    queryKey: ["programming-languages", questionData?.fieldType],
+    queryFn: () => fetchProgrammingLanguages(questionData?.fieldType || ""),
+    enabled: questionData?.answerType === "PROGRAMMING" && !!questionData?.fieldType,
+  });
+
+  // 프로그래밍 언어를 chips 형태로 변환
+  const programmingLanguageChips = programmingLanguages?.result
+    ?.filter((lang: any) => lang.field === questionData?.fieldType) // fieldType에 따라 필터링
+    ?.map((lang: any) => ({
+      id: lang.id,
+      language: lang.language, // ChipController가 기대하는 속성명
+      field: questionData?.fieldType,
+      selected: false
+    })) || [];
+
+  // answerType에 따라 표시할 chips 결정
+  const displayChips = questionData?.answerType === "PROGRAMMING" 
+    ? (programmingLanguageChips || []) // undefined 방지
+    : (skills || []); // undefined 방지
+
+  // 언어 삭제 핸들러
+  const handleLanguageDelete = useCallback(async (languageId: number, languageName: string) => {
+    try {
+      // 프로그래밍 언어 삭제 API 호출
+      await axiosInstance.delete(`/v1/manager/lan/${languageId}`);
+      
+      // 토스트 메시지 표시
+      setToastMessage(`${languageName} 삭제했습니다.`);
+      setIsToastOpen(true);
+      
+      // 2초 후 새로고침
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+      
+    } catch (error) {
+      console.error("언어 삭제 실패:", error);
+      setToastMessage("언어 삭제에 실패했습니다.");
+      setIsToastOpen(true);
+    }
+  }, []);
 
   const {
     attributes,
@@ -89,6 +146,13 @@ const DraggableItem = ({
       }
     }
   }, [inputValue]);
+
+  // mode가 focused일 때 자동으로 포커스
+  useEffect(() => {
+    if (item.mode === "focused" && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [item.mode]);
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
@@ -165,10 +229,12 @@ const DraggableItem = ({
 
   const handleKeyDown = useCallback(
     async (e: React.KeyboardEvent) => {
-      if (e.key === "Enter") {
+      // textarea 내부에서 입력 중일 때는 이벤트 전파를 막지 않음
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault(); // Enter 키의 기본 동작 방지
         await handleEdit();
       }
+      // 스페이스 바와 다른 키들은 정상적으로 작동하도록 함
     },
     [handleEdit]
   );
@@ -187,40 +253,42 @@ const DraggableItem = ({
       {...attributes}
     >
       <div className="flex items-center justify-between">
-        <div
-          className={`flex items-center rounded-lg p-4 ${
-            !isDragging && "hover:outline-2 hover:outline-blue-500"
-          } ${
-            isDragging
-              ? "cursor-grabbing outline-2 outline-blue-500"
-              : "cursor-pointer"
-          }`}
-          {...listeners}
-        >
-          <Icon type="Menu" size={20} className="mr-2" />
+        <div className="flex items-center rounded-lg p-4">
+          <div
+            className={`flex items-center ${
+              !isDragging && "hover:outline-2 hover:outline-blue-500"
+            } ${
+              isDragging
+                ? "cursor-grabbing outline-2 outline-blue-500"
+                : "cursor-grab"
+            }`}
+            {...listeners}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Icon type="Menu" size={20} className="mr-2" />
+          </div>
           <textarea
             ref={inputRef}
             readOnly={item.mode !== "focused"}
             value={inputValue}
             className={`text-gray-900 font-medium resize-none border-none outline-none bg-transparent ${
-              isDragging ? "cursor-grabbing" : ""
+              isDragging ? "cursor-grabbing" : "cursor-text"
             }`}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
             style={{ 
-              width: `${Math.min(inputValue.length + 5, 80)}ch`,
+              width: `${Math.min(inputValue.length + 10, (item.textLength || 100))}ch`,
               minHeight: '1.5rem',
               height: '1.5rem',
               overflow: 'hidden'
             }}
-
           />
-          {item.maxLength && (
-            <p className="text-gray-500 text-sm">{`(${item.maxLength}자 이내)`}</p>
-          )}
         </div>
 
         <FlexBox className="gap-4">
+          <p className="text-gray-500 text-sm">{`(${item.textLength || 100}자 이내)`}</p>
           <Switch
             title="필수 질문"
             setIsOn={handleToggleRequired}
@@ -282,14 +350,14 @@ const DraggableItem = ({
             )}
           </div>
 
-          {item.maxLength && (
+          {/* {item.textLength && (
             <button
               className="p-2 border border-gray-300 rounded-lg hover:bg-blue-100 cursor-pointer"
               onClick={() => wordLimitModalRef.current?.showModal()}
             >
               <Icon type="TextLength" size={20} />
             </button>
-          )}
+          )} */}
 
           <button
             className="p-2 border border-gray-300 rounded-lg hover:bg-blue-100 cursor-pointer"
@@ -304,9 +372,9 @@ const DraggableItem = ({
           currentContent={questionData?.content || item.question}
           currentFieldType={questionData?.fieldType}
           currentOrdered={questionData?.ordered}
-          currentTextLength={questionData?.textLength || item.maxLength}
+          currentTextLength={questionData?.textLength || item.textLength}
           onUpdateSuccess={() => {
-            console.log("글자수 제한 업데이트 완료");
+          
           }}
         />
         <TypeChangeModal 
@@ -315,7 +383,7 @@ const DraggableItem = ({
           currentContent={questionData?.content || item.question}
           currentFieldType={questionData?.fieldType}
           currentOrdered={questionData?.ordered}
-          currentTextLength={questionData?.textLength || item.maxLength}
+          currentTextLength={questionData?.textLength || item.textLength}
           currentAnswerType={questionData?.answerType}
           currentRequired={questionData?.required}
           onUpdateSuccess={async () => {
@@ -324,13 +392,25 @@ const DraggableItem = ({
             console.log("데이터 무효화 완료");
           }}
         />
-        <InterviewScheduleModal ref={interviewScheduleModal} />
+    
       </div>
-      {skills.length > 0 && (
+      {(displayChips.length > 0 || questionData?.answerType === "PROGRAMMING") && (
         <div className="px-4 pb-4">
-          <ChipController chips={skills} focused={item.mode === "focused"} />
+          <ChipController 
+            chips={displayChips} 
+            focused={item.mode === "focused"}
+            onLanguageDelete={questionData?.answerType === "PROGRAMMING" ? handleLanguageDelete : undefined}
+            answerType={questionData?.answerType}
+          />
         </div>
       )}
+      
+      <ToastMessage
+        message={toastMessage}
+        isOpen={isToastOpen}
+        setIsOpen={setIsToastOpen}
+        isError={false}
+      />
     </li>
   );
 };
