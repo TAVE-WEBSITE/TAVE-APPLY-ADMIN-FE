@@ -86,9 +86,10 @@ const DraggableItem = ({
     })) || [];
 
   // answerType에 따라 표시할 chips 결정
+  // 메인 프로그래밍 실력 질문(PROGRAMMING)에만 chips 표시
   const displayChips = questionData?.answerType === "PROGRAMMING" 
     ? (programmingLanguageChips || []) // undefined 방지
-    : (skills || []); // undefined 방지
+    : []; // 일반 질문에는 chips 표시하지 않음
 
   // 언어 삭제 핸들러
   const handleLanguageDelete = useCallback(async (languageId: number, languageName: string) => {
@@ -373,6 +374,8 @@ const DraggableItem = ({
           currentFieldType={questionData?.fieldType}
           currentOrdered={questionData?.ordered}
           currentTextLength={questionData?.textLength || item.textLength}
+          currentRequired={questionData?.required}
+          currentAnswerType={questionData?.answerType}
           onUpdateSuccess={() => {
           
           }}

@@ -12,10 +12,41 @@ import { type EvaluationItem } from "@/types/application";
 import { usePagination } from "@/hooks/usePagination";
 import { type RoleType } from "@/types/role.d";
 
+// localStorage 키
+const FILTER_STORAGE_KEY = "evaluation_document_filter_role";
+const PAGE_STORAGE_KEY = "evaluation_document_page";
+
 
 const Document = () => {
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
+  
+  // localStorage에서 페이지 번호 복원
+  const [currentPage, setCurrentPage] = useState(() => {
+    try {
+      const saved = localStorage.getItem(PAGE_STORAGE_KEY);
+      if (saved) {
+        const page = parseInt(saved, 10);
+        if (!isNaN(page) && page > 0) {
+          return page;
+        }
+      }
+    } catch (error) {
+      // localStorage 읽기 실패 시 기본값 사용
+    }
+    return 1;
+  });
+  
+  // 페이지 번호 변경 시 localStorage에 저장
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    
+    // localStorage에 즉시 저장
+    try {
+      localStorage.setItem(PAGE_STORAGE_KEY, page.toString());
+    } catch (error) {
+      // localStorage 저장 실패 시 무시
+    }
+  };
 
   const getStatusFromTab = (tab: string) => {
     switch (tab) {
@@ -35,7 +66,20 @@ const Document = () => {
 
   const [searchInput, setSearchInput] = useState("");
   const [searchValue, setSearchValue] = useState("");
-  const [selectedRole, setSelectedRole] = useState<RoleType | null>(null);
+  
+  // localStorage에서 필터 상태 복원
+  const [selectedRole, setSelectedRole] = useState<RoleType | null>(() => {
+    try {
+      const saved = localStorage.getItem(FILTER_STORAGE_KEY);
+      if (saved) {
+        const role = saved as RoleType;
+        return role;
+      }
+    } catch (error) {
+      // localStorage 읽기 실패 시 기본값 사용
+    }
+    return null;
+  });
 
   const { entireList, isLoading, totalPages, countData } = usePagination<EvaluationItem>({
     pageType: "서류 평가",
@@ -48,11 +92,31 @@ const Document = () => {
 
   const handleTabChange = (tab: string) => { 
     setActiveTab(tab);
+    // 탭 변경 시 페이지를 1로 리셋하고 localStorage에도 저장
     setCurrentPage(1);
+    try {
+      localStorage.setItem(PAGE_STORAGE_KEY, "1");
+    } catch (error) {
+      // localStorage 저장 실패 시 무시
+    }
   };
 
+
+
   const handleFilter = (role: RoleType | null) => {
+    // 상태 업데이트
     setSelectedRole(role);
+    
+    // localStorage에 즉시 저장
+    try {
+      if (role) {
+        localStorage.setItem(FILTER_STORAGE_KEY, role);
+      } else {
+        localStorage.removeItem(FILTER_STORAGE_KEY);
+      }
+    } catch (error) {
+      // localStorage 저장 실패 시 무시
+    }
   };
 
 
@@ -95,9 +159,14 @@ const Document = () => {
               onChange={(e) => setSearchValue(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  console.log("Enter 키 입력됨, searchValue:", searchValue);
                   setSearchInput(searchValue);
-                  setCurrentPage(1); // 검색 시 1페이지로 이동
+                  // 검색 시 1페이지로 이동하고 localStorage에도 저장
+                  setCurrentPage(1);
+                  try {
+                    localStorage.setItem(PAGE_STORAGE_KEY, "1");
+                  } catch (error) {
+                    // localStorage 저장 실패 시 무시
+                  }
                 }
               }}
             />
@@ -117,7 +186,7 @@ const Document = () => {
             totalPages={totalPages}
             isLoading={isLoading}
             currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
+            setCurrentPage={handlePageChange}
             baseUrl="/evaluation/document"
             navigate={navigate}
             pageType="document"

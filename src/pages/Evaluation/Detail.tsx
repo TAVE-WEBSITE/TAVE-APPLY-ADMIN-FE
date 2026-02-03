@@ -103,6 +103,7 @@ const Detail = () => {
       
       // 2초 후 서류 평가 페이지로 리다이렉트
       setTimeout(() => {
+        // localStorage에 필터와 페이지가 있으면 유지 (이미 Document.tsx에서 읽음)
         navigate("/evaluation/document");
       }, 2000);
     },
@@ -143,7 +144,10 @@ const Detail = () => {
             type="ChevronDown"
             size={40}
             className="rotate-90 cursor-pointer"
-            onClick={() => navigate("/evaluation/document")}
+            onClick={() => {
+              // localStorage에 필터와 페이지가 있으면 유지 (이미 Document.tsx에서 읽음)
+              navigate("/evaluation/document");
+            }}
           />
           <h1 className="font-bold text-4xl">
             {applicant?.username} ({applicant?.field})

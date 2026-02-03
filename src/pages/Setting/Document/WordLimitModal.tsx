@@ -11,6 +11,8 @@ interface WordLimitModalProps {
   currentFieldType?: FieldType;
   currentOrdered?: number;
   currentTextLength?: number;
+  currentRequired?: boolean;
+  currentAnswerType?: string;
   onUpdateSuccess?: () => void;
 }
 
@@ -20,6 +22,8 @@ const WordLimitModal = forwardRef<HTMLDialogElement | null, WordLimitModalProps>
   currentFieldType,
   currentOrdered,
   currentTextLength,
+  currentRequired,
+  currentAnswerType,
   onUpdateSuccess
 }, ref) => {
   const [wordLimit, setWordLimit] = useState("");
@@ -56,7 +60,8 @@ const WordLimitModal = forwardRef<HTMLDialogElement | null, WordLimitModalProps>
         currentFieldType,
         currentOrdered || 0,
         parseInt(wordLimit),
-        undefined // required는 기존 값 유지
+        currentRequired !== undefined ? currentRequired : false, // required 값 전달
+        currentAnswerType || "TEXTAREA" // answerType 값 전달
       );
 
       console.log("글자수 제한 업데이트 성공");
