@@ -30,6 +30,8 @@ const DraggableList = () => {
     queryFn: () => fetchAllQuestions(),
   });
 
+  // console.log(allQuestionsData);
+
   // 조회된 전체 질문들
   const allQuestions = allQuestionsData?.result || [];
   
