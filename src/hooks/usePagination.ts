@@ -108,34 +108,49 @@ export const usePagination = <T>({
     };
   }, [pageQueries[0]?.dataUpdatedAt]); // 첫 번째 쿼리의 dataUpdatedAt만 사용
 
-  // totalPages를 totalRecruiter와 size를 기반으로 계산
+  // totalPages 계산 - 필터링된 결과의 실제 페이지 수를 우선 사용
   const totalPages = useMemo(() => {
-    // 첫 번째 페이지 쿼리에서 totalRecruiter 정보 가져오기
-    const firstQuery = pageQueries[0];
+    // 현재 페이지 쿼리에서 필터링된 결과의 페이지 수를 우선 확인
+    const currentPageQuery = pageQueries[page];
     
+    if (currentPageQuery?.isSuccess && currentPageQuery.data?.result) {
+      // 필터링된 결과의 실제 페이지 수를 우선 사용
+      if (currentPageQuery.data.result.resumeResDtos?.page?.totalPages !== undefined) {
+        return currentPageQuery.data.result.resumeResDtos.page.totalPages;
+      } else if (currentPageQuery.data.result.dtos?.page?.totalPages !== undefined) {
+        return currentPageQuery.data.result.dtos.page.totalPages;
+      } else if (currentPageQuery.data.result.totalPage !== undefined) {
+        return currentPageQuery.data.result.totalPage;
+      }
+    }
+    
+    // 첫 번째 페이지 쿼리에서도 확인
+    const firstQuery = pageQueries[0];
+    if (firstQuery?.isSuccess && firstQuery.data?.result) {
+      if (firstQuery.data.result.resumeResDtos?.page?.totalPages !== undefined) {
+        return firstQuery.data.result.resumeResDtos.page.totalPages;
+      } else if (firstQuery.data.result.dtos?.page?.totalPages !== undefined) {
+        return firstQuery.data.result.dtos.page.totalPages;
+      } else if (firstQuery.data.result.totalPage !== undefined) {
+        return firstQuery.data.result.totalPage;
+      }
+    }
+    
+    // totalPagesRef에 저장된 값 사용 (entireList에서 설정됨)
+    if (totalPagesRef.current !== undefined) {
+      return totalPagesRef.current;
+    }
+    
+    // 마지막 fallback: totalRecruiter를 사용 (필터링이 없을 때만)
     if (firstQuery?.isSuccess && firstQuery.data?.result) {
       const totalRecruiter = firstQuery.data.result.totalRecruiter;
-      
       if (totalRecruiter !== undefined && totalRecruiter !== null) {
-        // totalRecruiter를 size로 나누어 올림하여 totalPages 계산
-        const calculatedTotalPages = Math.ceil(totalRecruiter / size);
-        return calculatedTotalPages;
+        return Math.ceil(totalRecruiter / size);
       }
     }
     
-    // fallback: 기존 구조들 확인
-    if (firstQuery?.isSuccess && firstQuery.data?.result) {
-      if (firstQuery.data.result.resumeResDtos?.page?.totalPages) {
-        return firstQuery.data.result.resumeResDtos.page.totalPages;
-      } else if (firstQuery.data.result.totalPage) {
-        return firstQuery.data.result.totalPage;
-      } else if (firstQuery.data.result.dtos?.page?.totalPages) {
-        return firstQuery.data.result.dtos.page.totalPages;
-      }
-    }
-    
-    return totalPagesRef.current || 1;
-  }, [pageQueries[0]?.dataUpdatedAt, size]); // size도 의존성에 추가
+    return 1;
+  }, [pageQueries, page, size]); // pageQueries, page, size 변경 시 재계산
 
   const isLoading = pageQueries.some((query) => query.isLoading);
   return {
