@@ -374,6 +374,8 @@ const DraggableItem = ({
           currentFieldType={questionData?.fieldType}
           currentOrdered={questionData?.ordered}
           currentTextLength={questionData?.textLength || item.textLength}
+          currentRequired={questionData?.required}
+          currentAnswerType={questionData?.answerType}
           onUpdateSuccess={() => {
           
           }}

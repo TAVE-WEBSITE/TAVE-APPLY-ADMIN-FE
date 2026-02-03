@@ -17,6 +17,17 @@ const Header = ({ redirectionList }: HeaderProps) => {
   };
 
   const handleNavigate = (url: string) => {
+    // 서류 평가 페이지가 아닌 다른 페이지로 이동 시 localStorage 리셋
+    const FILTER_STORAGE_KEY = "evaluation_document_filter_role";
+    const PAGE_STORAGE_KEY = "evaluation_document_page";
+    
+    try {
+      localStorage.removeItem(FILTER_STORAGE_KEY);
+      localStorage.removeItem(PAGE_STORAGE_KEY);
+    } catch (error) {
+      // localStorage 리셋 실패 시 무시
+    }
+
     switch (url) {
       case "APPLY LIST":
         navigate("applies");
@@ -52,25 +63,49 @@ const Header = ({ redirectionList }: HeaderProps) => {
                   <ul className="absolute z-99 top-14 left-0 w-full bg-gray-800 text-gray-400 px-4 py-3 rounded-xl flex flex-col gap-3 text-center hidden group-hover:flex transition-all duration-200">
                     <li
                       className="hover:text-white cursor-pointer"
-                      onClick={() => navigate("/setting/default")}
+                      onClick={() => {
+                        const FILTER_STORAGE_KEY = "evaluation_document_filter_role";
+                        const PAGE_STORAGE_KEY = "evaluation_document_page";
+                        localStorage.removeItem(FILTER_STORAGE_KEY);
+                        localStorage.removeItem(PAGE_STORAGE_KEY);
+                        navigate("/setting/default");
+                      }}
                     >
                       기본 설정
                     </li>
                     <li
                       className="hover:text-white cursor-pointer"
-                      onClick={() => navigate("/setting/document")}
+                      onClick={() => {
+                        const FILTER_STORAGE_KEY = "evaluation_document_filter_role";
+                        const PAGE_STORAGE_KEY = "evaluation_document_page";
+                        localStorage.removeItem(FILTER_STORAGE_KEY);
+                        localStorage.removeItem(PAGE_STORAGE_KEY);
+                        navigate("/setting/document");
+                      }}
                     >
                       서류 설정
                     </li>
                     <li
                       className="hover:text-white cursor-pointer"
-                      onClick={() => navigate("/setting/interview")}
+                      onClick={() => {
+                        const FILTER_STORAGE_KEY = "evaluation_document_filter_role";
+                        const PAGE_STORAGE_KEY = "evaluation_document_page";
+                        localStorage.removeItem(FILTER_STORAGE_KEY);
+                        localStorage.removeItem(PAGE_STORAGE_KEY);
+                        navigate("/setting/interview");
+                      }}
                     >
                       면접 설정
                     </li>
                     <li
                       className="hover:text-white cursor-pointer"
-                      onClick={() => navigate("/setting/final")}
+                      onClick={() => {
+                        const FILTER_STORAGE_KEY = "evaluation_document_filter_role";
+                        const PAGE_STORAGE_KEY = "evaluation_document_page";
+                        localStorage.removeItem(FILTER_STORAGE_KEY);
+                        localStorage.removeItem(PAGE_STORAGE_KEY);
+                        navigate("/setting/final");
+                      }}
                     >
                       최종 합격
                     </li>
@@ -82,13 +117,23 @@ const Header = ({ redirectionList }: HeaderProps) => {
                   <ul className="absolute top-14 left-0 w-full bg-gray-800 text-gray-400 px-4 py-3 rounded-xl flex flex-col gap-3 text-center hidden group-hover:flex transition-all duration-200">
                     <li
                       className="hover:text-white cursor-pointer"
-                      onClick={() => navigate("/evaluation/document")}
+                      onClick={() => {
+                        // 서류 평가 페이지로 이동할 때는 리셋하지 않음
+                        navigate("/evaluation/document");
+                      }}
                     >
                       서류 평가
                     </li>
                     <li
                       className="hover:text-white cursor-pointer"
-                      onClick={() => navigate("/evaluation/interview")}
+                      onClick={() => {
+                        // 서류 평가가 아닌 다른 평가 페이지로 이동 시 리셋
+                        const FILTER_STORAGE_KEY = "evaluation_document_filter_role";
+                        const PAGE_STORAGE_KEY = "evaluation_document_page";
+                        localStorage.removeItem(FILTER_STORAGE_KEY);
+                        localStorage.removeItem(PAGE_STORAGE_KEY);
+                        navigate("/evaluation/interview");
+                      }}
                     >
                       면접 평가
                     </li>
