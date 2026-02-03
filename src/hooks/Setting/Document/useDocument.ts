@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import useDocumentStore from "./useDocumentStore";
 import {
-  fetchSkillSetByField,
   fetchQuestionsByField,
   fetchAllQuestions,
   postQuestionByField,
@@ -32,20 +31,11 @@ const useDocument = () => {
 
   const allQuestions = allQuestionsData?.result || [];
 
-  const { data: currentSkills } = useQuery({
-    queryKey: ["setting", "document", "skills", currentType],
-    queryFn: () => fetchSkillSetByField(currentType),
-    enabled: currentType !== "COMMON",
-  });
-
   useEffect(() => {
     if (data) {
       setQuestions(data.result);
     }
-    if (currentSkills) {
-      setSkillSets(currentSkills.result);
-    }
-  }, [data, currentSkills, currentType]);
+  }, [data, currentType]);
 
 
   const addNewQuestion = () => {

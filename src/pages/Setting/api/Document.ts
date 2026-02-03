@@ -31,7 +31,7 @@ export const fetchAllQuestions = async () => {
 
 export const fetchSkillSetByField = async (fieldType: FieldType) => {
   try {
-    const res = await axiosInstance.get(`/v1/manager/lan/${fieldType}`);
+    const res = await axiosInstance.get(`/v1/member/lan/field/${fieldType}`);
     return res.data;
   } catch (error) {
     return error;
