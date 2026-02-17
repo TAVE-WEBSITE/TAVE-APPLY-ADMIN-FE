@@ -53,7 +53,9 @@ const DefaultSetting = () => {
     <div className="text-white">
       <FlexBox className="gap-8 px-16 pb-8 items-start" direction="col">
         <h1 className="font-bold text-4xl">신규 지원 초기 설정</h1>
+
         <h2 className="font-semibold text-xl">{data?.result?.generation ? `${data?.result?.generation}기` : ""}</h2>
+
       </FlexBox>
 
       <Body>
