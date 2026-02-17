@@ -18,7 +18,7 @@ const Interview = () => {
 
   useEffect(() => {
     const fetcher = async () => {
-      const res = await getInterviewTimeTable(16);
+      const res = await getInterviewTimeTable(17);
       setTimeTable(res?.result?.timetableList);
     };
     fetcher();
@@ -48,7 +48,7 @@ const Interview = () => {
   return (
     <div className="text-white">
       <FlexBox className="gap-8 px-16 pb-8 items-start" direction="col">
-        <h1 className="font-bold text-4xl">16기 면접 현황</h1>
+        <h1 className="font-bold text-4xl">17기 면접 현황</h1>
         <FlexBox className="w-full justify-between">
           <p className="text-gray-500">
             {formatDateTime(new Date().toISOString()) + " 기준"}
