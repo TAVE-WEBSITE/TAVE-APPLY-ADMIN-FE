@@ -90,6 +90,8 @@ const Document = () => {
     type: selectedRole || undefined,
   });
 
+  
+
   const handleTabChange = (tab: string) => { 
     setActiveTab(tab);
     // 탭 변경 시 페이지를 1로 리셋하고 localStorage에도 저장
