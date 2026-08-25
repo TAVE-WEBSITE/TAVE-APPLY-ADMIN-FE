@@ -211,7 +211,20 @@ export const getInterviewTimeTable = async (generation: number | string) => {
       `/v1/manager/interview-final/time-table/${generation}`
     );
     return res.data;
-  } catch (error) {
+  } catch (error: any) {
+    console.error("GET /v1/manager/interview-final/time-table 에러 상세:");
+    console.error("URL:", `/v1/manager/interview-final/time-table/${generation}`);
+    console.error("에러 객체:", error);
+    if (error.response) {
+      console.error("응답 상태:", error.response.status);
+      console.error("응답 헤더:", error.response.headers);
+      console.error("응답 데이터:", error.response.data);
+    } else if (error.request) {
+      console.error("요청 객체:", error.request);
+    } else {
+      console.error("에러 메시지:", error.message);
+    }
+    console.error("전체 에러 스택:", error.stack);
     return error;
   }
 };

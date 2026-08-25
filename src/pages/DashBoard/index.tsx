@@ -50,14 +50,14 @@ export const Page = () => {
   const updateDashboardMutation = useMutation({
     mutationFn: updateDashboard,
     onSuccess: async () => {
-      console.log("대시보드 업데이트 완료");
+      // console.log("대시보드 업데이트 완료");
       
       // POST 요청 성공 후 GET 요청으로 최신 데이터 조회
       try {
         await queryClient.refetchQueries({ queryKey: ["chart-data", "dashboard"] });
         await queryClient.refetchQueries({ queryKey: ["chart-data", "gender"] });
         await queryClient.refetchQueries({ queryKey: ["chart-data", "skill"] });
-        console.log("대시보드 데이터 재조회 완료");
+        // console.log("대시보드 데이터 재조회 완료");
       } catch (error) {
         console.error("대시보드 데이터 재조회 실패:", error);
       }
@@ -102,7 +102,7 @@ export const Page = () => {
       <FlexBox className="gap-8 px-16 pb-8 items-start" direction="col">
         <h1 className="font-bold text-4xl">DashBoard</h1>
         <FlexBox className="w-full justify-between">
-          <h2 className="font-semibold text-xl">16기 지원 현황</h2>
+          <h2 className="font-semibold text-xl">{defaultSettingData?.result?.generation}기 지원 현황</h2>
           <p className="text-gray-500">
             {getDateDisplay()}
           </p>

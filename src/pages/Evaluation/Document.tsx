@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import Body from "@/components/Layout/Body";
 import FlexBox from "@/components/Layout/FlexBox";
 import { formatDateTime } from "@/utils/formatDate";
@@ -11,6 +12,7 @@ import ApplicationTable from "@/components/ApplicationTable/ApplicationTable";
 import { type EvaluationItem } from "@/types/application";
 import { usePagination } from "@/hooks/usePagination";
 import { type RoleType } from "@/types/role.d";
+import { fetchSettingDefault } from "@/pages/Setting/api/Default";
 
 // localStorage 키
 const FILTER_STORAGE_KEY = "evaluation_document_filter_role";
@@ -19,6 +21,12 @@ const PAGE_STORAGE_KEY = "evaluation_document_page";
 
 const Document = () => {
   const navigate = useNavigate();
+  const { data: defaultSettingData } = useQuery({
+    queryKey: ["setting", "default"],
+    queryFn: fetchSettingDefault,
+    staleTime: 1000 * 60 * 60 * 24,
+  });
+  const generation = defaultSettingData?.result?.generation;
   
   // localStorage에서 페이지 번호 복원
   const [currentPage, setCurrentPage] = useState(() => {
@@ -90,6 +98,8 @@ const Document = () => {
     type: selectedRole || undefined,
   });
 
+  
+
   const handleTabChange = (tab: string) => { 
     setActiveTab(tab);
     // 탭 변경 시 페이지를 1로 리셋하고 localStorage에도 저장
@@ -125,7 +135,9 @@ const Document = () => {
   return (
     <div className="text-white">
       <FlexBox className="gap-8 px-16 pb-8 items-start" direction="col">
-        <h1 className="font-bold text-4xl">16기 서류 평가 현황</h1>
+        <h1 className="font-bold text-4xl">
+          {generation ? `${generation}기 ` : ""}서류 평가 현황
+        </h1>
         <FlexBox className="w-full justify-between">
           <p className="text-gray-500">
             {formatDateTime(new Date().toISOString()) + " 기준"}
