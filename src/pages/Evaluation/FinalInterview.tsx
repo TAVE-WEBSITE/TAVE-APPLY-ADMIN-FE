@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Body from "@/components/Layout/Body";
 import FlexBox from "@/components/Layout/FlexBox";
 import { formatDateTime } from "@/utils/formatDate";
@@ -14,9 +14,17 @@ import { usePagination } from "@/hooks/usePagination";
 import { type RoleType } from "@/types/role.d";
 import Button from "@/components/Button/Button";
 import { getFinalInterviewEmailCancel, getFinalInterviewEmailConfig, getFinalInterviewEmailFind } from "./api";
+import { fetchSettingDefault } from "@/pages/Setting/api/Default";
 import Modal from "@/components/Modal/Modal";
 
 const FinalInterview = () => {
+  const { data: defaultSettingData } = useQuery({
+    queryKey: ["setting", "default"],
+    queryFn: fetchSettingDefault,
+    staleTime: 1000 * 60 * 60 * 24,
+  });
+  const generation = defaultSettingData?.result?.generation;
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const dialogRefFirst = useRef<HTMLDialogElement>(null);
@@ -164,7 +172,9 @@ const FinalInterview = () => {
   return (
     <div className="text-white">
       <FlexBox className="gap-8 px-16 pb-8 items-start" direction="col">
-        <h1 className="font-bold text-4xl">16기 최종 면접 평가</h1>
+        <h1 className="font-bold text-4xl">
+          {generation ? `${generation}기 ` : ""}최종 면접 평가
+        </h1>
         <FlexBox className="w-full justify-between">
           <p className="text-gray-500">
             {formatDateTime(new Date().toISOString()) + " 기준"}

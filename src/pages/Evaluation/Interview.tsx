@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import Body from "@/components/Layout/Body";
 import FlexBox from "@/components/Layout/FlexBox";
 import { formatDateTime } from "@/utils/formatDate";
@@ -9,20 +10,28 @@ import TimeTable from "@/components/TimeTable";
 import Button from "@/components/Button/Button";
 import Icon from "@/components/Icon/Icon";
 import { fetchList } from "@/api/fetchList";
+import { fetchSettingDefault } from "@/pages/Setting/api/Default";
 
 const Interview = () => {
   const navigate = useNavigate();
   const [timeTable, setTimeTable] = useState<TimeTableList[]>([]);
   const [isPending, setIsPending] = useState(false);
   const [isPending2, setIsPending2] = useState(false);
+  const { data: defaultSettingData } = useQuery({
+    queryKey: ["setting", "default"],
+    queryFn: fetchSettingDefault,
+    staleTime: 1000 * 60 * 60 * 24,
+  });
+  const generation = defaultSettingData?.result?.generation;
 
   useEffect(() => {
     const fetcher = async () => {
-      const res = await getInterviewTimeTable(16);
+      if (!generation) return;
+      const res = await getInterviewTimeTable(generation);
       setTimeTable(res?.result?.timetableList);
     };
     fetcher();
-  }, []);
+  }, [generation]);
 
   const downloadTimeTableForm = async () => {
     setIsPending(true);
@@ -48,7 +57,9 @@ const Interview = () => {
   return (
     <div className="text-white">
       <FlexBox className="gap-8 px-16 pb-8 items-start" direction="col">
-        <h1 className="font-bold text-4xl">16기 면접 현황</h1>
+        <h1 className="font-bold text-4xl">
+          {generation ? `${generation}기 ` : ""}면접 현황
+        </h1>
         <FlexBox className="w-full justify-between">
           <p className="text-gray-500">
             {formatDateTime(new Date().toISOString()) + " 기준"}

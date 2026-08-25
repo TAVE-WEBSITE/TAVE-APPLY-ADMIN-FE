@@ -11,7 +11,7 @@ const fetchSettingDefault = async () => {
 };
 
 const postSettingDefault = async (data: SettingBody) => {
-  console.log(data);
+  // console.log(data);
   try {
     const res = await axiosInstance.post("/v1/admin/apply/setting", data);
     return res.data;
